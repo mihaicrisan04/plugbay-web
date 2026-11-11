@@ -1,0 +1,53 @@
+---
+// One plugbay.toml at 1:1, with the folded corner of the file mark. A note is
+// tied to one line of the file: a leader on wide screens, a numbered balloon
+// with its legend underneath on narrow ones.
+import "./file-panel.css";
+import type { ConfigFile } from "../lib/model";
+import Leader from "./Leader.astro";
+import NoteText from "./NoteText.astro";
+
+export interface Note {
+  line: string;
+  number: number;
+  text: string;
+}
+
+interface Props {
+  file: ConfigFile;
+  notes?: Note[];
+}
+
+const { file, notes = [] } = Astro.props;
+const noteFor = (line: string) => notes.find((note) => note.line === line);
+const legend = file.lines.flatMap((line) => noteFor(line) ?? []);
+---
+
+<div class="file">
+  <figure class="window file-panel">
+    <figcaption class="window-bar">{file.path}</figcaption>
+    <div class="file-source">
+      {file.lines.map((line) => {
+        const note = noteFor(line);
+        return (
+          <code class="file-line">{line}{note ? (
+            <span aria-hidden="true" class="file-mark">
+              <span class="balloon">{note.number}</span>
+              <span class="leader">
+                <Leader />
+                <span class="leader-note"><NoteText line={note.line} text={note.text} /></span>
+              </span>
+            </span>
+          ) : null}</code>
+        );
+      })}
+    </div>
+  </figure>
+  <p class="file-scope">{file.scope}</p>
+  {legend.map((note) => (
+    <p class="file-legend">
+      <span aria-hidden="true" class="balloon">{note.number}</span>
+      <NoteText line={note.line} text={note.text} />
+    </p>
+  ))}
+</div>

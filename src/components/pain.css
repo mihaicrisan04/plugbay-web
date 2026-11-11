@@ -1,0 +1,29 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  .pain {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .pain-title {
+    max-width: 18ch;
+  }
+
+  /* The figure is drawn 1100 wide. It gets the full sheet, and air above it. */
+  .pain > .correction {
+    max-width: 1100px;
+    margin-top: 32px;
+  }
+
+  @media (min-width: 720px) {
+    .pain {
+      gap: 32px;
+    }
+
+    .pain > .correction {
+      margin-top: 56px;
+    }
+  }
+}

@@ -1,0 +1,131 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  .file {
+    min-width: 0;
+    font-size: var(--code);
+  }
+
+  /* The cut corner is the fold of the file mark, at full size. */
+  .file-panel {
+    position: relative;
+    width: fit-content;
+  }
+
+  .file-panel > .window-bar {
+    padding-right: 22px;
+    margin: -1px -1px 0;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  }
+
+  /* Paper over the box's own corner, a little oversized so no sliver of the
+     border survives. Its diagonal lies on the bar's cut. */
+  .file-panel::before {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 16px;
+    height: 16px;
+    content: "";
+    background: var(--color-paper);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+  }
+
+  .file-source {
+    padding: 8px 16px 10px 10px;
+  }
+
+  .file-line {
+    position: relative;
+    display: block;
+    line-height: 22px;
+    white-space: pre;
+  }
+
+  .file-mark {
+    user-select: none;
+  }
+
+  .file-mark > .balloon {
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+    vertical-align: 1px;
+  }
+
+  .file-scope {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--color-ink-muted);
+  }
+
+  /* The notes are sentences, so they are set in the sans. */
+  .file-legend {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    max-width: 32ch;
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .note-text code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .file-legend > .balloon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .leader {
+    display: none;
+  }
+
+  /* One annotation system: a square node on the line, a leader with one
+     45 degree kink, a short caption. */
+  @media (min-width: 1440px) {
+    .file-mark > .balloon {
+      display: none;
+    }
+
+    .file-legend {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    /* The leader lives inside the line it annotates and hangs from that
+       line's own box: its node is centred on the line's middle, 3px above the
+       drawing's bottom edge, just past the panel's right padding. The caption
+       is placed from the drawing, so its height cannot move the node. */
+    .leader {
+      position: absolute;
+      bottom: calc(50% - 3px);
+      left: calc(100% + 3px);
+      display: block;
+      width: 48px;
+      height: 34px;
+      pointer-events: none;
+    }
+
+    .leader-note {
+      position: absolute;
+      top: -7px;
+      left: calc(100% + 8px);
+      width: max-content;
+      max-width: 23ch;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 20px;
+      text-wrap: balance;
+      white-space: normal;
+    }
+  }
+}

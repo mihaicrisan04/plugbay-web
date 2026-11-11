@@ -1,0 +1,62 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  .install-body {
+    display: grid;
+    gap: 56px;
+    margin-top: 48px;
+  }
+
+  .install-commands {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+    min-width: 0;
+  }
+
+  .install-commands > .label:not(:first-child) {
+    margin-top: 24px;
+  }
+
+  .install-facts {
+    display: grid;
+    gap: 28px;
+  }
+
+  .facts {
+    display: grid;
+    gap: 8px;
+  }
+
+  .facts > .note {
+    font-size: 18px;
+    color: var(--color-ink);
+  }
+
+  @media (min-width: 720px) {
+    .install-body {
+      margin-top: 64px;
+    }
+
+    .install-commands > .command-primary {
+      font-size: 17px;
+    }
+
+    .command-primary > .command-text,
+    .command-primary > .copy {
+      min-height: 60px;
+    }
+
+    .command-primary > .copy {
+      min-width: 104px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .install-body {
+      grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+      column-gap: 72px;
+      align-items: start;
+    }
+  }
+}

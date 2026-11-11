@@ -1,0 +1,146 @@
+---
+// The drawing of zone C. The ~/work tree in elevation, one lane per server,
+// and one dimension per setting: the run of directories a single line of a
+// plugbay.toml governs. Everything is placed by the grid, from src/data.
+// The directory on show is chosen in zone D. The two directory rows here are
+// plain click targets for the same radios: the radios keep one name each.
+import "./elevation.css";
+import { legend } from "../lib/content";
+import { details, ports, root, rows, servers, spans } from "../lib/model";
+import ArmDraw from "./ArmDraw.astro";
+import FileGlyph from "./FileGlyph.astro";
+
+// Above the directory rows: the window's title bar, then the lane heads.
+const HEAD_ROWS = 2;
+const TREE_COLUMNS = 1;
+const gridRow = (index: number) => index + HEAD_ROWS + 1;
+const lane = (server: string) => servers.indexOf(server) + TREE_COLUMNS + 1;
+const depthOf = (index: number) => rows[index].connectors.length;
+
+const summary = details
+  .map((detail) => {
+    const off = detail.disabled.map(
+      (entry) => `${entry.server} is switched off by ${entry.by}`
+    );
+    return `${detail.directory} gets ${[...detail.servers, ...off].join(", ")}.`;
+  })
+  .join(" ");
+---
+
+<figure
+  aria-label={`Elevation of ${root}: the server and account each directory gets`}
+  class="elevation"
+  style={`--rows:${rows.length};--lanes:${servers.length}`}
+>
+  <figcaption class="window-bar elevation-bar">
+    <span class="label">Elevation</span>
+    <span class="bar-subject">{root}</span>
+    <span class="label bar-end">Not to scale</span>
+  </figcaption>
+
+  <p class="sr-only">{summary}</p>
+
+  <span aria-hidden="true" class="paper paper-tree"></span>
+  <span aria-hidden="true" class="paper paper-lanes"></span>
+  <span aria-hidden="true" class="elevation-frame"></span>
+
+  <p class="lane-key">[servers]</p>
+  {servers.map((server) => (
+    <p class="lane-head" style={`grid-column:${lane(server)}`}>{server}</p>
+  ))}
+
+  {rows.map((row, index) => (
+    <div
+      class:list={["row", row.detail && `row-leaf is-${row.detail.id}`]}
+      data-detail={row.detail ? `detail-${row.detail.id}` : undefined}
+      style={`grid-row:${gridRow(index)}`}
+    >
+      {row.connectors.map((kind) => <span class={`rail rail-${kind}`} />)}
+      <span class:list={["node", row.hasChildren && "node-parent"]} />
+      <span class="row-name">{row.label}</span>
+      {row.file ? (
+        <span class="file-tag">
+          <FileGlyph />
+          <span class="file-tag-name">plugbay.toml</span>
+        </span>
+      ) : null}
+      {row.detail ? <span aria-hidden="true" class="balloon">{row.detail.letter}</span> : null}
+    </div>
+  ))}
+
+  {spans.map((span) => (
+    <p
+      class:list={["dim", !span.enabled && "dim-off"]}
+      style={[
+        `grid-column:${lane(span.server)}`,
+        `grid-row:${gridRow(span.start)} / ${gridRow(span.end) + 1}`,
+        ...details.map((detail) => `--on-${detail.id}:${span.covers.includes(detail.id) ? 1 : 0}`),
+        `--order:${span.start}`,
+      ].join(";")}
+    >
+      {!span.enabled && <span class="hatch" />}
+      <span class="dim-rule dim-solid" />
+      <span class="dim-rule dim-phantom" />
+      <span class="dim-end dim-end-top" />
+      <span class="dim-end dim-end-bottom" />
+      <span class="dim-value">
+        <span class="sr-only">{span.server} = </span>{span.literal}
+      </span>
+    </p>
+  ))}
+
+  {details.map((detail) => {
+    const index = rows.findIndex((row) => row.path === detail.directory);
+    return (
+      <span
+        aria-hidden="true"
+        class={`projection is-${detail.id}`}
+        style={`grid-row:${gridRow(index)};--depth:${depthOf(index)};--name:${rows[index].label.length}`}
+      />
+    );
+  })}
+
+  {ports.map((port) => (
+    <span
+      aria-hidden="true"
+      class={`port port-${port.state}`}
+      style={`grid-column:${lane(port.server)};grid-row:${gridRow(port.row)};--order:${port.row}`}
+    />
+  ))}
+
+  <div class="elevation-key">
+    <ul class="marks">
+      <li><span aria-hidden="true" class="mark mark-solid"></span>{legend.here}</li>
+      <li><span aria-hidden="true" class="mark mark-phantom"></span>{legend.elsewhere}</li>
+      <li><span aria-hidden="true" class="mark mark-hatch"></span>{legend.off}</li>
+      <li><span aria-hidden="true" class="mark mark-port"></span>{legend.plugged}</li>
+      <li><span aria-hidden="true" class="mark mark-ring"></span>{legend.offHere}</li>
+      <li class="mark-file"><FileGlyph />plugbay.toml</li>
+    </ul>
+    <a class="label detail-link" href="#d">
+      {details.map((detail) => <span aria-hidden="true" class="balloon">{detail.letter}</span>)}
+      Details in zone D
+    </a>
+  </div>
+</figure>
+<ArmDraw />
+
+<script>
+  // A directory row chooses that directory: it checks the radio in zone D
+  // without moving focus, so the page stays where it is. Choosing the one
+  // already on show does nothing.
+  const elevation = document.querySelector<HTMLElement>(".elevation");
+  if (elevation) {
+    elevation.dataset.live = "";
+    for (const row of elevation.querySelectorAll<HTMLElement>("[data-detail]")) {
+      row.addEventListener("click", () => {
+        const radio = document.getElementById(row.dataset.detail ?? "");
+        if (!(radio instanceof HTMLInputElement) || radio.checked) {
+          return;
+        }
+        radio.checked = true;
+        radio.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    }
+  }
+</script>

@@ -1,0 +1,447 @@
+@layer theme, base, components, utilities;
+
+/* The correction figure. It draws in the sheet's one ink and one red pencil
+   (--color-red, whose only job this is), and is built from the sheet's shared
+   parts: window, bar, label, balloon, leader. Correction.astro passes each
+   drawing's size and the places both of them share as variables: --n-* for the
+   narrow drawing (360 by 440), --w-* for the wide one (1100 by 400). */
+@layer components {
+  .correction {
+    --correction-hand: var(--correction-hand-light);
+    position: relative;
+    container-type: inline-size;
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .correction {
+      --correction-hand: var(--correction-hand-dark);
+    }
+  }
+
+  .correction-stage {
+    --u: calc(100% / var(--n-w));
+    --v: calc(100% / var(--n-h));
+    --wrong-x: var(--n-wrong-x);
+    --right-x: var(--n-right-x);
+    --jack-y: var(--n-jack-y);
+    --pin-y: var(--n-pin-y);
+    --hand-width: 62%;
+    --hand-turn: -68deg;
+    position: relative;
+    aspect-ratio: var(--n-w) / var(--n-h);
+    overflow: clip;
+  }
+
+  .correction-drawing {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .correction-drawing-wide {
+    display: none;
+  }
+
+  .correction-drawing * {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .correction-line,
+  .correction-box {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 1;
+  }
+
+  .correction-box {
+    fill: var(--color-paper);
+  }
+
+  /* The cable where it was: kept, in the soft ink, under the cross. */
+  .correction-soft {
+    stroke: var(--color-ink-soft);
+  }
+
+  .correction-stray {
+    opacity: 0;
+  }
+
+  .correction-solid {
+    fill: var(--color-ink);
+  }
+
+  .correction-cross {
+    fill: none;
+    stroke: var(--color-red);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+  }
+
+  /* The hand is a one-bit mask over a paper-coloured shape, so the cable passes behind it.
+   Its box is placed by the tip of the plug, and turned about that tip. */
+  .correction-hand {
+    --tip-x: 2.05%;
+    --tip-y: 42.2%;
+    position: absolute;
+    top: calc(var(--jack-y) * var(--v));
+    left: calc(var(--right-x) * var(--u));
+    width: var(--hand-width);
+    aspect-ratio: 880 / 535;
+    pointer-events: none;
+    transform-origin: var(--tip-x) var(--tip-y);
+    rotate: var(--hand-turn);
+    translate: calc(var(--tip-x) * -1) calc(var(--tip-y) * -1);
+  }
+
+  .correction-hand-shape,
+  .correction-hand-ink {
+    position: absolute;
+    inset: 0;
+    background: var(--color-paper);
+    mask: var(--correction-hand-shape) center / 100% 100% no-repeat;
+  }
+
+  .correction-hand-ink {
+    background: var(--color-ink);
+    mask-image: var(--correction-hand);
+  }
+
+  /* The agent's window: a 1px box under a solid bar, standing on the line its cable leaves from. */
+  .correction-agent {
+    position: absolute;
+    bottom: calc(100% - var(--pin-y) * var(--v));
+    left: 0;
+    white-space: nowrap;
+    background: var(--color-paper);
+  }
+
+  .correction-tools {
+    padding: 12px 10px;
+  }
+
+  .correction-accounts,
+  .correction-jack,
+  .correction-written,
+  .correction-key {
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  .correction-accounts {
+    top: calc(334 * var(--v));
+    left: calc(154 * var(--u));
+    color: var(--color-ink-muted);
+    translate: -50% 0;
+  }
+
+  /* Each account is lettered under its jack. */
+  .correction-jack {
+    top: calc((var(--jack-y) + 28) * var(--v));
+    translate: -50% 0;
+  }
+
+  .correction-jack-wrong {
+    left: calc(var(--wrong-x) * var(--u));
+  }
+
+  .correction-jack-right {
+    left: calc(var(--right-x) * var(--u));
+  }
+
+  /* Written in, by hand, in the red pencil. */
+  .correction-written {
+    top: calc(348 * var(--v));
+    left: calc(250 * var(--u));
+    font-size: 22px;
+    /* Written, not typed: the one face, slanted. No italic font is loaded for a single word. */
+    font-style: oblique 12deg;
+    font-synthesis: style;
+    color: var(--color-red);
+    rotate: -5deg;
+  }
+
+  .correction-balloon {
+    background: var(--color-paper);
+  }
+
+  .correction-key-1 {
+    top: calc(236 * var(--v));
+    left: calc(108 * var(--u));
+  }
+
+  .correction-key-2 {
+    top: calc(112 * var(--v));
+    left: calc(146 * var(--u));
+  }
+
+  /* Narrow: the notes are a keyed legend under the drawing. */
+  .correction-notes {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .correction-note {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .correction-leader {
+    display: none;
+  }
+
+  .correction-caption {
+    display: grid;
+    gap: 5px;
+    padding-top: 4px;
+    line-height: 1.25;
+  }
+
+  /* Code keeps its own case inside a caps caption. */
+  .correction-caption code {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  /* Wide: the whole drawing, with each note on a leader: a square node on the cable,
+   one 45 degree kink, a shoulder, a short caption. */
+  @container (min-width: 640px) {
+    .correction-stage {
+      --u: calc(100% / var(--w-w));
+      --v: calc(100% / var(--w-h));
+      --wrong-x: var(--w-wrong-x);
+      --right-x: var(--w-right-x);
+      --jack-y: var(--w-jack-y);
+      --pin-y: var(--w-pin-y);
+      --hand-width: 36%;
+      --hand-turn: -40deg;
+      aspect-ratio: var(--w-w) / var(--w-h);
+    }
+
+    .correction-drawing-wide {
+      display: block;
+    }
+
+    /* (.correction ...: the balloon is a shared part with its own display, so
+       hiding it here has to outrank that.) */
+    .correction-drawing-narrow,
+    .correction .correction-balloon {
+      display: none;
+    }
+
+    .correction-accounts {
+      top: calc(324 * var(--v));
+      left: calc(388 * var(--u));
+      translate: none;
+    }
+
+    .correction-written {
+      top: calc(312 * var(--v));
+      left: calc(794 * var(--u));
+      font-size: 24px;
+    }
+
+    .correction-notes {
+      position: absolute;
+      inset: 0;
+      display: block;
+      margin: 0;
+      pointer-events: none;
+    }
+
+    /* A note is placed by the centre of its node. */
+    .correction-note {
+      position: absolute;
+      top: calc(var(--node-y) * 100% / var(--w-h) - 31px);
+      left: calc(var(--node-x) * 100% / var(--w-w) - 3px);
+      pointer-events: auto;
+    }
+
+    .correction-note-1 {
+      --node-x: 500;
+      --node-y: 222;
+    }
+
+    .correction-note-2 {
+      --node-x: 420;
+      --node-y: 130;
+    }
+
+    .correction-leader {
+      display: block;
+      flex: none;
+    }
+
+    .correction-caption {
+      width: max-content;
+      max-width: 30ch;
+      padding: 0;
+      margin-top: -5px;
+    }
+
+    /* Its cable runs on to the right, so this caption stands on the shoulder, not under it. */
+    .correction-note-2 > .correction-caption {
+      translate: 0 calc(-100% + 16px);
+    }
+  }
+
+  /* The sequence, once, when the figure scrolls into view: the cable in the wrong account,
+   the red cross, the hand with the plug, the right name written in. It runs only when the
+   helper has armed it (ArmDraw.astro). With reduced motion or no script the figure is simply finished. */
+  @media (prefers-reduced-motion: no-preference) {
+    .correction[data-draw] {
+      --correction-play: paused;
+    }
+
+    .correction[data-draw="drawn"] {
+      --correction-play: running;
+    }
+
+    .correction[data-draw]
+      :is(
+        .correction-stray,
+        .correction-soft,
+        .correction-cross,
+        .correction-held,
+        .correction-plugged,
+        .correction-hand,
+        .correction-written,
+        .correction-note,
+        .correction-key
+      ) {
+      /* Backwards only: every step ends on its resting style, so once it has
+         played the animation lets go and nothing is left on its own layer. */
+      animation-fill-mode: backwards;
+      animation-play-state: var(--correction-play);
+    }
+
+    /* 1. The cable runs into the wrong account, in full ink, and stays a moment. */
+    .correction[data-draw] .correction-stray {
+      stroke-dasharray: 1.6;
+      animation-name: correction-stray;
+      animation-duration: 1500ms;
+      animation-timing-function: var(--ease-in-out);
+      animation-delay: 100ms;
+    }
+
+    .correction[data-draw] :is(.correction-note-1, .correction-key-1) {
+      animation-name: correction-appear;
+      animation-duration: 240ms;
+      animation-timing-function: var(--ease-out);
+      animation-delay: 760ms;
+    }
+
+    /* 2. It is crossed out, and drops back to the soft ink. */
+    .correction[data-draw] .correction-cross {
+      animation-name: correction-write;
+      animation-duration: 280ms;
+      animation-timing-function: var(--ease-in-out);
+      animation-delay: 1200ms;
+    }
+
+    .correction[data-draw] .correction-soft {
+      animation-name: correction-appear;
+      animation-duration: 200ms;
+      animation-timing-function: ease;
+      animation-delay: 1400ms;
+    }
+
+    /* 3. The hand arrives along the line of the plug, its cable behind it. */
+    .correction[data-draw] .correction-held {
+      stroke-dasharray: 1.6;
+      animation-name: correction-run;
+      animation-duration: 700ms;
+      animation-timing-function: var(--ease-in-out);
+      animation-delay: 1560ms;
+    }
+
+    .correction[data-draw] .correction-hand {
+      animation-name: correction-hand;
+      animation-duration: 560ms;
+      animation-timing-function: var(--ease-out);
+      animation-delay: 1700ms;
+    }
+
+    .correction[data-draw] .correction-plugged {
+      animation-name: correction-appear;
+      animation-duration: 160ms;
+      animation-timing-function: ease;
+      animation-delay: 2180ms;
+    }
+
+    /* 4. The right account is written in. */
+    .correction[data-draw] .correction-written {
+      animation-name: correction-write;
+      animation-duration: 420ms;
+      animation-timing-function: var(--ease-in-out);
+      animation-delay: 2300ms;
+    }
+
+    .correction[data-draw] :is(.correction-note-2, .correction-key-2) {
+      animation-name: correction-appear;
+      animation-duration: 240ms;
+      animation-timing-function: var(--ease-out);
+      animation-delay: 2560ms;
+    }
+  }
+
+  @keyframes correction-stray {
+    0% {
+      stroke-dashoffset: 1.6;
+      opacity: 1;
+    }
+
+    42% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+
+    86% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+  }
+
+  @keyframes correction-run {
+    from {
+      stroke-dashoffset: 1.6;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes correction-appear {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes correction-write {
+    from {
+      clip-path: inset(-12px 100% -12px -12px);
+    }
+
+    to {
+      clip-path: inset(-12px);
+    }
+  }
+
+  /* The hand keeps its turn and its place by the plug tip, and travels the last stretch. */
+  @keyframes correction-hand {
+    from {
+      opacity: 0;
+      transform: translateX(26px);
+    }
+  }
+}

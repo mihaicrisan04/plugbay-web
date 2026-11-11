@@ -1,0 +1,77 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  .steps {
+    display: grid;
+    gap: 96px;
+    margin-top: 64px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  .step-copy {
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+  }
+
+  .step-title {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-family: var(--font-display);
+    font-size: clamp(32px, 3.2vw, 44px);
+    font-weight: 300;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .step-figure {
+    width: 100%;
+  }
+
+  .sockets {
+    max-width: 220px;
+  }
+
+  .keys {
+    max-width: 360px;
+  }
+
+  @media (min-width: 720px) {
+    .steps {
+      gap: 120px;
+      margin-top: 88px;
+    }
+
+    /* Room for the captions the leaders carry out to either side. */
+    .sockets {
+      max-width: 240px;
+      padding-top: 24px;
+      margin-inline: 150px 100px;
+    }
+
+    .keys {
+      padding-bottom: 32px;
+      margin-inline: 140px 150px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    /* The copy keeps a reading width; the figure takes the rest, which is
+       what lets the stack switch to its wide drawing. */
+    .step {
+      grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+      column-gap: 72px;
+      align-items: center;
+    }
+
+    .step-figure {
+      justify-self: center;
+    }
+  }
+}

@@ -1,0 +1,155 @@
+---
+// The pain, drawn, and its correction. An agent started in the Globex repo has its Sentry cable
+// in the Acme account, the one used last. That is crossed out in red, the hand moves the plug to
+// the Globex account, and the right name is written in. One ink and one red pencil.
+// Every value comes from src/data/plugbay.ts. The stippled hand was generated in Paper and is
+// shipped as one-bit masks, so it takes the ink of whichever theme it is in.
+import "./correction.css";
+import handDark from "../../assets/figures/correction/hand-dark.png";
+import handLight from "../../assets/figures/correction/hand-light.png";
+import handShape from "../../assets/figures/correction/hand-shape.png";
+import { pain, resolved, terminal } from "../../data/plugbay";
+import { settingAt } from "../../lib/model";
+import ArmDraw from "../ArmDraw.astro";
+import Leader from "../Leader.astro";
+
+const SERVER = "sentry";
+const USED_LAST = "logged in to whichever account you used last";
+
+function required<T>(value: T | undefined, what: string): T {
+  if (value === undefined) {
+    throw new Error(`Correction figure: the page data has no ${what}`);
+  }
+  return value;
+}
+
+const [otherTree, agentTree] = resolved;
+const { directory } = agentTree;
+const wrong = required(
+  otherTree.servers.find((entry) => entry.startsWith(`${SERVER}:`)),
+  `${SERVER} account in ${otherTree.directory}`
+);
+const right = required(
+  agentTree.servers.find((entry) => entry.startsWith(`${SERVER}:`)),
+  `${SERVER} account in ${directory}`
+);
+const [, rightAccount] = right.split(":");
+// The same merge the elevation draws: deeper wins, field by field.
+const set = required(settingAt(directory, SERVER) ?? undefined, `${SERVER} setting for ${directory}`);
+const { line: setting, setBy: file } = set;
+const tools = `${SERVER}__*`;
+if (!(terminal.lsGlobex.output.includes(tools) && pain.body.includes(USED_LAST))) {
+  throw new Error("Correction figure: its captions no longer match the page data");
+}
+
+// Two drawings of the same thing, each in its own units: wide (1100 by 400) and narrow (360 by 440).
+// A cable leaves the agent's window at its pin and ends in a jack, or behind the hand.
+const wide = {
+  bay: { bottom: 386, left: 372, right: 920, top: 288 },
+  cross: { x: 500, y: 256 },
+  height: 400,
+  held: "M28 112C28 170 200 150 420 130S740 150 846 252",
+  jack: { right: { x: 756, y: 330 }, wrong: { x: 500, y: 330 } },
+  pin: { x: 28, y: 112 },
+  stray: "M28 112C28 250 500 130 500 240V314",
+  width: 1100,
+};
+const narrow = {
+  bay: { bottom: 414, left: 0.5, right: 359.5, top: 322 },
+  cross: { x: 84, y: 292 },
+  height: 440,
+  held: "M28 84C28 150 200 140 250 300",
+  jack: { right: { x: 224, y: 362 }, wrong: { x: 84, y: 362 } },
+  pin: { x: 28, y: 84 },
+  stray: "M28 84C28 230 84 190 84 270V346",
+  width: 360,
+};
+const drawings = [
+  { ...wide, name: "wide" },
+  { ...narrow, name: "narrow" },
+];
+const jackRadius = 16;
+const holeRadius = 7;
+const pinSize = 7;
+const cut = 10;
+// One stroke of the red pencil, drawn in Paper. Mirrored, it makes the cross.
+const slash = "m-3.04 2.95c2.05-2.03 4.21-4.11 6.08-5.89";
+const sizeVars = (prefix: string, drawing: typeof wide) => [
+  `--${prefix}-w:${drawing.width}`,
+  `--${prefix}-h:${drawing.height}`,
+  `--${prefix}-wrong-x:${drawing.jack.wrong.x}`,
+  `--${prefix}-right-x:${drawing.jack.right.x}`,
+  `--${prefix}-jack-y:${drawing.jack.right.y}`,
+  `--${prefix}-pin-y:${drawing.pin.y}`,
+];
+// The hand's three masks, and both drawings' sizes for the stylesheet to place its lettering by.
+const style = [
+  `--correction-hand-light:url(${handLight.src})`,
+  `--correction-hand-dark:url(${handDark.src})`,
+  `--correction-hand-shape:url(${handShape.src})`,
+  ...sizeVars("n", narrow),
+  ...sizeVars("w", wide),
+].join(";");
+const summary = `An agent started in ${directory} has its ${SERVER} cable plugged into ${wrong}, the account used last. That is crossed out. A hand moves the plug to ${right}.`;
+---
+
+<figure aria-label={summary} class="correction" style={style}>
+  <div class="correction-stage">
+    {
+      drawings.map((drawing) => (
+        <svg aria-hidden="true" class={`correction-drawing correction-drawing-${drawing.name}`} preserveAspectRatio="none" viewBox={`0 0 ${drawing.width} ${drawing.height}`}>
+          <path
+            class="correction-box correction-appear"
+            d={`M${drawing.bay.left} ${drawing.bay.top}H${drawing.bay.right}V${drawing.bay.bottom - cut}L${drawing.bay.right - cut} ${drawing.bay.bottom}H${drawing.bay.left}Z`}
+          />
+          <circle class="correction-box correction-appear" cx={drawing.jack.wrong.x} cy={drawing.jack.wrong.y} r={jackRadius} />
+          <circle class="correction-box correction-appear" cx={drawing.jack.right.x} cy={drawing.jack.right.y} r={jackRadius} />
+          <path class="correction-line correction-soft" d={drawing.stray} />
+          <path class="correction-line correction-stray" d={drawing.stray} pathLength="1" />
+          <path class="correction-line correction-held" d={drawing.held} pathLength="1" />
+          <rect class="correction-solid" height={pinSize} width={pinSize} x={drawing.pin.x - pinSize / 2} y={drawing.pin.y - pinSize / 2} />
+          <circle class="correction-solid correction-plugged" cx={drawing.jack.right.x} cy={drawing.jack.right.y} r={holeRadius} />
+          <g class="correction-cross" transform={`translate(${drawing.cross.x} ${drawing.cross.y}) scale(6.5)`}>
+            <path d={slash} />
+            <path d={slash} transform="scale(-1 1)" />
+          </g>
+        </svg>
+      ))
+    }
+
+    <div aria-hidden="true" class="correction-hand">
+      <span class="correction-hand-shape"></span>
+      <span class="correction-hand-ink"></span>
+    </div>
+
+    <div class="window correction-agent">
+      <p class="window-bar"><span class="label">Agent</span> {directory}</p>
+      <p class="correction-tools">{tools}</p>
+    </div>
+
+    <p class="label correction-accounts">Accounts</p>
+    <p class="correction-jack correction-jack-wrong">{wrong}</p>
+    <p class="correction-jack correction-jack-right">{right}</p>
+    <p aria-hidden="true" class="correction-written">{rightAccount}</p>
+    <span aria-hidden="true" class="balloon correction-balloon correction-key correction-key-1">1</span>
+    <span aria-hidden="true" class="balloon correction-balloon correction-key correction-key-2">2</span>
+  </div>
+
+  <ol class="correction-notes">
+    <li class="correction-note correction-note-1">
+      <span aria-hidden="true" class="balloon correction-balloon">1</span>
+      <Leader class="correction-leader" />
+      <span class="label correction-caption">{USED_LAST}</span>
+    </li>
+    <li class="correction-note correction-note-2">
+      <span aria-hidden="true" class="balloon correction-balloon">2</span>
+      <Leader class="correction-leader" />
+      <span class="label correction-caption">
+        <code>{file.path}</code>
+        <code>{setting}</code>
+        <span>{file.scope}</span>
+      </span>
+    </li>
+  </ol>
+</figure>
+<ArmDraw />

@@ -1,0 +1,14 @@
+---
+// The sheet's one leader: a square node on the subject, one 45 degree kink, a
+// shoulder for the caption to stand on. 48 by 34, node centred at (3, 31).
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<svg aria-hidden="true" fill="none" height="34" viewBox="0 0 48 34" width="48" class:list={["leader-mark", className]} >
+  <path d="M0 28h6v6H0z" fill="currentColor" />
+  <path d="M3 31 31 3h17" stroke="currentColor" />
+</svg>

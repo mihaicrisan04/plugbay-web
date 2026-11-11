@@ -1,0 +1,511 @@
+@layer theme, base, components, utilities;
+
+/* The stack figure. It is built from the sheet's shared parts (window, bar,
+   label, balloon, stipple) and reads the page's directory choice from the same
+   variables as the elevation: --sel-a and --sel-b (src/styles/global.css).
+   Its sizes come from Stack.astro as variables: --n-* for the narrow drawing,
+   --w-* for the wide one. */
+@layer components {
+  .stack {
+    /* 1 while the stack is shut. Only ever set with motion allowed. */
+    --pressed: 0;
+    max-width: calc(var(--w-w) * 1px + 2px);
+    container: stack / inline-size;
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .stack [data-view="a"] {
+    --on: var(--sel-a, 1);
+  }
+
+  .stack [data-view="b"] {
+    --on: var(--sel-b, 0);
+  }
+
+  .stack [data-view] {
+    opacity: var(--on);
+  }
+
+  /* ---------- Window and title bar ---------- */
+
+  .stack-window {
+    max-width: 420px;
+  }
+
+  .stack-bar-subject {
+    display: grid;
+    min-width: 0;
+  }
+
+  /* Both directories share the cell. A name too long for the bar is cut with
+     an ellipsis, not allowed to run past the window. */
+  .stack-bar-view {
+    display: flex;
+    grid-area: 1 / 1;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  /* ---------- The drawing ---------- */
+
+  /* Below 640px one unit is the narrow drawing's width divided by its units. */
+  .stack-body {
+    --u: calc((min(100cqw, 420px) - 2px) / var(--n-w));
+    --plate-w: var(--n-plate-w);
+    --plate-h: var(--n-plate-h);
+    --ghost-x: var(--n-ghost-x);
+    --ghost-y: var(--n-ghost-y);
+    position: relative;
+    aspect-ratio: var(--n-w) / var(--n-h);
+    overflow: clip;
+    isolation: isolate;
+  }
+
+  .stack-at {
+    position: absolute;
+    top: calc(var(--ny) * var(--u));
+    left: calc(var(--nx) * var(--u));
+  }
+
+  /* Parts that belong to one drawing only are hidden in the other, and keep
+     their own display where they show. (.stack ...: some are shared parts with
+     a display of their own, which hiding has to outrank.) */
+  @container stack (max-width: 639.98px) {
+    .stack .stack-wide {
+      display: none;
+    }
+  }
+
+  .stack-defs {
+    position: absolute;
+  }
+
+  .stack-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .stack-lines path,
+  .stack-fittings path,
+  .stack-fittings ellipse {
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Centre line, long dash and dot: the walk from / to the project directory. */
+  .stack-axis {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-dasharray: 24 3 1 3;
+  }
+
+  /* The same socket on every plate, whether or not a file fills it. */
+  .stack-guide {
+    fill: none;
+    stroke: var(--color-ink-soft);
+  }
+
+  /* A server that is pinned from here on: the one 2px line on the sheet. */
+  .stack-live {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+
+  /* Plate to plate: gone while the plates are on the move. */
+  .stack-between {
+    opacity: calc(1 - var(--pressed));
+  }
+
+  /* From the last plate to the result: lets go while the stack is shut. */
+  .stack-tail {
+    transform: scaleX(calc(1 - var(--pressed)));
+    transform-origin: left center;
+    transform-box: fill-box;
+  }
+
+  .stack-ink {
+    fill: var(--color-ink);
+  }
+
+  .stack-paper {
+    fill: var(--color-paper);
+  }
+
+  /* Hatching: switched off by this file. */
+  .stack-hatch-line {
+    stroke: var(--color-ink);
+  }
+
+  .stack-cap {
+    fill: url("#stack-hatch");
+    stroke: var(--color-ink);
+  }
+
+  /* ---------- Plates ---------- */
+
+  .stack-plate {
+    --ghost: 0;
+    --press: var(--n-press);
+    z-index: calc(2 - var(--ghost));
+    width: calc(var(--plate-w) * var(--u));
+    height: calc(var(--plate-h) * var(--u));
+    /* The alternate plate waits behind the one on the axis. */
+    transform: translate(
+      calc(var(--ghost) * var(--ghost-x) * var(--u)),
+      calc(var(--ghost) * var(--ghost-y) * var(--u))
+    );
+    /* Shut, the stack sits against the result. */
+    translate: calc(
+        (1 - var(--ghost)) *
+        var(--pressed) *
+        var(--press) *
+        var(--u)
+      )
+      0;
+  }
+
+  .stack-plate[data-branch="a"],
+  .stack-legend-row[data-file-branch="a"] {
+    --ghost: var(--sel-b, 0);
+  }
+
+  .stack-plate[data-branch="b"],
+  .stack-legend-row[data-file-branch="b"] {
+    --ghost: var(--sel-a, 1);
+  }
+
+  .stack-plate-body {
+    position: absolute;
+    inset: 0;
+    /* Opaque, so a cable passing behind a plate is hidden until its socket. */
+    background: var(--color-paper);
+    opacity: calc(1 - var(--ghost));
+    clip-path: var(--stack-clip);
+  }
+
+  /* The stippled plate. The ghost keeps a faint print of it. */
+  .stack-plate-art {
+    opacity: calc(1 - 0.72 * var(--ghost));
+  }
+
+  .stack-fittings {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .stack-solid {
+    opacity: calc(1 - var(--ghost));
+  }
+
+  /* Phantom line, long dash and two dots: the same slot under the other client. */
+  .stack-ghost-line {
+    opacity: var(--ghost);
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-dasharray: 24 3 1 3 1 3;
+  }
+
+  /* Under each plate, its item number; the alternate's sits beside its top. */
+  .stack-plate-item {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: calc(50% - 10px);
+    background: var(--color-paper);
+    opacity: calc(1 - var(--pressed));
+    transform: translate(
+      calc(var(--ghost) * (-0.5 * var(--plate-w) * var(--u) - 14px)),
+      calc(var(--ghost) * (-1 * var(--plate-h) * var(--u) - 4px))
+    );
+  }
+
+  .stack-plate-root {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* An item number is ringed with dashes while its plate is the ghost, and
+     with a solid line while it is on the axis: a solid ring laid over the
+     dashed one, as present as the plate is. */
+  .stack-legend-row {
+    --ghost: 0;
+  }
+
+  .stack-legend-row > .balloon {
+    position: relative;
+  }
+
+  .stack-plate-item.balloon,
+  .stack-legend-row > .balloon {
+    border-style: dashed;
+  }
+
+  .stack-plate-item.balloon::after,
+  .stack-legend-row > .balloon::after {
+    position: absolute;
+    inset: -1px;
+    content: "";
+    border: 1px solid currentcolor;
+    border-radius: 50%;
+    opacity: calc(1 - var(--ghost));
+  }
+
+  /* ---------- Result ---------- */
+
+  .stack-result {
+    z-index: 3;
+    display: grid;
+    grid-template-rows:
+      calc(var(--n-head) * var(--u))
+      repeat(var(--lanes), calc(var(--n-row) * var(--u)));
+    width: calc(var(--n-width) * var(--u));
+    background: var(--color-paper);
+    border: 1px solid var(--color-ink);
+  }
+
+  .stack-result-head {
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    color: var(--color-paper);
+    background: var(--color-ink);
+  }
+
+  .stack-row {
+    position: relative;
+    display: grid;
+  }
+
+  .stack-row + .stack-row {
+    border-top: 1px solid var(--color-ink-grid);
+  }
+
+  .stack-row-view {
+    display: flex;
+    grid-area: 1 / 1;
+    align-items: center;
+    min-width: 0;
+    padding-left: 11px;
+    /* Narrower than 342px, the lettering shrinks with the drawing rather than clip. */
+    font-size: min(13px, calc(13 * var(--u)));
+  }
+
+  /* A square node where a lane meets the result: solid if a cable arrives. */
+  .stack-node {
+    position: absolute;
+    top: calc(50% - 4px);
+    left: -5px;
+    width: 7px;
+    height: 7px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-ink);
+  }
+
+  .stack-row-on .stack-node {
+    background: var(--color-ink);
+  }
+
+  .stack-row-open .stack-row-text,
+  .stack-row-note {
+    color: var(--color-ink-muted);
+  }
+
+  .stack-row-off {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-ink-soft) 0 1px,
+      transparent 1px 6px
+    );
+  }
+
+  .stack-row-off .stack-row-text {
+    padding: 3px 4px;
+    margin-left: -4px;
+    background: var(--color-paper);
+  }
+
+  /* ---------- Legend, below 640px ---------- */
+
+  .stack-legend {
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+    margin-top: 14px;
+  }
+
+  .stack-legend-row {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 6px 8px;
+    align-items: center;
+  }
+
+  .stack-legend-path {
+    overflow-wrap: anywhere;
+  }
+
+  .stack-legend-lines {
+    grid-column: 2;
+    line-height: 20px;
+    color: var(--color-ink-muted);
+    white-space: pre;
+  }
+
+  /* ---------- 640px and wider: labels on the drawing, 1:1 at full width ---------- */
+
+  @container stack (min-width: 640px) {
+    .stack-window {
+      max-width: none;
+    }
+
+    /* One unit is a CSS pixel at full width, and shrinks with the column. */
+    .stack-body {
+      --u: calc((100cqw - 2px) / var(--w-w));
+      --plate-w: var(--w-plate-w);
+      --plate-h: var(--w-plate-h);
+      --ghost-x: var(--w-ghost-x);
+      --ghost-y: var(--w-ghost-y);
+      aspect-ratio: var(--w-w) / var(--w-h);
+    }
+
+    .stack-at {
+      top: calc(var(--wy) * var(--u));
+      left: calc(var(--wx) * var(--u));
+    }
+
+    .stack .stack-narrow {
+      display: none;
+    }
+
+    .stack-plate {
+      --press: var(--w-press);
+    }
+
+    .stack-lane-name {
+      translate: 0 -50%;
+    }
+
+    /* Directory under its plate; the alternate's name moves above its ghost. */
+    .stack-caption {
+      position: absolute;
+      top: calc(100% + 9px);
+      left: 50%;
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      white-space: nowrap;
+      opacity: calc(1 - var(--pressed));
+      transform: translate(
+        -50%,
+        calc(var(--ghost) * (-1 * var(--plate-h) * var(--u) - 28px))
+      );
+    }
+
+    .stack-caption-file {
+      color: var(--color-ink-muted);
+      opacity: calc(1 - var(--ghost));
+    }
+
+    /* What a plate sets, lettered on the lane just after it. */
+    .stack-values {
+      opacity: calc(1 - var(--pressed));
+    }
+
+    .stack-value {
+      padding-inline: 3px;
+      background: var(--color-paper);
+    }
+
+    .stack-result {
+      grid-template-rows:
+        calc(var(--w-head) * var(--u))
+        repeat(var(--lanes), calc(var(--w-row) * var(--u)));
+      width: calc(var(--w-width) * var(--u));
+    }
+
+    .stack-row-view {
+      padding-left: 14px;
+      font-size: 13px;
+    }
+  }
+
+  /* ---------- Motion: the press ----------
+     On a directory change the stack shuts against the result, the plates and
+     the result swap while it is shut, and it opens again. All transitions, so
+     a second change mid-way picks up from wherever things are. `data-live` and
+     `data-pressed` come from the figure's script; without it, or with reduced
+     motion, the change is instant. */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stack[data-pressed] {
+      --pressed: 1;
+    }
+
+    .stack[data-live] .stack-plate {
+      transition:
+        translate 380ms var(--ease-out),
+        transform 240ms var(--ease-in-out),
+        z-index 0s linear 120ms;
+    }
+
+    .stack[data-live][data-pressed] .stack-plate {
+      transition:
+        translate 240ms var(--ease-in-out),
+        transform 240ms var(--ease-in-out),
+        z-index 0s linear 120ms;
+    }
+
+    .stack[data-live]
+      :is(
+        .stack-plate-body,
+        .stack-plate-art,
+        .stack-solid,
+        .stack-ghost-line,
+        .stack-caption-file
+      ),
+    .stack[data-live] .balloon::after {
+      transition: opacity 200ms ease;
+    }
+
+    /* Cables let go at once and are drawn back from the plate as it opens. */
+    .stack[data-live] .stack-tail {
+      transition:
+        transform 300ms var(--ease-in-out) 80ms,
+        opacity 100ms ease;
+    }
+
+    .stack[data-live][data-pressed] .stack-tail {
+      transition:
+        transform 120ms ease,
+        opacity 100ms ease;
+    }
+
+    /* Lettering swaps while the stack is shut. */
+    .stack[data-live] [data-view]:not(.stack-tail) {
+      transition: opacity 110ms ease 170ms;
+    }
+
+    .stack[data-live]
+      :is(.stack-caption, .stack-plate-item, .stack-values, .stack-between) {
+      transition:
+        opacity 180ms ease 200ms,
+        transform 240ms var(--ease-in-out);
+    }
+
+    .stack[data-live][data-pressed]
+      :is(.stack-caption, .stack-plate-item, .stack-values, .stack-between) {
+      transition:
+        opacity 90ms ease,
+        transform 240ms var(--ease-in-out);
+    }
+  }
+}

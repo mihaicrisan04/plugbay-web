@@ -1,0 +1,264 @@
+---
+// Figure: how resolution works. The directories on the way to where the agent
+// started are plates on one axis, each socket is one server, and the cable on a
+// lane carries whatever the last plate set. The other client's plate waits
+// behind as a ghost. The figure follows the page's directory switch and has no
+// control of its own.
+import "./stack.css";
+import art from "../../assets/figures/stack/plate.png";
+import { maskStyle } from "../../lib/art";
+import { files, servers } from "../../lib/model";
+import { itemOf, type Layout, layoutStyle, liveAfter, narrow, plates, views, wide } from "./stack";
+
+const lanes = servers.map((_, lane) => lane);
+const lastStation = Math.max(...plates.map((item) => item.station));
+const trunk = plates.filter((item) => item.branch === null);
+const [home] = views;
+
+// Both layouts are placed from the same markup: `n` values in narrow units,
+// `w` values in wide pixels.
+const at = (n: [number, number], w: [number, number]) =>
+  `--nx:${n[0]};--ny:${n[1]};--wx:${w[0]};--wy:${w[1]}`;
+
+// The cables of one layout: guides the whole way, live from the plate that pins
+// a server to the next plate, and from the branch plate to the result.
+function cables(layout: Layout) {
+  const end = layout.result.left;
+  const between = trunk.slice(1).flatMap((stop) =>
+    lanes
+      .filter((lane) => liveAfter(home, lane, stop.station))
+      .map((lane) => `M${layout.socketXs[stop.station]} ${layout.laneYs[lane]}H${layout.socketXs[stop.station + 1]}`)
+  );
+  const tails = lanes
+    .map((lane) => ({
+      d: `M${layout.socketXs[lastStation]} ${layout.laneYs[lane]}H${end}`,
+      // Views in which this lane arrives live. Every view means it is never unplugged.
+      views: views.filter((view) => liveAfter(view, lane, lastStation)).map((view) => view.id),
+    }))
+    .filter((tail) => tail.views.length > 0);
+  return { between, end, tails };
+}
+
+const drawings = [
+  { cables: cables(narrow), layout: narrow, name: "narrow" },
+  { cables: cables(wide), layout: wide, name: "wide" },
+];
+
+const plateVars = (station: number) =>
+  [
+    at([narrow.stations[station], narrow.plateTop], [wide.stations[station], wide.plateTop]),
+    `--n-press:${narrow.press[station]}`,
+    `--w-press:${wide.press[station]}`,
+  ].join(";");
+
+// Fittings are drawn on the wide plate's own box and scale with the plate.
+const { plate } = wide;
+const hole = { rx: plate.width * 0.1, ry: plate.width * 0.12 };
+const plug = { height: 7, length: 16 };
+
+const summary = views
+  .map((view) => {
+    const got = view.result
+      .filter((row) => row.state !== "open")
+      .map((row) => (row.state === "on" ? row.text : `${row.server} switched off by ${row.by}`));
+    return `${view.directory} resolves to ${got.join(", ")}.`;
+  })
+  .join(" ");
+---
+
+<div class="stack" style={`${maskStyle(art, "plate")};--stack-clip:polygon(${plate.outline});${layoutStyle}`}>
+  <figure
+    aria-label="Exploded view: every plugbay.toml on the way to the project directory, merged field by field"
+    class="window stack-window"
+  >
+    <figcaption class="window-bar">
+      <span class="label">Exploded view</span>
+      <span aria-hidden="true" class="stack-bar-subject">
+        {views.map((view) => (
+          <span class="stack-bar-view" data-view={view.id}>
+            <span class="balloon balloon-reversed">{view.letter}</span>
+            <span class="bar-subject">{view.directory}</span>
+          </span>
+        ))}
+      </span>
+      <span class="label bar-end stack-wide">Not to scale</span>
+    </figcaption>
+
+    <p class="sr-only">{summary}</p>
+
+    <div aria-hidden="true" class="stack-body">
+      <svg aria-hidden="true" class="stack-defs" height="0" width="0">
+        <defs>
+          <pattern height="5" id="stack-hatch" patternTransform="rotate(45)" patternUnits="userSpaceOnUse" width="5">
+            <line class="stack-hatch-line" x1="0.5" x2="0.5" y1="0" y2="5"></line>
+          </pattern>
+        </defs>
+      </svg>
+
+      {drawings.map(({ cables: drawn, layout, name }) => (
+        <svg
+          aria-hidden="true"
+          class={`stack-lines stack-${name}`}
+          preserveAspectRatio="none"
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+        >
+          <path class="stack-axis" d={`M0 ${layout.axisY}H${drawn.end}`} />
+          {layout.laneYs.map((y) => (
+            <path class="stack-guide" d={`M${layout.stations[0] - 18} ${y}H${drawn.end}`} />
+          ))}
+          {drawn.between.map((d) => <path class="stack-live stack-between" d={d} />)}
+          {drawn.tails.map((tail) => (
+            <path
+              class="stack-live stack-tail"
+              d={tail.d}
+              data-view={tail.views.length === views.length ? undefined : tail.views[0]}
+              pathLength="1"
+            />
+          ))}
+        </svg>
+      ))}
+
+      {servers.map((server, lane) => (
+        <span class="stack-at stack-lane-name stack-wide" style={at([0, 0], [14, wide.laneYs[lane]])}>
+          {server}
+        </span>
+      ))}
+
+      {plates.map((item) => (
+        <div class="stack-at stack-plate" data-branch={item.branch} style={plateVars(item.station)}>
+          <span class="stack-plate-body" />
+          <span class="stipple stack-plate-art" />
+          <svg aria-hidden="true" class="stack-fittings" preserveAspectRatio="none" viewBox={`0 0 ${plate.width} ${plate.height}`}>
+            <path class="stack-ghost-line" d={plate.outlinePath} />
+            <g class="stack-solid">
+              <path class="stack-axis" d={`M${plate.boreX} ${plate.boreY}H${plate.width}`} />
+              {item.sockets.map((socket, lane) => {
+                const y = plate.socketYs[lane];
+                const live = views.some(
+                  (view) => (item.branch === null || item.branch === view.id) && liveAfter(view, lane, item.station)
+                );
+                return (
+                  <>
+                    {socket.state === "off" ? null : (
+                      <path class={live ? "stack-live" : "stack-guide"} d={`M${plate.socketX} ${y}H${plate.width}`} />
+                    )}
+                    {socket.state === "on" ? (
+                      <>
+                        <ellipse class="stack-ink" cx={plate.socketX} cy={y} rx={hole.rx + 1} ry={hole.ry + 1} />
+                        <rect class="stack-ink" height={plug.height} width={plug.length} x={plate.socketX} y={y - plug.height / 2} />
+                      </>
+                    ) : null}
+                    {socket.state === "off" ? (
+                      <>
+                        <ellipse class="stack-paper" cx={plate.socketX} cy={y} rx={hole.rx + 4} ry={hole.ry + 4} />
+                        <ellipse class="stack-cap" cx={plate.socketX} cy={y} rx={hole.rx + 4} ry={hole.ry + 4} />
+                      </>
+                    ) : null}
+                  </>
+                );
+              })}
+            </g>
+          </svg>
+
+          <span class="stack-caption stack-wide">
+            <span class="stack-caption-name">{item.label}</span>
+            <span class="stack-caption-file">{item.file ? "plugbay.toml" : "no file"}</span>
+          </span>
+          {item.file ? (
+            <span class="balloon stack-plate-item stack-narrow">{itemOf(item.file)}</span>
+          ) : (
+            <span class="stack-plate-item stack-plate-root stack-narrow">{item.label}</span>
+          )}
+        </div>
+      ))}
+
+      <div class="stack-values stack-wide">
+        {plates.map((item) =>
+          item.sockets.map((socket, lane) =>
+            socket.literal ? (
+              <span
+                class="stack-at stack-value"
+                data-view={item.branch ?? undefined}
+                style={at([0, 0], [wide.stations[item.station] + plate.width + 10, wide.laneYs[lane] - 19])}
+              >
+                {socket.literal}
+              </span>
+            ) : null
+          )
+        )}
+      </div>
+
+      <div
+        class="stack-at stack-result"
+        style={[
+          at([narrow.result.left, narrow.result.headTop], [wide.result.left, wide.result.headTop]),
+          `--n-width:${narrow.result.width}`,
+          `--w-width:${wide.result.width}`,
+          `--n-head:${narrow.laneYs[0] - narrow.result.rowHeight / 2 - narrow.result.headTop}`,
+          `--w-head:${wide.laneYs[0] - wide.result.rowHeight / 2 - wide.result.headTop}`,
+          `--n-row:${narrow.result.rowHeight}`,
+          `--w-row:${wide.result.rowHeight}`,
+        ].join(";")}
+      >
+        <span class="label stack-result-head">Resolved</span>
+        {lanes.map((lane) => (
+          <span class="stack-row">
+            {views.map((view) => {
+              const row = view.result[lane];
+              return (
+                <span class={`stack-row-view stack-row-${row.state}`} data-view={view.id}>
+                  <span class="stack-node" />
+                  <span class="stack-row-text">
+                    {row.text}{row.state === "off" ? <span class="stack-row-note"> off</span> : null}
+                  </span>
+                </span>
+              );
+            })}
+          </span>
+        ))}
+      </div>
+    </div>
+  </figure>
+
+  <ol class="stack-legend stack-narrow">
+    {files.map((file) => {
+      const branch = plates.find((item) => item.file === file)?.branch;
+      return (
+        <li class="stack-legend-row" data-file-branch={branch ?? undefined}>
+          <span class="balloon">{itemOf(file)}</span>
+          <span class="stack-legend-path">{file.path}</span>
+          <code class="stack-legend-lines">{file.settings.map((entry) => entry.line).join("\n")}</code>
+        </li>
+      );
+    })}
+  </ol>
+</div>
+
+<script>
+  // The press plays only when the page's directory switch changes, and only
+  // with motion allowed. Without this script the figure still follows the
+  // switch, instantly.
+  const HOLD_MS = 280;
+  const figures = [...document.querySelectorAll<HTMLElement>(".stack")];
+  let release: ReturnType<typeof setTimeout> | undefined;
+
+  for (const figure of figures) {
+    figure.dataset.live = "";
+  }
+
+  document.addEventListener("change", (event) => {
+    const { target } = event;
+    if (!(target instanceof HTMLInputElement) || target.name !== "detail") {
+      return;
+    }
+    for (const figure of figures) {
+      figure.dataset.pressed = "";
+    }
+    clearTimeout(release);
+    release = setTimeout(() => {
+      for (const figure of figures) {
+        delete figure.dataset.pressed;
+      }
+    }, HOLD_MS);
+  });
+</script>

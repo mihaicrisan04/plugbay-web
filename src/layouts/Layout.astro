@@ -1,0 +1,45 @@
+---
+import barlow from "@fontsource/barlow/files/barlow-latin-400-normal.woff2?url";
+import commitMono from "@fontsource/commit-mono/files/commit-mono-latin-400-normal.woff2?url";
+import "../styles/global.css";
+
+interface Props {
+  description?: string;
+  title?: string;
+}
+
+const {
+  title = "plugbay: mise for MCP servers",
+  description = "The right MCP servers, logged in to the right account, in every directory and every agent.",
+} = Astro.props;
+const preloads = ["/fonts/sheet/BigShoulders.woff2", commitMono, barlow];
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const socialImage = new URL("/og.png", Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content={description} name="description">
+    <meta content="light dark" name="color-scheme">
+    <meta content="#ffffff" media="(prefers-color-scheme: light)" name="theme-color">
+    <meta content="#09081d" media="(prefers-color-scheme: dark)" name="theme-color">
+    {preloads.map((href) => (
+      <link as="font" crossorigin href={href} rel="preload" type="font/woff2">
+    ))}
+    <link href="/favicon.svg" rel="icon" type="image/svg+xml">
+    <link href={canonical} rel="canonical">
+    <meta content="website" property="og:type">
+    <meta content={title} property="og:title">
+    <meta content={description} property="og:description">
+    <meta content={canonical} property="og:url">
+    <meta content={socialImage} property="og:image">
+    <meta content="summary_large_image" name="twitter:card">
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

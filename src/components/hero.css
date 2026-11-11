@@ -1,0 +1,217 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  /* The cables of the drawing run down into the ground line under the zone.
+     (.zone.hero: the zone's own padding must lose to this, whatever order the
+     stylesheets load in.) */
+  .zone.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 18px 0;
+    border-bottom: 1px solid var(--color-ink);
+  }
+
+  /* The next zone's frame ticks sit on that ground line, not under it. */
+  .zone.hero + .zone > .zone-ref::before,
+  .zone.hero + .zone::after {
+    top: -1px;
+  }
+
+  .masthead {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .logo {
+    width: auto;
+    height: 28px;
+  }
+
+  /* Part of the lockup: the brand's own line, in its own case. */
+  .tagline {
+    font-size: 14px;
+    line-height: 1;
+    color: var(--color-ink-muted);
+  }
+
+  .statement {
+    margin-top: 32px;
+  }
+
+  /* The big voice. */
+  .headline {
+    font-family: var(--font-display);
+    font-size: clamp(68px, 9.4vw, 136px);
+    font-weight: 300;
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  .headline > span {
+    display: block;
+  }
+
+  /* (.statement > ...: these two adjust shared classes, so they must outrank
+     them whatever order the stylesheets load in.) */
+  .statement > .subhead {
+    max-width: 40ch;
+    margin-top: 24px;
+    font-size: 19px;
+  }
+
+  /* Narrow: the command on one line, then Copy and GitHub side by side. */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 24px;
+  }
+
+  .actions > .command {
+    display: contents;
+  }
+
+  .actions .command-text {
+    grid-column: 1 / -1;
+    border: 1px solid var(--color-ink);
+    border-bottom: 0;
+  }
+
+  .statement > .works-with {
+    max-width: none;
+    margin-top: 20px;
+  }
+
+  /* The drawing runs to the frame, so the frame is its crop. Its own pixels
+     are the limit: 1158 of them, two per CSS pixel. */
+  .pictorial {
+    justify-self: end;
+    width: calc(100% + var(--pad));
+    max-width: 579px;
+    margin: 116px calc(var(--pad) * -1) 0 0;
+  }
+
+  .pictorial > .stipple-art {
+    isolation: isolate;
+  }
+
+  /* The measured grid behind the bay: one line through each column of sockets
+     and one through each row, and nothing unlabelled. Columns are servers,
+     named along the top. Rows are the two directories of the detail views,
+     keyed by letter and spelled out above. */
+  .bay-line {
+    position: absolute;
+    z-index: -1;
+    background: var(--color-ink-grid);
+  }
+
+  .bay-column {
+    top: -34px;
+    bottom: 0;
+    width: 1px;
+  }
+
+  .bay-row {
+    right: 0;
+    left: 0;
+    height: 1px;
+  }
+
+  .bay-name,
+  .bay-key {
+    position: absolute;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .bay-name {
+    bottom: calc(100% + 8px);
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  /* On the narrowest phones the columns sit closer than their names are wide,
+     so the outer two names lean away from the middle one. */
+  @media (max-width: 359px) {
+    .bay-column:first-child > .bay-name {
+      translate: -62% 0;
+    }
+
+    .bay-column:has(+ .bay-row) > .bay-name {
+      translate: -38% 0;
+    }
+  }
+
+  .bay-mark {
+    position: absolute;
+    left: 3.4%;
+    background: var(--color-paper);
+    translate: -50% -50%;
+  }
+
+  .bay-key {
+    bottom: calc(100% + 64px);
+    left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+  }
+
+  .bay-key > span {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  @media (min-width: 480px) {
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .actions > .command {
+      display: flex;
+    }
+
+    .actions .command-text {
+      border: 0;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .zone.hero {
+      padding-top: 24px;
+    }
+
+    .logo {
+      height: 32px;
+    }
+  }
+
+  /* Side by side. The statement holds the top left; the drawing stands on the
+     ground line at the right, and most of the zone is left empty. */
+  @media (min-width: 960px) {
+    .zone.hero {
+      grid-template-rows: auto 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 44%);
+      column-gap: 40px;
+      min-height: calc(100svh - 2 * var(--strip) - 2px);
+    }
+
+    .masthead {
+      grid-area: 1 / 1 / auto / -1;
+    }
+
+    .statement {
+      grid-area: 2 / 1;
+      padding-bottom: 72px;
+    }
+
+    .pictorial {
+      grid-area: 2 / 2;
+      align-self: end;
+    }
+  }
+}

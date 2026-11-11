@@ -1,0 +1,106 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  /* The button sits beside the command. A command too long for the screen it
+     is on stacks the button under it instead (the component decides from the
+     command's length), and wraps rather than hiding its end. */
+  .command {
+    display: flex;
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+    font-family: var(--font-mono);
+    font-size: var(--code);
+    border: 1px solid var(--color-ink);
+  }
+
+  .command-text {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .command-prompt {
+    display: none;
+    margin-right: 1ch;
+    color: var(--color-ink-muted);
+    user-select: none;
+  }
+
+  /* The solid block of ink is the action. */
+  .copy {
+    display: grid;
+    flex: none;
+    place-items: center;
+    min-width: 84px;
+    min-height: 44px;
+    color: var(--color-paper);
+    cursor: pointer;
+    background: var(--color-ink);
+    transition: transform 160ms var(--ease-out);
+  }
+
+  .copy:focus-visible {
+    outline-color: var(--color-paper);
+    outline-offset: -5px;
+  }
+
+  .copy:active {
+    transform: scale(0.97);
+  }
+
+  .copy > span {
+    grid-area: 1 / 1;
+    transition:
+      opacity 150ms ease,
+      filter 150ms ease;
+  }
+
+  .copy-done,
+  .copy[data-copied] .copy-idle {
+    opacity: 0;
+    filter: blur(2px);
+  }
+
+  .copy[data-copied] .copy-done {
+    opacity: 1;
+    filter: none;
+  }
+
+  @media (max-width: 479px) {
+    .command-stacks-phone {
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .command-stacks-tablet {
+      flex-direction: column;
+    }
+  }
+
+  @media (min-width: 480px) {
+    .command-text {
+      padding-inline: 16px;
+    }
+
+    .command-prompt {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .command {
+      font-size: 14px;
+    }
+
+    .command-text,
+    .copy {
+      min-height: 48px;
+    }
+  }
+}

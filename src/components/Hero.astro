@@ -1,0 +1,90 @@
+---
+// Zone A. The statement, the install command and one drawing: plugbay's own
+// metaphor, a patch bay being patched by hand. The bay stands on a measured
+// grid: one line per server, one per directory, and nothing unlabelled.
+import "./hero.css";
+import logoDark from "../assets/logo-dark.svg?url";
+import logoLight from "../assets/logo-light.svg?url";
+import art from "../assets/patch-bay.png";
+import { hero, install, links } from "../data/plugbay";
+import { details, servers } from "../lib/model";
+import CopyCommand from "./CopyCommand.astro";
+import StippleFigure from "./StippleFigure.astro";
+import ZoneRef from "./ZoneRef.astro";
+
+// The statement is set on three lines. The words are the data's, unchanged.
+const WORDS_PER_LINE = [2, 2];
+const words = hero.headlines[0].split(" ");
+const [first, second] = WORDS_PER_LINE;
+const lines = [
+  words.slice(0, first),
+  words.slice(first, first + second),
+  words.slice(first + second),
+].map((line) => line.join(" "));
+
+// Where the artwork's sockets sit, as a percentage of its box: one column per
+// server, one row per directory.
+const columns = [14.8, 32.6, 50.4];
+const rows = [17, 40.4];
+
+if (columns.length !== servers.length || rows.length !== details.length) {
+  throw new Error(
+    `The patch bay is drawn ${columns.length} by ${rows.length}, the data has ${servers.length} servers and ${details.length} directories`
+  );
+}
+---
+
+<section class="zone hero" id="a">
+  <ZoneRef letter="A" />
+
+  <header class="masthead">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset={logoDark}>
+      <img alt="plugbay" class="logo" height="88" src={logoLight} width="376">
+    </picture>
+    <p class="tagline">{hero.eyebrow}</p>
+  </header>
+
+  <div class="statement">
+    <h1 class="headline">
+      {lines.map((line) => <span>{line} </span>)}
+    </h1>
+    <p class="prose subhead">{hero.subhead}</p>
+    <div class="actions">
+      <CopyCommand command={install.brew} />
+      <a class="label box-link" href={links.repo}>
+        GitHub
+        <svg aria-hidden="true" fill="none" height="10" viewBox="0 0 10 10" width="10">
+          <path d="M2.5 1.5h6v6M8.5 1.5l-7 7" stroke="currentColor" />
+        </svg>
+      </a>
+    </div>
+    <p class="note works-with">{hero.worksWith}</p>
+  </div>
+
+  <StippleFigure
+    art={art}
+    class="pictorial"
+    label={`A hand patching a cable into a patch bay. Its columns are ${servers.join(", ")}; its rows are ${details.map((detail) => detail.directory).join(" and ")}.`}
+    name="patch-bay"
+  >
+    <div aria-hidden="true" class="contents" slot="marks">
+      {servers.map((server, index) => (
+        <span class="bay-line bay-column" style={`left:${columns[index]}%`}>
+          <span class="bay-name">{server}</span>
+        </span>
+      ))}
+      {details.map((detail, index) => (
+        <>
+          <span class="bay-line bay-row" style={`top:${rows[index]}%`} />
+          <span class="balloon bay-mark" style={`top:${rows[index]}%`}>{detail.letter}</span>
+        </>
+      ))}
+      <span class="bay-key">
+        {details.map((detail) => (
+          <span><span class="balloon">{detail.letter}</span>{detail.directory}</span>
+        ))}
+      </span>
+    </div>
+  </StippleFigure>
+</section>

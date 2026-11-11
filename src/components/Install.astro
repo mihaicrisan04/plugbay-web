@@ -1,0 +1,27 @@
+---
+// Zone F. The install commands again, and the plain facts.
+import "./install.css";
+import { facts, install, migrate } from "../data/plugbay";
+import { zoneTitles } from "../lib/content";
+import CopyCommand from "./CopyCommand.astro";
+import ZoneRef from "./ZoneRef.astro";
+---
+
+<section class="zone install" id="f">
+  <ZoneRef letter="F" />
+  <h2 class="section-title">{zoneTitles.install}</h2>
+  <div class="install-body">
+    <div class="install-commands">
+      <h3 class="label">Homebrew</h3>
+      <CopyCommand class="command-primary" command={install.brew} />
+      <h3 class="label">Cargo</h3>
+      <CopyCommand command={install.cargo} />
+    </div>
+    <div class="install-facts">
+      <ul class="facts">
+        {facts.map((fact) => <li class="note">{fact}</li>)}
+      </ul>
+      <p class="prose">{migrate}</p>
+    </div>
+  </div>
+</section>

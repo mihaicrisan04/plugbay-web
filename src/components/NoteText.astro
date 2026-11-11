@@ -1,0 +1,13 @@
+---
+// A note's sentence. When it opens by quoting the config line it explains,
+// that line stays in mono: literals are never set in the sentence face.
+interface Props {
+  line: string;
+  text: string;
+}
+
+const { line, text } = Astro.props;
+const quotesLine = text.startsWith(line);
+---
+
+<span class="note-text">{quotesLine ? <><code>{line}</code>{text.slice(line.length)}</> : text}</span>

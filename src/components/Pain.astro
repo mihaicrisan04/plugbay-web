@@ -1,0 +1,14 @@
+---
+// Zone B. The problem, and one figure: the correction.
+import "./pain.css";
+import { pain } from "../data/plugbay";
+import Correction from "./figures/Correction.astro";
+import ZoneRef from "./ZoneRef.astro";
+---
+
+<section class="zone pain" id="b">
+  <ZoneRef letter="B" />
+  <h2 class="section-title pain-title">{pain.headline}</h2>
+  <p class="prose">{pain.body}</p>
+  <Correction />
+</section>

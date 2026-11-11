@@ -1,0 +1,24 @@
+{/* Place right after a figure. Arms that figure's draw-in before it paints
+    (data-draw="armed"), then plays it once, the first time the figure scrolls
+    into view (data-draw="drawn"). With reduced motion, or without this script,
+    the attribute is never set and the figure is simply drawn. */}
+<script is:inline>
+  (() => {
+    const figure = document.currentScript.previousElementSibling;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!(figure instanceof HTMLElement) || still || !("IntersectionObserver" in window)) {
+      return;
+    }
+    figure.dataset.draw = "armed";
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          figure.dataset.draw = "drawn";
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(figure);
+  })();
+</script>

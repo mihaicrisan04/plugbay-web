@@ -1,0 +1,535 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  .elevation {
+    --rail: 14px;
+    --row: 56px;
+    --head: 32px;
+    --dim-x: 8px;
+    --after-name: 34px;
+    --tree-size: var(--code);
+    --value-size: 13px;
+    --end: calc(var(--rows) + 3);
+    /* A short foot under the last row, so dimension ends clear the frame.
+       --foot is the grid line below it. */
+    --foot: calc(var(--end) + 1);
+    display: grid;
+    grid-template-rows: var(--bar) var(--head) repeat(var(--rows), var(--row)) 12px auto;
+    grid-template-columns: minmax(0, 1fr) repeat(var(--lanes), 80px);
+    max-width: 1040px;
+    font-size: var(--code);
+  }
+
+  .elevation-bar {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+
+  .elevation-frame {
+    z-index: 4;
+    grid-row: 1 / var(--foot);
+    grid-column: 1 / -1;
+    pointer-events: none;
+    border: 1px solid var(--color-ink);
+  }
+
+  /* The grid is the drawing's own coordinates: one line per directory, one per
+     server. A line for boundary y sits on the pixel just above it. */
+  .paper {
+    --row-lines:
+      linear-gradient(var(--color-ink-grid) 1px, transparent 1px) 0
+      calc(var(--head) - 1px) / 100% var(--row);
+    --lane-lines:
+      linear-gradient(90deg, var(--color-ink-grid) 1px, transparent 1px) -1px 0
+      / calc(100% / var(--lanes)) 100%;
+    grid-row: 2 / var(--foot);
+    pointer-events: none;
+  }
+
+  .paper-tree {
+    grid-column: 1;
+    background: var(--row-lines);
+  }
+
+  .paper-lanes {
+    grid-column: 2 / -1;
+    background: var(--lane-lines), var(--row-lines);
+    border-left: 1px solid var(--color-ink-grid);
+  }
+
+  /* The lane heads are the grid's units. */
+  .lane-key,
+  .lane-head {
+    z-index: 1;
+    grid-row: 2;
+    align-self: center;
+    font-size: var(--value-size);
+    line-height: 1;
+  }
+
+  .lane-key {
+    grid-column: 1;
+    padding-inline: 10px;
+    color: var(--color-ink-muted);
+  }
+
+  .lane-head {
+    padding-left: calc(var(--dim-x) + 8px);
+  }
+
+  .row {
+    z-index: 2;
+    display: flex;
+    grid-column: 1;
+    align-items: center;
+    min-width: 0;
+    padding-left: 4px;
+    font-size: var(--tree-size);
+  }
+
+  .rail,
+  .node {
+    position: relative;
+    flex: none;
+    align-self: stretch;
+    width: var(--rail);
+  }
+
+  .rail::before,
+  .rail::after,
+  .node-parent::after {
+    position: absolute;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  /* Upright: the parent's line passing down this row. */
+  .rail-pipe::before,
+  .rail-tee::before,
+  .rail-elbow::before {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+  }
+
+  .rail-elbow::before {
+    bottom: 50%;
+  }
+
+  /* Arm: from the upright across to this directory's node. */
+  .rail-tee::after,
+  .rail-elbow::after {
+    top: calc(50% - 1px);
+    right: calc(-50% + 3px);
+    left: 50%;
+    height: 1px;
+  }
+
+  /* A directory is a solid square node. */
+  .node::before {
+    position: absolute;
+    top: calc(50% - 4px);
+    left: calc(50% - 3px);
+    width: 7px;
+    height: 7px;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  .node-parent::after {
+    top: 50%;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+  }
+
+  .row-name {
+    margin-left: 4px;
+  }
+
+  .file-tag {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: 6px;
+  }
+
+  .file-tag-name {
+    display: none;
+    font-size: 13px;
+  }
+
+  .file-glyph {
+    flex: none;
+  }
+
+  /* With the script running, a directory row chooses that directory. */
+  .elevation[data-live] .row-leaf {
+    cursor: pointer;
+  }
+
+  /* A filled balloon is the directory on show. */
+  .row .balloon {
+    margin-left: 6px;
+    color: color-mix(
+      in srgb,
+      var(--color-paper) calc(var(--sel) * 100%),
+      var(--color-ink)
+    );
+    background: color-mix(
+      in srgb,
+      var(--color-ink) calc(var(--sel) * 100%),
+      transparent
+    );
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .elevation[data-live] .row-leaf:active .balloon {
+    color: var(--color-paper);
+    background: var(--color-ink-soft);
+  }
+
+  /* One dimension per setting. Solid where it applies to the directory on
+     show, phantom where it applies somewhere else. */
+  .dim {
+    --active: calc(
+      var(--sel-a) *
+      var(--on-a, 0) +
+      var(--sel-b) *
+      var(--on-b, 0)
+    );
+    position: relative;
+    z-index: 1;
+  }
+
+  .dim-rule {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--dim-x);
+    width: 1px;
+    transition: opacity 200ms ease;
+  }
+
+  .dim-solid {
+    background: var(--color-ink);
+    opacity: var(--active);
+  }
+
+  /* ISO 128 phantom line: long dash, two dots. */
+  .dim-phantom {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-ink-soft) 0 24px,
+      transparent 24px 27px,
+      var(--color-ink-soft) 27px 28px,
+      transparent 28px 31px,
+      var(--color-ink-soft) 31px 32px,
+      transparent 32px 35px
+    );
+    opacity: calc(1 - var(--active));
+  }
+
+  /* Extension line with an oblique tick, at each end of the dimension. */
+  .dim-end {
+    position: absolute;
+    left: calc(var(--dim-x) - 8px);
+    width: 17px;
+    height: 1px;
+    background: var(--color-ink);
+  }
+
+  .dim-end::after {
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 13px;
+    height: 1px;
+    content: "";
+    background: inherit;
+    transform: rotate(-45deg);
+  }
+
+  .dim-end-top {
+    top: -1px;
+  }
+
+  .dim-end-bottom {
+    bottom: 0;
+  }
+
+  .dim-value {
+    position: absolute;
+    top: calc(var(--row) / 2);
+    left: calc(var(--dim-x) + 8px);
+    font-size: var(--value-size);
+    line-height: 1;
+    color: color-mix(
+      in srgb,
+      var(--color-ink) calc(var(--active) * 100%),
+      var(--color-ink-muted)
+    );
+    white-space: nowrap;
+    translate: 0 -50%;
+    transition: color 200ms ease;
+  }
+
+  /* Hatching: removed by this file. */
+  .hatch {
+    position: absolute;
+    top: 0;
+    bottom: 1px;
+    left: var(--dim-x);
+    width: 20px;
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-ink-soft) 0 1px,
+      transparent 1px 6px
+    );
+  }
+
+  /* A strip beside the lane's rule, as long as the setting reaches. */
+  .dim-off .dim-value {
+    left: calc(var(--dim-x) + 28px);
+  }
+
+  /* Ports use the logo's own code: filled is plugged in, a ring is not. */
+  .port {
+    z-index: 3;
+    align-self: center;
+    justify-self: start;
+    width: 11px;
+    height: 11px;
+    margin-left: calc(var(--dim-x) - 5px);
+    border-radius: 50%;
+  }
+
+  .port-on {
+    background: var(--color-ink);
+  }
+
+  .port-off {
+    background: var(--color-paper);
+    border: 1px solid var(--color-ink);
+  }
+
+  /* Projection line: reads the directory on show across every lane. It takes
+     no clicks, so a row under it can still be chosen. */
+  .projection {
+    z-index: 2;
+    grid-column: 1 / -1;
+    align-self: center;
+    height: 1px;
+    margin-left: calc(
+      4px +
+      (var(--depth) + 1) *
+      var(--rail) +
+      var(--name) *
+      1ch +
+      var(--after-name)
+    );
+    font-size: var(--tree-size);
+    pointer-events: none;
+    background: var(--color-ink);
+    transform: scaleX(var(--sel));
+    transform-origin: left center;
+    transition: transform calc(150ms + 250ms * var(--sel)) var(--ease-in-out);
+  }
+
+  /* Key to the drawing's own marks, and the way on to the detail views. */
+  .elevation-key {
+    display: flex;
+    flex-wrap: wrap;
+    grid-row: var(--foot);
+    grid-column: 1 / -1;
+    gap: 4px 32px;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--color-ink-muted);
+  }
+
+  .marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+  }
+
+  .marks > li {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    line-height: 1.6;
+  }
+
+  .mark {
+    flex: none;
+    width: 24px;
+    height: 1px;
+  }
+
+  .mark-solid {
+    background: var(--color-ink);
+  }
+
+  .mark-phantom {
+    background: linear-gradient(
+      to right,
+      var(--color-ink-soft) 0 14px,
+      transparent 14px 17px,
+      var(--color-ink-soft) 17px 18px,
+      transparent 18px 21px,
+      var(--color-ink-soft) 21px 22px,
+      transparent 22px
+    );
+  }
+
+  .mark-hatch {
+    height: 12px;
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-ink-soft) 0 1px,
+      transparent 1px 6px
+    );
+  }
+
+  .mark-port {
+    width: 11px;
+    height: 11px;
+    background: var(--color-ink);
+    border-radius: 50%;
+  }
+
+  .mark-ring {
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--color-ink);
+    border-radius: 50%;
+  }
+
+  .detail-link {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    min-height: 44px;
+    margin-left: auto;
+    color: var(--color-ink);
+  }
+
+  /* Pointing at the other directory previews its projection. */
+  @media (hover: hover) and (pointer: fine) {
+    .elevation[data-live] .row-leaf:hover .balloon {
+      color: var(--color-paper);
+      background: var(--color-ink);
+    }
+
+    .elevation[data-live] .row-leaf.is-a:hover ~ .projection.is-a,
+    .elevation[data-live] .row-leaf.is-b:hover ~ .projection.is-b {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (min-width: 720px) {
+    .elevation {
+      --rail: 24px;
+      --row: 72px;
+      --dim-x: 20px;
+      --after-name: 44px;
+      --tree-size: 15px;
+      --value-size: 14px;
+      grid-template-columns: 264px repeat(var(--lanes), minmax(0, 1fr));
+    }
+
+    .row-name {
+      margin-left: 6px;
+    }
+
+    .file-tag,
+    .row .balloon {
+      margin-left: 10px;
+    }
+
+    .file-tag-name {
+      display: inline;
+    }
+
+    .marks > .mark-file {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .elevation {
+      --row: 80px;
+      grid-template-columns: 320px repeat(var(--lanes), minmax(0, 1fr));
+    }
+  }
+
+  /* Draw-in, the first time the drawing scrolls into view: each dimension runs
+     down from the row whose file sets it, shallowest file first. That order is
+     the merge order. The script arms it; unarmed, or on paper, everything is
+     simply drawn. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .elevation[data-draw="armed"] :is(.dim-rule, .hatch) {
+      clip-path: inset(0 0 100% 0);
+    }
+
+    .elevation[data-draw="armed"] .projection {
+      clip-path: inset(-4px 100% -4px 0);
+    }
+
+    .elevation[data-draw="armed"] :is(.dim-end-bottom, .port) {
+      opacity: 0;
+    }
+
+    .elevation[data-draw="drawn"] :is(.dim-rule, .hatch) {
+      animation: elevation-run-down 520ms var(--ease-in-out) both;
+      animation-delay: calc(100ms + var(--order) * 110ms);
+    }
+
+    .elevation[data-draw="drawn"] :is(.dim-end-bottom, .port) {
+      animation: elevation-appear 200ms ease both;
+      animation-delay: calc(550ms + var(--order) * 110ms);
+    }
+
+    .elevation[data-draw="drawn"] .projection {
+      animation: elevation-run-across 520ms var(--ease-in-out) 1000ms both;
+    }
+  }
+
+  /* Reduced motion keeps the fades and drops the travelling line. */
+  @media (prefers-reduced-motion: reduce) {
+    .projection {
+      transition: none;
+    }
+  }
+
+  @keyframes elevation-run-down {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  @keyframes elevation-run-across {
+    from {
+      clip-path: inset(-4px 100% -4px 0);
+    }
+
+    to {
+      clip-path: inset(-4px 0);
+    }
+  }
+
+  @keyframes elevation-appear {
+    from {
+      opacity: 0;
+    }
+  }
+}

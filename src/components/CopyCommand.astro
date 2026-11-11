@@ -1,0 +1,68 @@
+---
+// A command as real, selectable text with a copy button.
+import "./copy-command.css";
+
+interface Props {
+  class?: string;
+  command: string;
+}
+
+const { command, class: className } = Astro.props;
+
+// A command too long for a phone, or for a tablet, stacks its button there.
+const PHONE_FIT = 24;
+const TABLET_FIT = 48;
+const stacksOnPhone = command.length > PHONE_FIT;
+const stacksOnTablet = command.length > TABLET_FIT;
+---
+
+<div class:list={["command", className, stacksOnPhone && "command-stacks-phone", stacksOnTablet && "command-stacks-tablet"]}>
+  <code class="command-text"><span aria-hidden="true" class="command-prompt">$ </span>{command}</code>
+  <button aria-label={`Copy ${command}`} class="label copy" data-copy={command} type="button">
+    <span class="copy-idle">Copy</span>
+    <span aria-hidden="true" class="copy-done">Copied</span>
+  </button>
+  <span aria-live="polite" class="sr-only" data-copy-status></span>
+</div>
+
+<script>
+  const COPIED_FOR_MS = 1600;
+
+  function selectCommand(button: HTMLElement) {
+    const text = button.parentElement?.querySelector(".command-text");
+    if (text) {
+      window.getSelection()?.selectAllChildren(text);
+    }
+  }
+
+  async function copy(button: HTMLElement) {
+    const status = button.parentElement?.querySelector("[data-copy-status]");
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy ?? "");
+    } catch {
+      // No clipboard access: leave the command selected so one keystroke copies it.
+      selectCommand(button);
+      return;
+    }
+    button.dataset.copied = "";
+    if (status) {
+      status.textContent = "Copied to clipboard";
+    }
+    window.setTimeout(() => {
+      delete button.dataset.copied;
+      if (status) {
+        status.textContent = "";
+      }
+    }, COPIED_FOR_MS);
+  }
+
+  document.addEventListener("click", (event) => {
+    const button =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>("[data-copy]")
+        : null;
+    if (button) {
+      copy(button);
+    }
+  });
+</script>

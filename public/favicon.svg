@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -26 116 116">
+  <style>
+    .o { stroke: #17171c; } .r { stroke: #9a9aa6; } .a { fill: #6d3fe0; }
+    @media (prefers-color-scheme: dark) { .o { stroke: #e6edf3; } .r { stroke: #6e7681; } .a { fill: #8b5cf6; } }
+  </style>
+    <rect x="2.5" y="2.5" width="95" height="59" rx="14" fill="none" class="o" stroke-width="5"/>
+    <circle cx="26" cy="22" r="7" fill="none" class="r" stroke-width="3.5"/>
+    <circle cx="50" cy="22" r="7.5" class="a"/>
+    <circle cx="74" cy="22" r="7" fill="none" class="r" stroke-width="3.5"/>
+    <circle cx="26" cy="42" r="7" fill="none" class="r" stroke-width="3.5"/>
+    <circle cx="50" cy="42" r="7" fill="none" class="r" stroke-width="3.5"/>
+    <circle cx="74" cy="42" r="7.5" class="a"/>
+  </svg>

@@ -1,0 +1,46 @@
+---
+// The sheet's title block, bottom right. Every field is real. plugbay has no
+// release yet, so there is no drawing number, date or revision table.
+import "./title-block.css";
+import logoDark from "../assets/logo-dark.svg?url";
+import logoLight from "../assets/logo-light.svg?url";
+import { links } from "../data/plugbay";
+import { titleBlock } from "../lib/content";
+---
+
+<footer class="sheet-foot">
+  <dl class="title-block">
+    <div class="field field-logo">
+      <dt class="sr-only">Mark</dt>
+      <dd>
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset={logoDark}>
+          <img alt="plugbay" class="title-logo" height="88" loading="lazy" src={logoLight} width="376">
+        </picture>
+      </dd>
+    </div>
+    <div class="field field-title">
+      <dt class="field-label">Title</dt>
+      <dd>
+        <span class="field-title-name">{titleBlock.title}</span>
+        {titleBlock.subtitle}
+      </dd>
+    </div>
+    <div class="field field-sheet">
+      <dt class="field-label">Sheet</dt>
+      <dd>{titleBlock.sheet}</dd>
+    </div>
+    <div class="field field-creator">
+      <dt class="field-label">Creator</dt>
+      <dd>{titleBlock.creator}</dd>
+    </div>
+    <div class="field field-licence">
+      <dt class="field-label">Licence</dt>
+      <dd>{titleBlock.licence}</dd>
+    </div>
+    <div class="field field-repository">
+      <dt class="field-label">Repository</dt>
+      <dd><a href={links.repo}>{titleBlock.repository}</a></dd>
+    </div>
+  </dl>
+</footer>
