@@ -1,0 +1,45 @@
+{
+  "name": "plugbay-web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "astro": "astro",
+    "build": "astro build",
+    "check": "ultracite check",
+    "dev": "astro dev",
+    "fix": "ultracite fix",
+    "prepare": "husky",
+    "preview": "astro preview",
+    "shots": "bun scripts/shot.ts / --full",
+    "test": "playwright test",
+    "typecheck": "astro check",
+    "verify": "bun run check && bun run typecheck && bun run build && bun run test"
+  },
+  "dependencies": {
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource-variable/azeret-mono": "^5.3.0",
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "@fontsource/commit-mono": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/ibm-plex-sans-condensed": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.8",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^24",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "typescript": "^6",
+    "ultracite": "7.12.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

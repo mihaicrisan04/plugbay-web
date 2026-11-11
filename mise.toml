@@ -1,0 +1,24 @@
+# Pinned for reproducibility. Bump deliberately.
+[tools]
+node = "24.21.0"
+bun = "1.4.2"
+
+[env]
+_.path = ["./node_modules/.bin"]
+
+[tasks.dev]
+alias = "d"
+run = "astro dev"
+
+[tasks.build]
+alias = "b"
+run = "astro build"
+
+[tasks.verify]
+description = "check → typecheck → build → smoke tests"
+alias = "v"
+run = "bun run verify"
+
+[tasks.shots]
+description = "full-page screenshots of / at mobile and desktop, light and dark, into .shots/"
+run = "bun run shots"

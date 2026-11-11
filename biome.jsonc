@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core", "ultracite/biome/astro"],
+  "files": {
+    "includes": [
+      "!public",
+      "!**/*.svg",
+      "!docs",
+      "!archive",
+      "!.agents",
+      "!.claude",
+      "!.codex",
+      "!.impeccable"
+    ]
+  },
+  "overrides": [
+    {
+      // Biome reads .astro templates as React JSX and its .astro formatter mangles
+      // expressions, so lint the frontmatter but leave template layout to us.
+      "includes": ["**/*.astro"],
+      "formatter": { "enabled": false },
+      "linter": {
+        "rules": {
+          // Scrollable terminal captures carry tabindex="0" so the keyboard can reach them.
+          "a11y": { "noNoninteractiveTabindex": "off" },
+          "style": { "useFilenamingConvention": "off" },
+          "suspicious": { "noUnknownAttribute": "off" }
+        }
+      }
+    }
+  ]
+}
