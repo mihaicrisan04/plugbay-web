@@ -1,0 +1,1778 @@
+/* Direction A, "Sheet 1 of 1". One ink on white, every line 1px.
+   Hierarchy comes from size, solid fills and three tints of the same ink. */
+
+@import "tailwindcss";
+@import "@fontsource/commit-mono/400.css";
+
+/* Big Shoulders, OFL 1.1 (public/fonts/sheet/BigShoulders-OFL.txt), instanced
+   to weights 200 to 500 at display size and subset to Basic Latin. */
+@font-face {
+  font-display: swap;
+  font-family: "Big Shoulders";
+  font-weight: 200 500;
+  src: url("/fonts/sheet/BigShoulders.woff2") format("woff2");
+}
+
+@theme {
+  --font-display: "Big Shoulders", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-mono);
+
+  --color-paper: #fff;
+  --color-ink: oklch(42% 0.24 284);
+  /* Tints of the ink. Muted is the lightest that still reads as text. */
+  --color-ink-muted: color-mix(
+    in srgb,
+    var(--color-ink) 72%,
+    var(--color-paper)
+  );
+  --color-ink-soft: color-mix(
+    in srgb,
+    var(--color-ink) 54%,
+    var(--color-paper)
+  );
+  --color-ink-grid: color-mix(
+    in srgb,
+    var(--color-ink) 12%,
+    var(--color-paper)
+  );
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@layer base {
+  :root {
+    --strip: 20px;
+    --pad: 14px;
+    --code: 13px;
+    --balloon: 20px;
+    --bar: 28px;
+    color-scheme: light dark;
+  }
+
+  @media (min-width: 720px) {
+    :root {
+      --strip: 28px;
+      --pad: 32px;
+    }
+  }
+
+  @media (min-width: 1560px) {
+    :root {
+      --code: 14px;
+    }
+  }
+
+  /* Night print: one light ink on one deep ground. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-paper: oklch(15% 0.045 283);
+      --color-ink: oklch(82% 0.115 290);
+      --color-ink-muted: color-mix(
+        in srgb,
+        var(--color-ink) 70%,
+        var(--color-paper)
+      );
+      --color-ink-grid: color-mix(
+        in srgb,
+        var(--color-ink) 15%,
+        var(--color-paper)
+      );
+    }
+
+    body {
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    scrollbar-color: var(--color-ink-soft) transparent;
+    text-size-adjust: 100%;
+    /* Every tappable thing below has its own pressed state. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    font-size: 14px;
+    font-variant-ligatures: none;
+    line-height: 1.55;
+  }
+
+  ::selection {
+    color: var(--color-paper);
+    background: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  /* Controls answer on the first tap and never select as text. Content does. */
+  a,
+  button,
+  label {
+    touch-action: manipulation;
+  }
+
+  button,
+  label {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+@layer components {
+  /* ---------- Shared parts ---------- */
+
+  /* The small voice: every label on the sheet. */
+  .label {
+    font-size: 13px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Instrument window: 1px box under a solid title bar. */
+  .window {
+    min-width: 0;
+    border: 1px solid var(--color-ink);
+  }
+
+  .window-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    height: var(--bar);
+    padding-inline: 10px;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--color-paper);
+    white-space: nowrap;
+    background: var(--color-ink);
+  }
+
+  .window-bar ::selection {
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+
+  .bar-subject {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-end {
+    margin-left: auto;
+  }
+
+  /* Balloon: a letter or number that keys one thing to another. */
+  .balloon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--balloon);
+    height: var(--balloon);
+    font-size: 13px;
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid currentcolor;
+    border-radius: 50%;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    padding: 8px 12px;
+    color: var(--color-paper);
+    background: var(--color-ink);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  /* ---------- Sheet furniture: frame, zone letters ---------- */
+
+  /* On a phone the frame is its left edge only, with the zone letters on it. */
+  .sheet {
+    position: relative;
+    max-width: 1560px;
+    margin-left: var(--strip);
+    border-left: 1px solid var(--color-ink);
+  }
+
+  @media (min-width: 720px) {
+    .sheet {
+      margin: var(--strip);
+      border: 1px solid var(--color-ink);
+    }
+  }
+
+  @media (min-width: 1616px) {
+    .sheet {
+      margin-inline: auto;
+    }
+  }
+
+  .zone {
+    position: relative;
+    padding: 18px var(--pad) 48px;
+  }
+
+  @media (min-width: 720px) {
+    .zone {
+      padding-block: 24px 64px;
+    }
+  }
+
+  .zone-ref {
+    position: absolute;
+    top: 0;
+    right: calc(100% + 1px);
+    bottom: 0;
+    width: var(--strip);
+  }
+
+  /* A tick across the frame where one zone ends and the next begins. */
+  .zone + .zone > .zone-ref::before,
+  .zone + .zone::after {
+    position: absolute;
+    top: 0;
+    width: 9px;
+    height: 1px;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  .zone + .zone > .zone-ref::before {
+    right: -5px;
+  }
+
+  .zone + .zone::after {
+    right: -5px;
+    display: none;
+  }
+
+  @media (min-width: 720px) {
+    .zone + .zone::after {
+      display: block;
+    }
+  }
+
+  .zone-ref a {
+    position: sticky;
+    top: calc(50svh - 22px);
+    display: grid;
+    place-items: center;
+    height: 44px;
+    font-size: 13px;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  /* 44px tap target without widening the strip. */
+  .zone-ref a::after {
+    position: absolute;
+    inset: 0 -8px;
+    content: "";
+  }
+
+  /* ---------- Zone A: statement and pictorial view ---------- */
+
+  /* Width of the detail view. Resolved where it is used, at the code size. */
+  .hero {
+    --detail-w: calc(var(--detail-cols) * 1ch + 42px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .masthead {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .logo {
+    width: auto;
+    height: 28px;
+  }
+
+  .tagline {
+    color: var(--color-ink-muted);
+  }
+
+  .statement {
+    margin-top: 20px;
+  }
+
+  /* The big voice: light, tall, tight. */
+  .headline {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 6.7vw, 104px);
+    font-weight: 300;
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  .headline > span {
+    display: block;
+  }
+
+  .subhead {
+    max-width: 62ch;
+    margin-top: 16px;
+    font-size: 14px;
+    text-wrap: pretty;
+  }
+
+  /* Narrow: the command on one line, then Copy and GitHub side by side. */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 16px;
+  }
+
+  .box-link {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding-inline: 18px;
+    text-decoration: none;
+    border: 1px solid var(--color-ink);
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      transform 160ms var(--ease-out);
+  }
+
+  .box-link:active {
+    transform: scale(0.97);
+  }
+
+  /* The artwork is a one-bit mask, so it takes the ink of the theme. */
+  .pictorial {
+    position: relative;
+    order: 1;
+    margin-top: 56px;
+  }
+
+  .pictorial-art {
+    position: absolute;
+    inset: 0;
+    background: var(--color-ink);
+    mask: var(--art) center / 100% 100% no-repeat;
+  }
+
+  /* Columns are servers, rows are the two directories of the detail view. */
+  .pictorial-column {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    font-size: 13px;
+    line-height: 1;
+    translate: -50% 0;
+  }
+
+  .pictorial-row {
+    position: absolute;
+    left: 0;
+    color: var(--color-paper);
+    background: var(--color-ink);
+    translate: -50% -50%;
+  }
+
+  @media (min-width: 480px) {
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .box-link {
+      min-height: 48px;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .logo {
+      height: 32px;
+    }
+
+    .statement {
+      margin-top: 24px;
+    }
+
+    .subhead {
+      margin-top: 20px;
+    }
+
+    .actions {
+      margin-top: 20px;
+    }
+  }
+
+  /* Side by side: the statement on the left, the pictorial view on the right,
+     its cables running down towards the detail window. */
+  @media (min-width: 1280px) {
+    .hero {
+      grid-template-rows: auto 1fr auto;
+      grid-template-columns: minmax(0, 1fr) var(--detail-w);
+      column-gap: 48px;
+      font-size: var(--code);
+    }
+
+    .subhead {
+      max-width: 72ch;
+    }
+
+    /* The two actions stay on one line. On the narrowest side-by-side layout
+       they reach into the empty margin beside the pictorial view. */
+    .actions {
+      flex-wrap: nowrap;
+      width: max-content;
+    }
+
+    .masthead {
+      grid-area: 1 / 1;
+    }
+
+    .statement {
+      grid-area: 2 / 1;
+    }
+
+    .drawing {
+      grid-area: 3 / 1 / auto / -1;
+    }
+
+    .pictorial {
+      grid-row: 1 / span 2;
+      grid-column: 2;
+      align-self: end;
+      justify-self: end;
+      order: 0;
+      width: min(100%, 560px);
+      margin: 22px 0 -44px;
+    }
+
+    .drawing {
+      order: 2;
+      margin-top: 44px;
+    }
+  }
+
+  /* ---------- Command with copy ---------- */
+
+  /* Narrow screens stack the button under the command so the whole command shows. */
+  .command {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    font-size: var(--code);
+    border: 1px solid var(--color-ink);
+  }
+
+  .command-text {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 12px;
+    overflow-x: auto;
+    white-space: pre;
+    scrollbar-width: none;
+  }
+
+  .command-prompt {
+    display: none;
+    color: var(--color-ink-muted);
+    user-select: none;
+  }
+
+  /* The primary action is the one solid block of ink in the statement. */
+  .copy {
+    display: grid;
+    flex: none;
+    place-items: center;
+    min-width: 84px;
+    min-height: 44px;
+    color: var(--color-paper);
+    cursor: pointer;
+    background: var(--color-ink);
+    transition: transform 160ms var(--ease-out);
+  }
+
+  .copy:focus-visible {
+    outline-color: var(--color-paper);
+    outline-offset: -5px;
+  }
+
+  .copy:active {
+    transform: scale(0.97);
+  }
+
+  .copy > span {
+    grid-area: 1 / 1;
+    transition:
+      opacity 150ms ease,
+      filter 150ms ease;
+  }
+
+  .copy-done,
+  .copy[data-copied] .copy-idle {
+    opacity: 0;
+    filter: blur(2px);
+  }
+
+  .copy[data-copied] .copy-done {
+    opacity: 1;
+    filter: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .box-link:hover {
+      color: var(--color-paper);
+      background: var(--color-ink);
+    }
+  }
+
+  @media (min-width: 480px) {
+    .command {
+      flex-direction: row;
+    }
+
+    .command-text {
+      padding-inline: 16px;
+    }
+
+    .command-prompt {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .command {
+      font-size: 14px;
+    }
+
+    .command-text,
+    .copy {
+      min-height: 48px;
+    }
+  }
+
+  /* In the statement, a narrow screen keeps the command on one line and puts
+     Copy and GitHub side by side under it. */
+  .actions > .command {
+    display: contents;
+  }
+
+  .actions .command-text {
+    grid-column: 1 / -1;
+    border: 1px solid var(--color-ink);
+    border-bottom: 0;
+  }
+
+  @media (min-width: 480px) {
+    .actions > .command {
+      display: flex;
+    }
+
+    .actions .command-text {
+      border: 0;
+    }
+  }
+
+  /* ---------- Terminal capture ---------- */
+
+  .capture {
+    max-width: 100%;
+    font-size: var(--code);
+  }
+
+  .capture-body {
+    position: relative;
+  }
+
+  /* Corner squares: this is cut from a real session, at 1:1. */
+  .corner-squares {
+    --square: linear-gradient(var(--color-ink), var(--color-ink)) no-repeat;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      var(--square) 0 0 / 5px 5px,
+      var(--square) 100% 0 / 5px 5px,
+      var(--square) 0 100% / 5px 5px,
+      var(--square) 100% 100% / 5px 5px;
+  }
+
+  /* Narrow screens scroll the capture sideways. The fade is the scroll cue. */
+  .capture-scroll {
+    padding: 14px 28px 14px 16px;
+    overflow-x: auto;
+    line-height: 1.5;
+    white-space: pre;
+    scrollbar-width: thin;
+    mask-image: linear-gradient(to left, transparent, #000 24px);
+  }
+
+  .capture-scroll:focus-visible {
+    outline-offset: -5px;
+  }
+
+  .prompt {
+    color: var(--color-ink-muted);
+    user-select: none;
+  }
+
+  /* Balloons on a title bar are reversed. The filled one is the view on show. */
+  .balloon-current {
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+
+  label.balloon {
+    position: relative;
+    cursor: pointer;
+  }
+
+  label.balloon::after {
+    position: absolute;
+    inset: -12px -5px;
+    content: "";
+  }
+
+  @media (min-width: 1280px) {
+    .capture {
+      width: calc(var(--cols) * 1ch + 42px);
+    }
+
+    .capture-scroll {
+      padding-inline: 20px;
+      mask-image: none;
+    }
+  }
+
+  /* ---------- Zone A: the elevation ---------- */
+
+  .drawing {
+    --rail: 14px;
+    --row: 52px;
+    --head: 32px;
+    --lane: 80px;
+    --dim-x: 8px;
+    --after-name: 34px;
+    --tree-size: var(--code);
+    --value-size: 13px;
+    --end: calc(var(--rows) + 3);
+    /* A short foot under the last row, so dimension ends clear the frame.
+       --foot is the grid line below it. */
+    --foot: calc(var(--end) + 1);
+    --proj-end: -1;
+    /* Which directory is projected into the detail view. */
+    --sel-a: 1;
+    --sel-b: 0;
+    display: grid;
+    grid-template-rows: var(--bar) var(--head) repeat(var(--rows), var(--row)) 12px;
+    grid-template-columns: minmax(0, 1fr) repeat(var(--lanes), var(--lane));
+    margin-top: 32px;
+    font-size: var(--code);
+  }
+
+  .drawing:has(#detail-b:checked) {
+    --sel-a: 0;
+    --sel-b: 1;
+  }
+
+  .is-a {
+    --sel: var(--sel-a);
+  }
+
+  .is-b {
+    --sel: var(--sel-b);
+  }
+
+  .elevation-bar {
+    grid-row: 1;
+    grid-column: 1 / span calc(var(--lanes) + 1);
+  }
+
+  /* Key for the file mark, wherever the rows are too narrow to spell it out. */
+  .file-key {
+    display: flex;
+    grid-row: var(--foot);
+    grid-column: 1 / -1;
+    gap: 6px;
+    align-items: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--color-ink-muted);
+  }
+
+  .elevation-frame {
+    z-index: 4;
+    grid-row: 1 / var(--foot);
+    grid-column: 1 / span calc(var(--lanes) + 1);
+    pointer-events: none;
+    border: 1px solid var(--color-ink);
+  }
+
+  /* The grid is the drawing's own coordinates: one line per directory, one per
+     server. A line for boundary y sits on the pixel just above it. */
+  .paper {
+    --row-lines:
+      linear-gradient(var(--color-ink-grid) 1px, transparent 1px) 0
+      calc(var(--head) - 1px) / 100% var(--row);
+    --lane-lines:
+      linear-gradient(90deg, var(--color-ink-grid) 1px, transparent 1px) -1px 0
+      / var(--lane) 100%;
+    grid-row: 2 / var(--foot);
+    pointer-events: none;
+  }
+
+  .paper-tree {
+    grid-column: 1;
+    background: var(--row-lines);
+  }
+
+  .paper-lanes {
+    grid-column: 2 / span var(--lanes);
+    background: var(--lane-lines), var(--row-lines);
+    border-left: 1px solid var(--color-ink-grid);
+  }
+
+  /* The lane heads are the grid's units. */
+  .lane-key,
+  .lane-head {
+    z-index: 1;
+    grid-row: 2;
+    align-self: center;
+    font-size: var(--value-size);
+    line-height: 1;
+  }
+
+  .lane-key {
+    grid-column: 1;
+    padding-inline: 10px;
+    color: var(--color-ink-muted);
+  }
+
+  .lane-head {
+    padding-left: calc(var(--dim-x) + 8px);
+  }
+
+  .row {
+    z-index: 2;
+    display: flex;
+    grid-column: 1;
+    align-items: center;
+    min-width: 0;
+    padding-left: 4px;
+    font-size: var(--tree-size);
+  }
+
+  .rail,
+  .node {
+    position: relative;
+    flex: none;
+    align-self: stretch;
+    width: var(--rail);
+  }
+
+  .rail::before,
+  .rail::after,
+  .node-parent::after {
+    position: absolute;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  /* Upright: the parent's line passing down this row. */
+  .rail-pipe::before,
+  .rail-tee::before,
+  .rail-elbow::before {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+  }
+
+  .rail-elbow::before {
+    bottom: 50%;
+  }
+
+  /* Arm: from the upright across to this directory's node. */
+  .rail-tee::after,
+  .rail-elbow::after {
+    top: calc(50% - 1px);
+    right: calc(-50% + 3px);
+    left: 50%;
+    height: 1px;
+  }
+
+  /* A directory is a solid square node. */
+  .node::before {
+    position: absolute;
+    top: calc(50% - 4px);
+    left: calc(50% - 3px);
+    width: 7px;
+    height: 7px;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  .node-parent::after {
+    top: 50%;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+  }
+
+  .row-name {
+    margin-left: 4px;
+  }
+
+  .file-tag {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: 6px;
+  }
+
+  .file-tag-name {
+    display: none;
+    font-size: 13px;
+  }
+
+  .file-glyph {
+    flex: none;
+  }
+
+  .row-leaf {
+    cursor: pointer;
+  }
+
+  .row-leaf:has(:focus-visible) {
+    outline: 1px solid var(--color-ink);
+    outline-offset: -4px;
+  }
+
+  .row .balloon {
+    margin-left: 6px;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .row-leaf:active .balloon {
+    color: var(--color-paper);
+    background: var(--color-ink-soft);
+  }
+
+  /* A filled balloon is the directory on show. */
+  .row.is-a .balloon,
+  .drawing:has(#detail-b:checked) .row.is-b .balloon {
+    color: var(--color-paper);
+    background: var(--color-ink);
+  }
+
+  .drawing:has(#detail-b:checked) .row.is-a .balloon {
+    color: inherit;
+    background: transparent;
+  }
+
+  /* One dimension per setting. Solid where it applies to the directory on
+     show, phantom where it applies somewhere else. */
+  .dim {
+    --active: calc(
+      var(--sel-a) *
+      var(--on-a, 0) +
+      var(--sel-b) *
+      var(--on-b, 0)
+    );
+    position: relative;
+    z-index: 1;
+  }
+
+  .dim-rule {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--dim-x);
+    width: 1px;
+    transition: opacity 200ms ease;
+  }
+
+  .dim-solid {
+    background: var(--color-ink);
+    opacity: var(--active);
+  }
+
+  /* ISO 128 phantom line: long dash, two dots. */
+  .dim-phantom {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--color-ink-soft) 0 24px,
+      transparent 24px 27px,
+      var(--color-ink-soft) 27px 28px,
+      transparent 28px 31px,
+      var(--color-ink-soft) 31px 32px,
+      transparent 32px 35px
+    );
+    opacity: calc(1 - var(--active));
+  }
+
+  /* Extension line with an oblique tick, at each end of the dimension. */
+  .dim-end {
+    position: absolute;
+    left: calc(var(--dim-x) - 8px);
+    width: 17px;
+    height: 1px;
+    background: var(--color-ink);
+  }
+
+  .dim-end::after {
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 13px;
+    height: 1px;
+    content: "";
+    background: inherit;
+    transform: rotate(-45deg);
+  }
+
+  .dim-end-top {
+    top: -1px;
+  }
+
+  .dim-end-bottom {
+    bottom: 0;
+  }
+
+  .dim-value {
+    position: absolute;
+    top: calc(var(--row) / 2);
+    left: calc(var(--dim-x) + 8px);
+    font-size: var(--value-size);
+    line-height: 1;
+    color: color-mix(
+      in srgb,
+      var(--color-ink) calc(var(--active) * 100%),
+      var(--color-ink-muted)
+    );
+    white-space: nowrap;
+    translate: 0 -50%;
+    transition: color 200ms ease;
+  }
+
+  /* Hatching: removed by this file. */
+  .hatch {
+    position: absolute;
+    inset: 0 0 1px var(--dim-x);
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-ink-soft) 0 1px,
+      transparent 1px 6px
+    );
+  }
+
+  .dim-off .dim-value {
+    padding: 4px;
+    margin-left: -4px;
+    background: var(--color-paper);
+  }
+
+  /* Ports use the logo's own code: filled is plugged in, a ring is not. */
+  .port {
+    z-index: 3;
+    align-self: center;
+    justify-self: start;
+    width: 11px;
+    height: 11px;
+    margin-left: calc(var(--dim-x) - 5px);
+    border-radius: 50%;
+  }
+
+  .port-on {
+    background: var(--color-ink);
+  }
+
+  .port-off {
+    background: var(--color-paper);
+    border: 1px solid var(--color-ink);
+  }
+
+  /* Projection line: carries the directory on show across to its detail view,
+     and ends there on a square node. */
+  .projection {
+    position: relative;
+    z-index: 2;
+    grid-column: 1 / var(--proj-end);
+    align-self: center;
+    height: 1px;
+    margin-left: calc(
+      4px +
+      (var(--depth) + 1) *
+      var(--rail) +
+      var(--name) *
+      1ch +
+      var(--after-name)
+    );
+    font-size: var(--tree-size);
+    background: var(--color-ink);
+    transform: scaleX(var(--sel));
+    transform-origin: left center;
+    transition: transform calc(150ms + 250ms * var(--sel)) var(--ease-in-out);
+  }
+
+  .views {
+    display: grid;
+    grid-row: calc(var(--foot) + 1);
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin-top: 20px;
+  }
+
+  .view {
+    visibility: hidden;
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition:
+      opacity 150ms ease,
+      visibility 0s linear 150ms;
+  }
+
+  .view.is-a,
+  .drawing:has(#detail-b:checked) .view.is-b {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+
+  .drawing:has(#detail-b:checked) .view.is-a {
+    visibility: hidden;
+    opacity: 0;
+    transition-delay: 0s, 150ms;
+  }
+
+  /* Pointing at the other directory previews its projection. */
+  @media (hover: hover) and (pointer: fine) {
+    .row-leaf:hover .balloon {
+      color: var(--color-paper);
+      background: var(--color-ink);
+    }
+
+    .row-leaf.is-a:hover ~ .projection.is-a,
+    .row-leaf.is-b:hover ~ .projection.is-b {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (min-width: 720px) {
+    .drawing {
+      --rail: 24px;
+      --row: 56px;
+      --lane: 96px;
+      --dim-x: 14px;
+      --after-name: 44px;
+      margin-top: 40px;
+    }
+
+    .row-name {
+      margin-left: 6px;
+    }
+
+    .file-tag,
+    .row .balloon {
+      margin-left: 10px;
+    }
+  }
+
+  /* Side by side: the projection line reaches across to the detail window. */
+  @media (min-width: 1280px) {
+    .drawing {
+      --tree: 192px;
+      --proj-end: calc(var(--lanes) + 3);
+      grid-template-columns:
+        var(--tree) repeat(var(--lanes), var(--lane))
+        minmax(32px, 1fr) var(--detail-w);
+    }
+
+    .projection::after {
+      position: absolute;
+      top: -3px;
+      right: 0;
+      width: 7px;
+      height: 7px;
+      content: "";
+      background: var(--color-ink);
+    }
+
+    .file-key {
+      grid-column: 1 / span calc(var(--lanes) + 1);
+      margin-top: 10px;
+    }
+
+    .views {
+      grid-row: 1 / var(--foot);
+      grid-column: calc(var(--lanes) + 3);
+      margin-top: 0;
+    }
+
+    .view {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+
+    .view > .capture-body {
+      flex: 1;
+    }
+  }
+
+  /* Room to draw the elevation larger than the capture beside it. */
+  @media (min-width: 1440px) {
+    .drawing {
+      --tree: 256px;
+      --lane: 128px;
+      --dim-x: 20px;
+      --tree-size: 15px;
+      --value-size: 14px;
+    }
+
+    .file-tag-name {
+      display: inline;
+    }
+
+    .file-key {
+      display: none;
+    }
+  }
+
+  /* Draw-in, once, on load: each dimension runs down from the row whose file
+     sets it, shallowest file first. That order is the merge order. */
+  @media (prefers-reduced-motion: no-preference) {
+    .dim-rule,
+    .hatch {
+      animation: run-down 520ms var(--ease-in-out) both;
+      animation-delay: calc(250ms + var(--order) * 110ms);
+    }
+
+    .dim-end-bottom,
+    .port {
+      animation: appear 200ms ease both;
+      animation-delay: calc(700ms + var(--order) * 110ms);
+    }
+
+    .projection {
+      animation: run-across 520ms var(--ease-in-out) 1150ms both;
+    }
+  }
+
+  /* Reduced motion keeps the fades and drops the travelling line. */
+  @media (prefers-reduced-motion: reduce) {
+    .projection {
+      transition: none;
+    }
+  }
+
+  @keyframes run-down {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  @keyframes run-across {
+    from {
+      clip-path: inset(-4px 100% -4px 0);
+    }
+
+    to {
+      clip-path: inset(-4px 0);
+    }
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+@layer components {
+  /* ---------- Zone B: the walk ---------- */
+
+  .walk {
+    --gap: 48px;
+    /* ISO 128 centre line, long dash and dot: the walk from / to the project. */
+    --axis-down: repeating-linear-gradient(
+      to bottom,
+      var(--color-ink) 0 24px,
+      transparent 24px 27px,
+      var(--color-ink) 27px 28px,
+      transparent 28px 31px
+    );
+    --axis-across: repeating-linear-gradient(
+      to right,
+      var(--color-ink) 0 24px,
+      transparent 24px 27px,
+      var(--color-ink) 27px 28px,
+      transparent 28px 31px
+    );
+    --axis: 8px;
+    --indent: 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 4.6vw, 68px);
+    font-weight: 300;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .section-lead {
+    max-width: 46ch;
+    margin-top: 16px;
+    text-wrap: pretty;
+  }
+
+  /* The key ring. Leaders name each key on wide screens; narrow screens list
+     the same accounts under it. */
+  .keys {
+    margin-top: 36px;
+  }
+
+  .keys-art {
+    position: relative;
+  }
+
+  .key-note {
+    display: none;
+  }
+
+  .key-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+
+  .keys-caption {
+    max-width: 52ch;
+    margin-top: 20px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 720px) {
+    .keys-art {
+      max-width: 340px;
+      margin: 0 150px 28px 140px;
+    }
+
+    .key-list {
+      display: none;
+    }
+
+    .key-note {
+      position: absolute;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin: -3px 0 0 -3px;
+      font-size: 13px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .key-account {
+      margin-top: 15px;
+    }
+
+    /* A leader that leaves to the left is the same drawing, mirrored. */
+    .key-note-left {
+      flex-direction: row-reverse;
+      margin-left: 3px;
+      translate: -100% 0;
+    }
+
+    .key-note-left > svg {
+      scale: -1 1;
+    }
+  }
+
+  .notes {
+    display: grid;
+    gap: 6px;
+    max-width: 64ch;
+    margin-top: 20px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-ink-muted);
+  }
+
+  .notes > li {
+    position: relative;
+    padding-left: 16px;
+  }
+
+  .notes > li::before {
+    position: absolute;
+    top: 0.5em;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  .walk-intro {
+    padding-bottom: 40px;
+  }
+
+  .walk-fork {
+    display: none;
+  }
+
+  .stations {
+    min-width: 0;
+    font-size: var(--code);
+  }
+
+  .station {
+    position: relative;
+    padding: 0 0 28px var(--indent);
+  }
+
+  /* The walk passing this directory, and the directory itself. */
+  .station::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--axis);
+    width: 1px;
+    content: "";
+    background: var(--axis-down);
+  }
+
+  .station::after {
+    position: absolute;
+    top: 7px;
+    left: calc(var(--axis) - 3px);
+    width: 7px;
+    height: 7px;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  .walk-trunk > .station:first-child::before {
+    top: 11px;
+  }
+
+  /* The walk stops where the agent started. */
+  .station-end {
+    padding-bottom: 0;
+  }
+
+  .station-end::before {
+    display: none;
+  }
+
+  .station-name {
+    display: block;
+    line-height: 22px;
+  }
+
+  .station-end > .capture {
+    margin-top: 16px;
+    margin-left: calc(var(--indent) * -1);
+  }
+
+  /* On one column the branches hang off the trunk the way `tree` prints them. */
+  .walk-branch {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .walk-branch::before,
+  .walk-branch::after {
+    position: absolute;
+    content: "";
+  }
+
+  .walk-branch::before {
+    top: 0;
+    bottom: 0;
+    left: var(--axis);
+    width: 1px;
+    background: var(--axis-down);
+  }
+
+  .walk-branch:last-child::before {
+    bottom: auto;
+    height: 11px;
+  }
+
+  .walk-branch::after {
+    top: 10px;
+    left: var(--axis);
+    width: 24px;
+    height: 1px;
+    background: var(--axis-across);
+  }
+
+  .walk-branch:not(:last-child) {
+    padding-bottom: 40px;
+  }
+
+  @media (min-width: 1280px) {
+    .walk {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--gap);
+    }
+
+    .walk-intro {
+      grid-column: 1;
+      padding-bottom: 0;
+    }
+
+    /* The first stretch of the walk, from / to the first file, takes up the slack. */
+    .walk-trunk {
+      display: flex;
+      flex-direction: column;
+      grid-column: 2;
+    }
+
+    .walk-trunk > .station:first-child {
+      flex: 1;
+    }
+
+    /* The trunk carries on into the right branch and sends one arm left. */
+    .walk-fork {
+      display: block;
+      grid-column: 1 / -1;
+      height: 48px;
+      background:
+        var(--axis-across) var(--axis) 50% / calc(50% + var(--gap) / 2) 1px
+        no-repeat,
+        var(--axis-down) var(--axis) 100% / 1px 50% no-repeat,
+        var(--axis-down) calc(50% + var(--gap) / 2 + var(--axis)) 0 / 1px 100%
+        no-repeat;
+    }
+
+    .walk-trunk > .station:last-child {
+      padding-bottom: 20px;
+    }
+
+    .walk-branch {
+      padding: 0;
+    }
+
+    .walk-branch::before,
+    .walk-branch::after {
+      display: none;
+    }
+  }
+
+  /* ---------- plugbay.toml at 1:1 ---------- */
+
+  .file {
+    margin-top: 10px;
+  }
+
+  /* The cut corner is the fold of the file mark, at full size. */
+  .file-panel {
+    position: relative;
+    width: fit-content;
+  }
+
+  .file-panel > .window-bar {
+    padding-right: 22px;
+    margin: -1px -1px 0;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  }
+
+  /* Paper over the box's own corner, a little oversized so no sliver of the
+     border survives. Its diagonal lies on the bar's cut. */
+  .file-panel::before {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 16px;
+    height: 16px;
+    content: "";
+    background: var(--color-paper);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+  }
+
+  .file-source {
+    padding: 8px 16px 10px 10px;
+  }
+
+  .file-line {
+    position: relative;
+    display: block;
+    line-height: 22px;
+    white-space: pre;
+  }
+
+  .file-mark {
+    user-select: none;
+  }
+
+  .file-mark > .balloon {
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+    vertical-align: 1px;
+  }
+
+  .file-scope {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--color-ink-muted);
+  }
+
+  .legend {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    max-width: 40ch;
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .legend > .balloon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .leader {
+    display: none;
+  }
+
+  /* One annotation system: a square node on the line, a leader with one
+     45 degree kink, a short caption. */
+  @media (min-width: 1280px) {
+    .file-mark > .balloon {
+      display: none;
+    }
+
+    .legend {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    .leader {
+      position: absolute;
+      bottom: calc(50% - 3px);
+      left: calc(100% + 3px);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+
+    .leader-note {
+      width: max-content;
+      max-width: 27ch;
+      margin-top: -6px;
+      font-size: 13px;
+      line-height: 18px;
+      white-space: normal;
+    }
+  }
+
+  /* ---------- Title block and general notes ---------- */
+
+  .sheet-foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .general-notes {
+    min-width: 0;
+    padding: 20px var(--pad) 28px;
+  }
+
+  .general-notes > .notes {
+    margin-block: 10px 24px;
+  }
+
+  .general-notes > .command {
+    width: fit-content;
+    margin-top: 10px;
+  }
+
+  /* The long command wraps on narrow screens instead of hiding its end. */
+  .general-notes .command-text {
+    padding-block: 10px;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .general-notes .command-prompt {
+    margin-right: 1ch;
+  }
+
+  /* 11px is allowed here only: caps labels in the title block. */
+  .field-label {
+    font-size: 11px;
+    line-height: 1;
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .title-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 13px;
+    line-height: 1.3;
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+    padding: 10px var(--pad) 12px;
+    border-bottom: 1px solid var(--color-ink);
+  }
+
+  .field-logo,
+  .field-creator {
+    border-right: 1px solid var(--color-ink);
+  }
+
+  .field-logo {
+    align-content: center;
+  }
+
+  .field-title,
+  .field-repository {
+    grid-column: 1 / -1;
+  }
+
+  .field-title {
+    order: -1;
+  }
+
+  .field-repository {
+    border-bottom: 0;
+  }
+
+  .field-title-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .field-repository a {
+    display: inline-block;
+    padding-block: 6px;
+  }
+
+  @media (min-width: 720px) {
+    .title-block {
+      grid-template-columns: auto auto 1fr auto;
+    }
+
+    .field {
+      padding-inline: 16px;
+      border-right: 1px solid var(--color-ink);
+    }
+
+    .field-title {
+      grid-column: span 2;
+      order: 0;
+    }
+
+    .field-sheet,
+    .field-repository {
+      border-right: 0;
+    }
+
+    .field-creator,
+    .field-licence,
+    .field-repository {
+      border-bottom: 0;
+    }
+
+    .field-repository {
+      grid-column: span 2;
+    }
+  }
+
+  /* The block sits in the sheet's corner with its own corner cut. */
+  @media (min-width: 1024px) {
+    .sheet-foot {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+    }
+
+    .title-block {
+      position: relative;
+      border-left: 1px solid var(--color-ink);
+      clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+    }
+
+    .title-block::before {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 23px;
+      height: 1px;
+      content: "";
+      background: var(--color-ink);
+      transform: rotate(-45deg);
+      transform-origin: left center;
+    }
+
+    .field-logo {
+      padding-left: 24px;
+    }
+  }
+}

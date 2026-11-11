@@ -1,0 +1,1366 @@
+@import "tailwindcss";
+@import "@fontsource/barlow-condensed/latin-200.css";
+@import "@fontsource/commit-mono/latin-400.css";
+
+@theme {
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-mono: "Commit Mono", ui-monospace, "SF Mono", menlo, monospace;
+
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-line: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/*
+ * One ink on one ground. Every line, letter and fill is the ink; hierarchy comes
+ * from size, solid fills and three steps of the same ink. The label step is
+ * heavier than the reference's 40 percent so small text still passes 4.5:1.
+ */
+:root {
+  --paper: #fff;
+  --ink: #3b1fa8;
+  --ink-label: color-mix(in srgb, var(--ink) 70%, var(--paper));
+  --ink-guide: color-mix(in srgb, var(--ink) 55%, var(--paper));
+  --ink-grid: color-mix(in srgb, var(--ink) 10%, var(--paper));
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0d0a2b;
+    --ink: #d4cfff;
+    --ink-label: color-mix(in srgb, var(--ink) 62%, var(--paper));
+    --ink-guide: color-mix(in srgb, var(--ink) 46%, var(--paper));
+    --ink-grid: color-mix(in srgb, var(--ink) 12%, var(--paper));
+  }
+}
+
+@layer base {
+  html {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-variant-ligatures: none;
+    line-height: 22px;
+    scrollbar-color: var(--ink-guide) var(--paper);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: clip;
+  }
+
+  ::selection {
+    color: var(--paper);
+    background: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  button,
+  label {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* ---- Lines: all thin. One job each. ---- */
+
+.asm-svg {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+}
+
+.asm-fill {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Structure: edges, leaders, dimensions. */
+.ln-ink {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+/* A server that is pinned and live in this tree. */
+.ln-live {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* The same slot on every plate, whether or not a file fills it. */
+.ln-guide {
+  fill: none;
+  stroke: var(--ink-guide);
+  stroke-width: 1;
+}
+
+/* Centre line: the walk from / down to the working directory. */
+.ln-centre {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 24 3 1 3;
+}
+
+/* Phantom: the same slot under the other client. */
+.ln-phantom {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 24 3 1 3 1 3;
+}
+
+.ln-hatch {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.fill-paper {
+  fill: var(--paper);
+}
+
+.fill-ink {
+  fill: var(--ink);
+}
+
+/* Generated stipple art, used as a mask so it takes the ink in both themes. */
+.asm-stipple {
+  background: var(--ink);
+  mask: var(--mask) center / 100% 100% no-repeat;
+}
+
+/* ---- Lettering: one light display face, one mono for everything else ---- */
+
+.asm-h1,
+.asm-h2 {
+  font-family: var(--font-display);
+  font-weight: 200;
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.asm-label {
+  font-size: 11px;
+  line-height: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.asm-note {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-label);
+}
+
+.asm-balloon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+}
+
+.asm-balloon--phantom {
+  border-style: dashed;
+}
+
+/* The one value that differs between the two clients. */
+.asm-mark {
+  padding: 1px 0;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+/* ---- Page frame ---- */
+
+.asm {
+  --pad: 24px;
+  max-width: calc(1360px + 2 * var(--pad));
+  padding-inline: var(--pad);
+
+  margin-inline: auto;
+}
+
+@media (min-width: 1280px) {
+  .asm {
+    --pad: 40px;
+  }
+}
+
+.asm-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+.asm-skip {
+  position: absolute;
+  top: -80px;
+  left: 12px;
+  z-index: 10;
+  padding: 8px 12px;
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.asm-skip:focus {
+  top: 12px;
+}
+
+/* What shows for which working directory. The radios live at the top of .asm. */
+[data-when] {
+  transition:
+    opacity 150ms ease,
+    visibility 0s;
+}
+
+.asm:has(#asm-dir-acme:checked) [data-when="globex"],
+.asm:has(#asm-dir-globex:checked) [data-when="acme"] {
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    visibility 0s 120ms;
+}
+
+/* ---- Top bar ---- */
+
+.asm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  border-bottom: 1px solid var(--ink-grid);
+}
+
+.asm-bar__logo {
+  display: block;
+  width: auto;
+  height: 32px;
+}
+
+/* ---- Instrument windows: 1px box, solid title bar, corner squares ---- */
+
+.asm-win {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+}
+
+.asm-win__bar {
+  display: flex;
+  flex: none;
+  gap: 10px;
+  align-items: stretch;
+  height: 25px;
+  padding-inline: 10px;
+  font-size: 11px;
+  line-height: 25px;
+  color: var(--paper);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  background: var(--ink);
+}
+
+.asm-win__title::before,
+.asm-win__meta::after {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  content: "";
+  background: var(--paper);
+}
+
+.asm-win__title::before {
+  margin-right: 10px;
+}
+
+.asm-win__meta {
+  margin-left: auto;
+}
+
+.asm-win__meta::after {
+  margin-left: 10px;
+}
+
+.asm-win__link {
+  position: relative;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  text-decoration: underline 1px;
+  text-underline-offset: 4px;
+}
+
+.asm-win__link svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* 44px hit area on a 25px bar. */
+.asm-win__link::before {
+  position: absolute;
+  inset: -10px -6px;
+  content: "";
+}
+
+.asm-win__link:focus-visible {
+  outline-color: var(--paper);
+  outline-offset: -3px;
+}
+
+.asm-win__value {
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Tabs keep the paths in their real case. */
+.asm-tabs {
+  display: flex;
+  min-width: 0;
+}
+
+.asm-tab {
+  position: relative;
+  padding-inline: 10px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.asm-tab::before {
+  position: absolute;
+  inset: -10px 0;
+  content: "";
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .asm-tab:hover {
+    text-decoration: underline 1px;
+    text-underline-offset: 4px;
+  }
+}
+
+.asm:has(#asm-dir-acme:checked) .asm-tab[for="asm-dir-acme"],
+.asm:has(#asm-dir-globex:checked) .asm-tab[for="asm-dir-globex"] {
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+}
+
+.asm:has(#asm-dir-acme:focus-visible) .asm-tab[for="asm-dir-acme"],
+.asm:has(#asm-dir-globex:focus-visible) .asm-tab[for="asm-dir-globex"] {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---- Terminal: real output, one colour ---- */
+
+.asm-term__body {
+  display: grid;
+  padding: 12px 14px;
+  overflow-x: auto;
+  scrollbar-color: var(--ink-guide) transparent;
+  scrollbar-width: thin;
+}
+
+.asm-term__body > pre {
+  grid-area: 1 / 1;
+  font-size: 13px;
+  line-height: 22px;
+  white-space: pre;
+}
+
+.asm-term__prompt {
+  color: var(--ink-label);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---- Install window ---- */
+
+.asm-install__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
+  padding: 12px;
+}
+
+.asm-install__cmd {
+  display: flex;
+  flex: 1;
+  gap: 1ch;
+  align-items: center;
+  min-width: 0;
+  height: 44px;
+  padding-inline: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+  white-space: nowrap;
+  scrollbar-width: none;
+  border: 1px solid var(--ink);
+}
+
+/* On a phone the command gets the full row so all of it shows. */
+@media (max-width: 479.98px) {
+  .asm-install__cmd {
+    flex-basis: 100%;
+    padding-inline: 6px;
+  }
+
+  .asm-install__cmd .asm-term__prompt {
+    display: none;
+  }
+
+  .asm-install .asm-copy {
+    flex: 1;
+  }
+}
+
+.asm-copy {
+  flex: none;
+  width: 80px;
+  height: 44px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border: 1px solid var(--ink);
+  transition: transform 120ms var(--ease-out-strong);
+}
+
+.asm-copy:active {
+  color: var(--paper);
+  background: var(--ink);
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .asm-copy:hover {
+    color: var(--paper);
+    background: var(--ink);
+  }
+}
+
+.asm-copy [data-copied-label],
+.asm-copy[data-copied] [data-copy-label] {
+  display: none;
+}
+
+.asm-copy[data-copied] [data-copied-label] {
+  display: inline;
+}
+
+.asm-copy[data-copied] {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+/* ---- Callout cards: a cut corner instead of a radius ---- */
+
+.asm-card {
+  position: relative;
+  padding: 7px 14px 10px 10px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+}
+
+.asm-card::after {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 13px;
+  height: 13px;
+  content: "";
+  background: linear-gradient(
+    to top left,
+    var(--paper) calc(50% - 0.75px),
+    var(--ink) calc(50% - 0.75px),
+    var(--ink) calc(50% + 0.75px),
+    transparent calc(50% + 0.75px)
+  );
+}
+
+.asm-card--alternate {
+  border-style: dashed;
+}
+
+.asm-card__head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.asm-card__path {
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.asm-card__source {
+  padding-left: 28px;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-label);
+}
+
+/* ---- Plates ---- */
+
+.asm-plate {
+  position: absolute;
+}
+
+.asm-plate__body,
+.asm-plate__stipple {
+  position: absolute;
+  inset: 0;
+}
+
+/* Opaque, so a cable passing behind a plate is hidden until it reaches its socket. */
+.asm-plate__body {
+  background: var(--paper);
+  clip-path: var(--plate-clip);
+}
+
+.asm-plate__stipple {
+  background: var(--ink);
+  mask: var(--plate-mask) center / 100% 100% no-repeat;
+}
+
+.asm-plate > svg {
+  position: absolute;
+  display: block;
+  overflow: visible;
+}
+
+.asm-plate__ghost-line {
+  opacity: 0;
+}
+
+/* The branch plate that is not on the axis waits behind the other, as a ghost. */
+.asm:has(#asm-dir-acme:checked) .asm-plate[data-branch="globex"],
+.asm:has(#asm-dir-globex:checked) .asm-plate[data-branch="acme"] {
+  z-index: -1;
+  translate: var(--alt-x) var(--alt-y);
+}
+
+.asm:has(#asm-dir-acme:checked)
+  .asm-plate[data-branch="globex"]
+  :is(.asm-plate__body, .asm-plate__fittings),
+.asm:has(#asm-dir-globex:checked)
+  .asm-plate[data-branch="acme"]
+  :is(.asm-plate__body, .asm-plate__fittings) {
+  opacity: 0;
+}
+
+.asm:has(#asm-dir-acme:checked)
+  .asm-plate[data-branch="globex"]
+  .asm-plate__stipple,
+.asm:has(#asm-dir-globex:checked)
+  .asm-plate[data-branch="acme"]
+  .asm-plate__stipple {
+  opacity: 0.22;
+}
+
+.asm:has(#asm-dir-acme:checked)
+  .asm-plate[data-branch="globex"]
+  .asm-plate__ghost-line,
+.asm:has(#asm-dir-globex:checked)
+  .asm-plate[data-branch="acme"]
+  .asm-plate__ghost-line {
+  opacity: 1;
+}
+
+/* ---- The assembly drawing ---- */
+
+.asm-assembly {
+  position: relative;
+  isolation: isolate;
+}
+
+.asm-assembly__server {
+  position: absolute;
+  left: 0;
+  font-size: 13px;
+  line-height: 18px;
+  translate: 0 -50%;
+}
+
+/* The grid is measured: its bottom edge carries the path, one tick per directory. */
+.asm-grid {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(var(--ink-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  border-right: 1px solid var(--ink-grid);
+  border-bottom: 1px solid var(--ink-grid);
+}
+
+.asm-tick {
+  position: absolute;
+  padding-top: 12px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-label);
+  white-space: nowrap;
+  translate: -50% 0;
+}
+
+.asm-tick::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  content: "";
+  background: var(--ink);
+}
+
+/* ---- Notes and the keychain figure ---- */
+
+.asm-notes ol {
+  margin-top: 6px;
+  counter-reset: note;
+}
+
+.asm-notes li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--ink-label);
+  counter-increment: note;
+}
+
+.asm-notes li::before {
+  color: var(--ink);
+  content: counter(note, decimal-leading-zero);
+}
+
+.asm-key {
+  display: flex;
+  gap: 16px;
+  align-items: start;
+}
+
+.asm-key__art {
+  flex: none;
+  width: 44px;
+  aspect-ratio: 150 / 472;
+}
+
+.asm-key figcaption {
+  display: grid;
+  gap: 4px;
+  max-width: 24ch;
+  padding-top: 8px;
+  margin-top: 28px;
+  border-top: 1px solid var(--ink);
+}
+
+/* ---- Hero, below 1280px: one column, the narrow drawing ---- */
+
+.asm-hero {
+  padding-bottom: 56px;
+}
+
+.asm-sheet {
+  display: grid;
+  gap: 28px;
+  padding-top: 24px;
+}
+
+.asm-h1 {
+  font-size: clamp(60px, 17.4vw, 88px);
+}
+
+.asm-side {
+  display: grid;
+  gap: 16px;
+}
+
+.asm-sub {
+  max-width: 60ch;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--ink-label);
+  text-wrap: pretty;
+}
+
+.asm-sub code {
+  color: var(--ink);
+}
+
+.asm-assembly--wide {
+  display: none;
+}
+
+.asm-narrow {
+  min-width: 0;
+}
+
+.asm-assembly--narrow {
+  margin-top: 4px;
+}
+
+/* The narrow drawing is drawn at 342px; smaller phones get the whole drawing, slightly reduced. */
+@media (max-width: 389.98px) {
+  .asm-assembly--narrow {
+    zoom: 0.9;
+  }
+}
+
+@media (max-width: 345.98px) {
+  .asm-assembly--narrow {
+    zoom: 0.79;
+  }
+}
+
+.asm-assembly--narrow .asm-balloon {
+  position: absolute;
+  background: var(--paper);
+}
+
+.asm-assembly__term-narrow .asm-win__title,
+.asm-assembly__term-narrow .asm-win__meta {
+  display: none;
+}
+
+.asm-assembly__term-narrow .asm-win__bar {
+  height: 36px;
+  padding-inline: 0;
+  line-height: 36px;
+}
+
+.asm-assembly__term-narrow .asm-tabs {
+  flex: 1;
+}
+
+.asm-assembly__term-narrow .asm-tab {
+  flex: 1;
+  padding-inline: 0;
+  text-align: center;
+}
+
+/* Scroll cue only: the right edge fades where output continues. */
+.asm-assembly__term-narrow .asm-term__body,
+.asm-tree-terms .asm-term__body {
+  mask-image: linear-gradient(to left, transparent, #000 28px);
+}
+
+.asm-legend {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.asm-aside {
+  display: grid;
+  gap: 28px;
+}
+
+@media (min-width: 800px) and (max-width: 1279.98px) {
+  .asm-sheet {
+    grid-template-columns: minmax(0, 1fr) 342px;
+    column-gap: 56px;
+  }
+
+  .asm-h1,
+  .asm-side,
+  .asm-aside {
+    grid-column: 1;
+  }
+
+  .asm-narrow {
+    grid-row: 1 / span 4;
+    grid-column: 2;
+  }
+}
+
+/* ---- Hero, 1280px and up: the wide drawing is the page ---- */
+
+@media (min-width: 1280px) {
+  .asm-sheet {
+    position: relative;
+    display: block;
+    height: var(--wide-h);
+    padding-top: 0;
+  }
+
+  .asm-h1 {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    max-width: 11em;
+    font-size: clamp(76px, 6.6vw, 100px);
+  }
+
+  .asm-side {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    width: 464px;
+  }
+
+  .asm-sub {
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .asm-narrow {
+    display: none;
+  }
+
+  /* The drawing spans the sheet, so it must not swallow clicks meant for the copy above it. */
+  .asm-assembly--wide {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .asm-assembly--wide
+    > :is(.asm-win, .asm-card, .asm-tick, .asm-assembly__server) {
+    pointer-events: auto;
+  }
+
+  .asm-assembly__term {
+    position: absolute;
+    top: var(--term-top);
+    right: 0;
+    left: var(--term-left);
+    height: var(--term-h);
+  }
+
+  .asm-assembly .asm-card {
+    position: absolute;
+  }
+
+  .asm-aside {
+    position: absolute;
+    top: calc(var(--term-top) + var(--term-h) + 28px);
+    left: calc(var(--term-left) + 140px);
+  }
+}
+
+/* ---- Section: one file per tree ---- */
+
+.asm-section {
+  position: relative;
+  padding-bottom: 96px;
+}
+
+.asm-h2 {
+  font-size: clamp(48px, 13vw, 64px);
+}
+
+.asm-body {
+  max-width: 44ch;
+  margin-top: 16px;
+  color: var(--ink-label);
+  text-wrap: pretty;
+}
+
+.asm-parts {
+  width: 100%;
+  margin-top: 28px;
+  border-collapse: collapse;
+}
+
+.asm-parts caption {
+  padding-bottom: 6px;
+  text-align: left;
+}
+
+.asm-parts th {
+  padding: 0 12px 4px 0;
+  font-weight: 400;
+  text-align: left;
+  border-bottom: 1px solid var(--ink);
+}
+
+.asm-parts td {
+  padding: 8px 12px 8px 0;
+  font-size: 13px;
+  line-height: 20px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--ink-grid);
+}
+
+.asm-parts td:last-child,
+.asm-parts th:last-child {
+  padding-right: 0;
+}
+
+.asm-parts__path {
+  white-space: nowrap;
+}
+
+/* Below 480px the table reads as item, then file over what it covers. */
+@media (max-width: 479.98px) {
+  .asm-parts thead {
+    display: none;
+  }
+
+  .asm-parts tr {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--ink-grid);
+  }
+
+  .asm-parts td {
+    padding: 0;
+    border: 0;
+  }
+
+  .asm-parts td:first-child {
+    grid-row: span 2;
+  }
+}
+
+.asm-bay {
+  margin-top: 36px;
+}
+
+.asm-bay__art {
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 760 / 562;
+}
+
+.asm-bay figcaption {
+  max-width: 30ch;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--ink);
+}
+
+.asm-tree {
+  position: relative;
+  margin-top: 40px;
+}
+
+.asm-tree--wide {
+  display: none;
+}
+
+.asm-tree__grid {
+  /* The grid is the tree's coordinate system: one column per level down, one band per directory. */
+  position: absolute;
+  inset: 0 0 0 var(--tree-grid-left, 0);
+  /* The grid is the tree's coordinate system: one column per level down, one band per directory. */
+  background-image:
+    linear-gradient(var(--ink-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  border-right: 1px solid var(--ink-grid);
+  border-bottom: 1px solid var(--ink-grid);
+}
+
+.asm-tree__row {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: start;
+}
+
+.asm-tree__name {
+  padding: 0 6px;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  background: var(--paper);
+  translate: 0 -50%;
+}
+
+.asm-tree .asm-card {
+  position: absolute;
+  padding: 6px 16px 7px 10px;
+}
+
+.asm-tree__source {
+  padding-left: 0;
+  margin-top: 0;
+}
+
+.asm-tree__filename {
+  position: absolute;
+  padding: 0 6px;
+  background: var(--paper);
+  translate: 0 -50%;
+}
+
+.asm-tree__result {
+  position: absolute;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 2px 6px;
+  background: var(--paper);
+}
+
+.asm-tree__server {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.asm-tree__server svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  overflow: visible;
+}
+
+.asm-tree__here {
+  position: absolute;
+  padding: 0 6px;
+  color: var(--ink-label);
+  white-space: nowrap;
+  background: var(--paper);
+}
+
+.asm-tree .asm-balloon {
+  background: var(--paper);
+}
+
+.asm-tree__dim-balloon {
+  position: absolute;
+  translate: -50% -50%;
+}
+
+.asm-tree-terms {
+  display: grid;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.asm-callouts {
+  margin-top: 28px;
+}
+
+@media (min-width: 1280px) {
+  .asm-section {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    row-gap: 56px;
+    padding-top: 56px;
+  }
+
+  .asm-section__lead {
+    z-index: 1;
+    grid-area: 1 / 1;
+  }
+
+  .asm-tree--wide {
+    display: block;
+    grid-area: 1 / 1 / 2 / -1;
+    margin-top: 0;
+  }
+
+  .asm-tree--narrow {
+    display: none;
+  }
+
+  .asm-tree-terms {
+    grid-area: 2 / 1 / 3 / -1;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 0;
+  }
+
+  .asm-tree-terms .asm-term__body {
+    mask-image: none;
+  }
+}
+
+/* ---- Notes and title block ---- */
+
+.asm-foot {
+  display: grid;
+  gap: 32px;
+  align-items: end;
+  padding-block: 32px 48px;
+  border-top: 1px solid var(--ink-grid);
+}
+
+@media (min-width: 800px) {
+  .asm-foot {
+    grid-template-columns: 1fr minmax(0, 560px);
+  }
+}
+
+.asm-title-block {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--ink);
+}
+
+.asm-title-block > div {
+  min-width: 0;
+  padding: 6px 10px 8px;
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.asm-title-block > div:nth-child(2n) {
+  border-right: 0;
+}
+
+.asm-title-block > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.asm-title-block dt {
+  color: var(--ink-label);
+}
+
+.asm-title-block dd {
+  font-size: 13px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Motion ---- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .asm-plate[data-branch] {
+    transition: translate 280ms var(--ease-in-out-strong);
+  }
+
+  .asm-plate[data-branch]
+    :is(
+      .asm-plate__body,
+      .asm-plate__stipple,
+      .asm-plate__fittings,
+      .asm-plate__ghost-line
+    ) {
+    transition: opacity 200ms ease;
+  }
+
+  /*
+   * The press: on a directory change the stack closes against the result, the
+   * output is swapped while it is shut, and it opens again. Armed by the first
+   * change so it never plays on load. Two names so each change restarts it.
+   */
+  .asm[data-armed]:has(#asm-dir-acme:checked)
+  :is(.asm-plate[data-press], .asm-plate[data-branch="acme"]) {
+    animation: asm-press-a 1000ms both;
+  }
+
+  .asm[data-armed]:has(#asm-dir-globex:checked)
+    :is(.asm-plate[data-press], .asm-plate[data-branch="globex"]) {
+    animation: asm-press-g 1000ms both;
+  }
+
+  .asm[data-armed]:has(#asm-dir-acme:checked)
+    :is([data-wires="acme"], [data-wires="shared"]) {
+    animation: asm-rewire-a 1000ms both;
+  }
+
+  .asm[data-armed]:has(#asm-dir-globex:checked)
+    :is([data-wires="globex"], [data-wires="shared"]) {
+    animation: asm-rewire-g 1000ms both;
+  }
+
+  .asm[data-armed]:has(#asm-dir-acme:checked)
+    :is([data-output="acme"], [data-wires-end="acme"]) {
+    animation: asm-print-a 1000ms both;
+  }
+
+  .asm[data-armed]:has(#asm-dir-globex:checked)
+    :is([data-output="globex"], [data-wires-end="globex"]) {
+    animation: asm-print-g 1000ms both;
+  }
+
+  /* The outgoing output stays on screen until the stack has shut. */
+  .asm[data-armed]:has(#asm-dir-acme:checked) [data-output="globex"],
+  .asm[data-armed]:has(#asm-dir-globex:checked) [data-output="acme"] {
+    transition:
+      opacity 90ms ease 460ms,
+      visibility 0s 550ms;
+  }
+
+  /* Scope dimensions draw as the tree scrolls in: a file covers everything below it. */
+  @supports (animation-timeline: view()) {
+    .asm-tree [data-draw] {
+      animation: asm-draw linear both;
+      animation-range: entry 30% cover 40%;
+      animation-timeline: view();
+      stroke-dasharray: 1;
+    }
+
+    .asm-tree [data-draw="late"] {
+      animation-range: entry 55% cover 52%;
+    }
+
+    .asm-tree [data-fade] {
+      animation: asm-fade linear both;
+      animation-range: cover 42% cover 54%;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes asm-press-a {
+  0%,
+  24% {
+    animation-timing-function: var(--ease-in-out-strong);
+    transform: translateX(0);
+  }
+
+  50%,
+  60% {
+    animation-timing-function: var(--ease-out-strong);
+    transform: translateX(var(--press-x, 0));
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes asm-press-g {
+  0%,
+  24% {
+    animation-timing-function: var(--ease-in-out-strong);
+    transform: translateX(0);
+  }
+
+  50%,
+  60% {
+    animation-timing-function: var(--ease-out-strong);
+    transform: translateX(var(--press-x, 0));
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes asm-rewire-a {
+  0%,
+  72% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+
+  73% {
+    animation-timing-function: var(--ease-line);
+    opacity: 1;
+    stroke-dashoffset: 1;
+  }
+
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes asm-rewire-g {
+  0%,
+  72% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+
+  73% {
+    animation-timing-function: var(--ease-line);
+    opacity: 1;
+    stroke-dashoffset: 1;
+  }
+
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes asm-print-a {
+  0%,
+  52% {
+    opacity: 0;
+  }
+
+  62%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes asm-print-g {
+  0%,
+  52% {
+    opacity: 0;
+  }
+
+  62%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes asm-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes asm-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

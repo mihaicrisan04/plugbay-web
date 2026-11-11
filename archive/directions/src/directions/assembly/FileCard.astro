@@ -1,0 +1,34 @@
+---
+// One plugbay.toml as a callout card: cut corner, path, and the file verbatim.
+import type { BranchId } from "./world";
+
+interface Props {
+  /** The file of the branch that is not on the axis: dashed, like its ghost plate. */
+  alternate?: boolean;
+  class?: string;
+  file: { item: number; path: string; source: string };
+  style?: string;
+  when?: BranchId;
+}
+
+const { alternate = false, class: className, file, style, when } = Astro.props;
+
+// The account is the one value that differs between the two clients.
+const ACCOUNT = /^(sentry = )(".+")$/;
+const lines = file.source.split("\n").map((line) => {
+  const match = ACCOUNT.exec(line);
+  return match ? { marked: match[2], text: match[1] } : { marked: "", text: line };
+});
+---
+
+<div data-when={when} style={style} class:list={["asm-card", { "asm-card--alternate": alternate }, className]} >
+  <p class="asm-card__head">
+    <span class:list={["asm-balloon", { "asm-balloon--phantom": alternate }]}>
+      <span class="asm-sr">Item </span>{file.item}
+    </span>
+    <span class="asm-card__path">{file.path}</span>
+  </p>
+  <pre class="asm-card__source"><code>{lines.map((line, index) => (
+    <>{index > 0 && "\n"}{line.text}{line.marked ? <span class="asm-mark">{line.marked}</span> : null}</>
+  ))}</code></pre>
+</div>

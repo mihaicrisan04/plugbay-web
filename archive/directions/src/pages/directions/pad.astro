@@ -1,0 +1,38 @@
+---
+// Direction D, "Engineering pad": construction in non-photo blue, ink in graphite,
+// one red pencil for corrections. docs/research/blueprint-language.md, section 8 D.
+import { hero, links } from "../../data/plugbay";
+import { titleBlock } from "../../directions/pad/content";
+import Given from "../../directions/pad/Given.astro";
+import Hero from "../../directions/pad/Hero.astro";
+import Layout from "../../directions/pad/Layout.astro";
+import OneFilePerTree from "../../directions/pad/OneFilePerTree.astro";
+import SheetHeader from "../../directions/pad/SheetHeader.astro";
+---
+
+<Layout description={hero.subhead} title={`${titleBlock.project}: ${titleBlock.subject}`}>
+  <main>
+    <section class="sheet">
+      <SheetHeader sheet={1} subject={titleBlock.subject} withLogo />
+      <div class="sheet-body">
+        <Hero />
+        <Given />
+      </div>
+    </section>
+
+    <section class="sheet" id="one-file-per-tree">
+      <SheetHeader sheet={2} subject="One file per tree" />
+      <div class="sheet-body sheet-body--end">
+        <OneFilePerTree />
+        <footer class="sheet-end">
+          <dl class="strip strip--foot">
+            <div class="field"><dt>By</dt><dd>{titleBlock.creator}</dd></div>
+            <div class="field"><dt>Licence</dt><dd>{titleBlock.licence}</dd></div>
+            <div class="field field--full"><dt>Runs on</dt><dd>{titleBlock.platforms}</dd></div>
+            <div class="field field--full"><dt>Source</dt><dd><a href={links.repo}>{titleBlock.repoLabel}</a></dd></div>
+          </dl>
+        </footer>
+      </div>
+    </section>
+  </main>
+</Layout>

@@ -1,0 +1,66 @@
+---
+import keyMask from "../../assets/directions/assembly/key.webp";
+import logoDark from "../../assets/logo-dark.svg";
+import logoLight from "../../assets/logo-light.svg";
+import { callouts, hero, steps } from "../../data/plugbay";
+import Assembly from "./Assembly.astro";
+import FileCard from "./FileCard.astro";
+import { wide } from "./geometry";
+import Install from "./Install.astro";
+import { files } from "./world";
+
+const sheetStyle = [
+  `--wide-h:${wide.height}px`,
+  `--term-left:${wide.terminal.left}px`,
+  `--term-top:${wide.terminal.top}px`,
+  `--term-h:${wide.terminal.bottom - wide.terminal.top}px`,
+].join(";");
+
+// "plugbay.toml" is set as code inside the subhead.
+const [subheadBefore, subheadAfter] = hero.subhead.split("plugbay.toml");
+const keychain = steps.find((step) => step.command === "plugbay login");
+---
+
+<header class="asm-hero">
+  <div class="asm-bar">
+    <a aria-label="plugbay" href="/directions/assembly">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset={logoDark.src}>
+        <img alt="plugbay" class="asm-bar__logo" height="88" src={logoLight.src} width="376">
+      </picture>
+    </a>
+    <p class="asm-label">{hero.eyebrow}</p>
+  </div>
+
+  <div class="asm-sheet" style={sheetStyle}>
+    <h1 class="asm-h1">{hero.headlines[0]}</h1>
+
+    <div class="asm-side">
+      <Install />
+      <p class="asm-sub">{subheadBefore}<code>plugbay.toml</code>{subheadAfter}</p>
+    </div>
+
+    <p class="asm-sr">
+      Drawing: the directories /, ~/work and ~/work/acme as patch-bay plates on one axis, each
+      carrying its plugbay.toml. Swapping the ~/work/acme plate for ~/work/globex changes which
+      account sentry resolves to. The terminal shows the result for the selected directory.
+    </p>
+    <Assembly variant="wide" />
+    <div class="asm-narrow">
+      <Assembly variant="narrow" />
+      <div class="asm-legend">
+        {files.map((file) => <FileCard file={file} />)}
+      </div>
+    </div>
+
+    <div class="asm-aside">
+      <figure class="asm-key">
+        <div class="asm-key__art asm-stipple" style={`--mask:url(${keyMask.src})`}></div>
+        <figcaption>
+          <span class="asm-label">{keychain?.title}</span>
+          <span class="asm-note">{callouts.secrets}</span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</header>

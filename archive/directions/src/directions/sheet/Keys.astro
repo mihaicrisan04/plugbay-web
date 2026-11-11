@@ -1,0 +1,51 @@
+---
+// The other half of the story: the files name an account, the keychain holds
+// its token. One key per server and account in the example world. Stippled in
+// Paper, shipped as a one-bit mask like the pictorial view.
+import art from "../../assets/directions/sheet/key-ring.png";
+import { steps } from "../../data/plugbay";
+import { accounts } from "./model";
+
+// Key tips in the artwork, left to right, as a percentage of its box, and the
+// side each leader leaves from.
+const tips = [
+  { side: "left", x: 0.9, y: 72 },
+  { side: "left", x: 31.8, y: 99 },
+  { side: "right", x: 74.6, y: 95.6 },
+  { side: "right", x: 98.7, y: 65.2 },
+];
+
+if (tips.length !== accounts.length) {
+  throw new Error(`The key ring has ${tips.length} keys, the data has ${accounts.length} accounts`);
+}
+
+const [, , login] = steps;
+---
+
+<figure class="keys">
+  <div
+    aria-label={`A key ring with ${accounts.length} keys: ${accounts.join(", ")}`}
+    class="keys-art"
+    role="img"
+    style={`--art:url(${art.src});aspect-ratio:${art.width} / ${art.height}`}
+  >
+    <span class="pictorial-art"></span>
+    {accounts.map((account, index) => (
+      <span
+        aria-hidden="true"
+        class={`key-note key-note-${tips[index].side}`}
+        style={`left:${tips[index].x}%;top:${tips[index].y}%`}
+      >
+        <svg aria-hidden="true" fill="none" height="24" viewBox="0 0 38 24" width="38">
+          <path d="M0 0h6v6H0z" fill="currentColor" />
+          <path d="M3 3 21 21h17" stroke="currentColor" />
+        </svg>
+        <span class="key-account">{account}</span>
+      </span>
+    ))}
+  </div>
+  <ul aria-hidden="true" class="key-list">
+    {accounts.map((account) => <li>{account}</li>)}
+  </ul>
+  <figcaption class="keys-caption">{login.body}</figcaption>
+</figure>

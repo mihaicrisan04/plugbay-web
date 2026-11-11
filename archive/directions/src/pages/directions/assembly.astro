@@ -1,0 +1,47 @@
+---
+// Direction B, "Exploded assembly": directories are plates on one axis, and the
+// terminal is what you get when the stack closes.
+import { hero } from "../../data/plugbay";
+import Hero from "../../directions/assembly/Hero.astro";
+import Layout from "../../directions/assembly/Layout.astro";
+import OneFilePerTree from "../../directions/assembly/OneFilePerTree.astro";
+import TitleBlock from "../../directions/assembly/TitleBlock.astro";
+import { branches } from "../../directions/assembly/world";
+---
+
+<Layout description={hero.subhead} title="plugbay: mise for MCP servers">
+  <a class="asm-skip" href="#one-file-per-tree">Skip to the file tree</a>
+  <div class="asm">
+    <!-- One switch drives every view on the page: which directory the agent starts in. -->
+    <fieldset class="asm-sr">
+      <legend>Directory the agent starts in</legend>
+      {
+        branches.map((branch, index) => (
+          <label>
+            <input checked={index === 0} id={`asm-dir-${branch.id}`} name="asm-dir" type="radio" value={branch.id} />
+            {branch.ls.cwd}
+          </label>
+        ))
+      }
+    </fieldset>
+
+    <!-- Hatch: removed by this file. Defined once, used by every drawing. -->
+    <svg aria-hidden="true" height="0" style="position:absolute" width="0">
+      <defs>
+        <pattern height="4" id="asm-hatch" patternTransform="rotate(45)" patternUnits="userSpaceOnUse" width="4">
+          <line class="ln-hatch" x1="0.5" x2="0.5" y1="0" y2="4"></line>
+        </pattern>
+      </defs>
+    </svg>
+
+    <Hero />
+    <main>
+      <OneFilePerTree />
+    </main>
+    <TitleBlock />
+  </div>
+</Layout>
+
+<script>
+  import "../../directions/assembly/interactions";
+</script>

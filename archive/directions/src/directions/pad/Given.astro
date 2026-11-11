@@ -1,0 +1,39 @@
+---
+// Sheet 1, bottom. What was given, line by line, with the red pencil through it
+// and what plugbay does instead written in.
+import keyStipple from "../../assets/directions/pad/key-stipple.webp";
+import { beforeAfter, callouts, pain } from "../../data/plugbay";
+import { withCode } from "./content";
+
+const mono = (sentence: string) => withCode(sentence);
+---
+
+<div class="block given" data-draw>
+  <p aria-hidden="true" class="step step--margin-only">Before</p>
+  <div class="work">
+    <div>
+      <h2 class="statement">{pain.headline}</h2>
+      <p class="prose">{pain.body}</p>
+      <figure class="keyfig ink-in pass-ink" style="--i: 4">
+        <span aria-hidden="true" class="keyfig-key" style={`--key: url(${keyStipple.src})`}></span>
+        <svg aria-hidden="true" class="keyfig-leader" viewBox="0 0 56 33">
+          <rect class="keyfig-node" height="7" width="7" y="26" />
+          <path d="M3.5 29.5H16L42 3.5H56" />
+        </svg>
+        <figcaption class="caption">{callouts.secrets}</figcaption>
+      </figure>
+    </div>
+    <ul class="corrections">
+      {
+        beforeAfter.map((pair, index) => (
+          <li>
+            <del class="was"><span class="was-text">{mono(pair.before).map((part) => (part.isCode ? <code>{part.text}</code> : part.text))}</span></del>
+            <ins class="now pencil write pass-pencil" style={`--pass: ${300 + index * 260}ms`}>
+              {mono(pair.after).map((part) => (part.isCode ? <code>{part.text}</code> : part.text))}
+            </ins>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>

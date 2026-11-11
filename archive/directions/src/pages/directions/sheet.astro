@@ -1,0 +1,19 @@
+---
+// Direction A, "Sheet 1 of 1": the page is one engineering drawing sheet.
+import { hero } from "../../data/plugbay";
+import Hero from "../../directions/sheet/Hero.astro";
+import Layout from "../../directions/sheet/Layout.astro";
+import OneFilePerTree from "../../directions/sheet/OneFilePerTree.astro";
+import TitleBlock from "../../directions/sheet/TitleBlock.astro";
+---
+
+<Layout description={hero.subhead} title="plugbay: mise for MCP servers">
+  <a class="skip-link" href="#a">Skip to the drawing</a>
+  <div class="sheet">
+    <main>
+      <Hero />
+      <OneFilePerTree />
+    </main>
+    <TitleBlock />
+  </div>
+</Layout>

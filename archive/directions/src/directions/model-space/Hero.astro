@@ -1,0 +1,141 @@
+---
+import logoDark from "../../assets/logo-dark.svg";
+import logoLight from "../../assets/logo-light.svg";
+import { facts, hero, install, links } from "../../data/plugbay";
+import Plan from "./Plan.astro";
+import { layersFor, stops } from "./world";
+
+const repoLabel = links.repo.replace("https://", "");
+---
+
+<header class="top">
+  <a class="logo" href="/directions/model-space">
+    <img alt="plugbay" class="logo-light" height="88" src={logoLight.src} width="376">
+    <img alt="plugbay" class="logo-dark" height="88" src={logoDark.src} width="376">
+  </a>
+  <p class="top-line">{hero.eyebrow}</p>
+  <a class="top-link" href={links.repo}>
+    GitHub
+    <svg aria-hidden="true" focusable="false" height="12" viewBox="0 0 12 12" width="12">
+      <path class="ln" d="M3,9 L9,3 M4,3 H9 V8" />
+    </svg>
+  </a>
+</header>
+
+<section aria-labelledby="hero-title" class="hero">
+  <div class="offer">
+    <h1 id="hero-title">{hero.headlines[0]}</h1>
+    <div class="offer-side">
+      <p class="offer-sub">{hero.subhead}</p>
+      <div class="install">
+        <span aria-hidden="true" class="install-ps">$</span>
+        <code class="install-cmd">{install.brew}</code>
+        <button class="copy" data-copy={install.brew} type="button">
+          <svg aria-hidden="true" focusable="false" height="14" viewBox="0 0 14 14" width="14">
+            <path class="ln copy-idle" d="M4.5,4.5 V1.5 H12.5 V9.5 H9.5 M1.5,4.5 H9.5 V12.5 H1.5 Z" />
+            <path class="ln copy-done" d="M2,7.5 L5.5,11 L12,3.5" />
+          </svg>
+          <span class="copy-label" data-copied="Copied" data-idle="Copy">Copy</span>
+        </button>
+        <span aria-live="polite" class="sr-only" data-copy-status></span>
+      </div>
+      <p class="offer-meta">
+        <a href={links.repo}>{repoLabel}</a>
+        <span>{facts[1]}</span>
+        <span>{facts[2]}</span>
+      </p>
+      <p class="offer-works">{hero.worksWith}</p>
+    </div>
+  </div>
+
+  <div class="ms">
+    <div class="field">
+      <Plan />
+    </div>
+
+    <section aria-labelledby="layers-title" class="win layers">
+      <h2 class="win-bar" id="layers-title">Layers</h2>
+      <div class="layer-stack">
+        {
+          stops.map((stop) => (
+            <table class:list={["layer-table", `layers-${stop.id}`]}>
+              <caption>
+                An agent started in <code>{stop.directory}</code> gets
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <span class="sr-only">On</span>
+                  </th>
+                  <th scope="col">Server</th>
+                  <th scope="col">Account</th>
+                  <th scope="col">Line</th>
+                  <th scope="col">Why</th>
+                </tr>
+              </thead>
+              <tbody>
+                {layersFor(stop.id).map((layer) => (
+                  <tr class:list={{ "is-off": !layer.on }}>
+                    <td>
+                      <span class:list={["socket", { "is-plugged": layer.on }]} />
+                      <span class="sr-only">{layer.on ? "on" : "off"}</span>
+                    </td>
+                    <td>{layer.server}</td>
+                    <td>{layer.account}</td>
+                    <td>
+                      <svg aria-hidden="true" class="swatch" focusable="false" height="8" width="40">
+                        <path class:list={["ln", layer.on ? "swatch-live" : `cable-ghost lt-${layer.linetype}`]} d="M0,4 H40" />
+                      </svg>
+                    </td>
+                    <td class="layer-note">{layer.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ))
+        }
+      </div>
+    </section>
+
+    <section aria-labelledby="cmd-title" class="win cmd">
+      <div class="win-bar">
+        <h2 id="cmd-title">Command line</h2>
+        <fieldset class="cd">
+          <legend class="sr-only">Start the agent in</legend>
+          {
+            stops.map((stop, index) => (
+              <label class="chip">
+                <input
+                  aria-label={`cd ${stop.directory}`}
+                  checked={index === 0}
+                  id={`cwd-${stop.id}`}
+                  name="cwd"
+                  type="radio"
+                  value={stop.id}
+                />
+                <span class="chip-text">cd {stop.directory}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+      </div>
+      <div aria-live="polite" class="term">
+        {
+          stops.map((stop) => (
+            <div class:list={["tx", `only-${stop.id}`]}>
+              <p class="tx-line">
+                <span class="ps">$</span>
+                <span class="typed" style={`--n:${`cd ${stop.directory}`.length};--at:0ms`}>{`cd ${stop.directory}`}</span>
+              </p>
+              <p class="tx-line printed" style="--at:330ms">
+                <span class="ps">$</span>
+                <span class="typed" style={`--n:${stop.ls.command.length};--at:350ms`}>{stop.ls.command}</span>
+              </p>
+              <pre class="tx-out printed" style="--at:560ms">{stop.ls.output}</pre>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</section>

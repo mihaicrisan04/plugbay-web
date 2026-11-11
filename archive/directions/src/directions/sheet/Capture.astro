@@ -1,0 +1,26 @@
+---
+// A terminal capture as an instrument window, shown at 1:1. The corner squares
+// mark it as cut from a real session. plugbay prints no colour, so the output
+// stays one colour; only the prompt is styled.
+import { columnsOf } from "./model";
+
+interface Props {
+  class?: string;
+  sessions: readonly { command: string; cwd: string; output: string }[];
+}
+
+const { sessions, class: className } = Astro.props;
+const label = sessions
+  .map((session) => `${session.command} in ${session.cwd}`)
+  .join(", then ");
+---
+
+<figure aria-label={`Terminal: ${label}`} style={`--cols:${columnsOf(sessions)}`} class:list={["window capture", className]} >
+  <figcaption class="window-bar"><slot name="bar" /></figcaption>
+  <div class="capture-body">
+    <span aria-hidden="true" class="corner-squares"></span>
+    <pre class="capture-scroll">{sessions.map((session, index) => (
+      <code>{index > 0 && "\n\n"}<span class="prompt">{session.cwd} $</span>{` ${session.command}\n`}{session.output}</code>
+    ))}</pre>
+  </div>
+</figure>

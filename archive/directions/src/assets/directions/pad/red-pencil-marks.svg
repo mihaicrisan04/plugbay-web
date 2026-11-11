@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 34 80 12" width="800" height="120" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Generated in Paper (quiver-arrow, page "D Pad"), colours stripped to currentColor. -->
+  <!-- Inlined where they draw in: #strike-long in Strike.astro, #slash (twice, as the cross) in PatchFigure.astro. The rest are unused. -->
+  <path id="strike-long" vector-effect="non-scaling-stroke" d="m2.59 40.02c1.94 0.05 3.87 0.05 5.81-0.01 1.28-0.05 2.56-0.12 3.85-0.1 1.07 0.03 2.13 0.12 3.2 0.11 2.03-0.03 4.05-0.17 5.74-0.09"/>
+  <path id="strike-short" vector-effect="non-scaling-stroke" d="m26.8 40.01c1.67 0.05 3.35 0.05 5.02-0.01 1.7-0.07 3.35-0.14 4.69-0.09"/>
+  <path id="slash" vector-effect="non-scaling-stroke" d="m41.06 42.92c2.05-2.03 4.21-4.11 6.08-5.89"/>
+  <path id="caret" vector-effect="non-scaling-stroke" d="m52.76 42.92 3.54-5.81c0.07-0.12 0.15-0.12 0.24 0.01l3.31 5.8"/>
+  <path id="loop" vector-effect="non-scaling-stroke" d="m73.25 36.69c-3.21 0-7.83 1.5-7.83 3.93 0 1.69 2.05 2.68 4.34 2.68 3.44 0 7.65-1.83 7.65-3.92 0-1.16-1.1-1.89-2.13-2.14"/>
+</svg>

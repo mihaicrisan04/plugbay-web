@@ -1,0 +1,65 @@
+---
+// Real plugbay output, verbatim and in one colour, framed as an instrument
+// window. With two sessions the tabs are the two directories an agent can start in.
+import type { BranchId } from "./world";
+
+interface Session {
+  branch?: BranchId;
+  command: string;
+  cwd: string;
+  /** Underlined; the text itself keeps its colour. */
+  mark?: string;
+  output: string;
+}
+
+interface Props {
+  class?: string;
+  label: string;
+  sessions: Session[];
+}
+
+const { class: className, label, sessions } = Astro.props;
+const switchable = sessions.length > 1;
+
+function split(output: string, mark?: string) {
+  const at = mark ? output.indexOf(mark) : -1;
+  if (!mark || at === -1) {
+    return { after: "", before: output, marked: "" };
+  }
+  return {
+    after: output.slice(at + mark.length),
+    before: output.slice(0, at),
+    marked: mark,
+  };
+}
+---
+
+<div class:list={["asm-win asm-term", className]}>
+  <div class="asm-win__bar">
+    <span class="asm-win__title">{label}</span>
+    {
+      switchable ? (
+        <div class="asm-tabs">
+          {sessions.map((session) => (
+            <label class="asm-tab" for={`asm-dir-${session.branch}`}>
+              {session.cwd}
+            </label>
+          ))}
+        </div>
+      ) : (
+        <span class="asm-win__value">{sessions[0].cwd}</span>
+      )
+    }
+    <span class="asm-win__meta">Scale 1:1</span>
+  </div>
+  <section aria-label={`${label} ${sessions[0].cwd}`} class="asm-term__body">
+    {
+      sessions.map((session) => {
+        const { after, before, marked } = split(session.output, session.mark);
+        return (
+          <pre data-output={switchable ? session.branch : undefined} data-when={switchable ? session.branch : undefined}><code><span class="asm-term__prompt">$ </span>{session.command}{"\n"}{before}{marked ? <span class="asm-mark">{marked}</span> : null}{after}</code></pre>
+        );
+      })
+    }
+  </section>
+</div>

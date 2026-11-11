@@ -1,0 +1,41 @@
+---
+// Title block: real fields only. plugbay has no release yet, so there is no
+// drawing number, date or revision.
+import { facts, hero, links } from "../../data/plugbay";
+
+const licence = facts[2].replace("Open source, ", "");
+const repoLabel = links.repo.replace("https://", "");
+// Creator: the GitHub account in links.repo.
+const [, creator] = new URL(links.repo).pathname.split("/");
+---
+
+<footer class="titleblock">
+  <dl>
+    <div class="tb-title">
+      <dt>Title</dt>
+      <dd>plugbay</dd>
+    </div>
+    <div class="tb-wide">
+      <dt>Description</dt>
+      <dd>{hero.eyebrow}</dd>
+    </div>
+    <div>
+      <dt>Creator</dt>
+      <dd>{creator}</dd>
+    </div>
+    <div>
+      <dt>Licence</dt>
+      <dd>{licence}</dd>
+    </div>
+    <div class="tb-wide">
+      <dt>Repository</dt>
+      <dd>
+        <a href={links.repo}>{repoLabel}</a>
+      </dd>
+    </div>
+    <div>
+      <dt>Sheet</dt>
+      <dd>1 / 1</dd>
+    </div>
+  </dl>
+</footer>

@@ -1,0 +1,247 @@
+---
+// The exploded assembly, read left to right like a path. Three cables are the
+// three servers. On the wide drawing each one lands on its own row of the real
+// `plugbay ls` output; on the narrow one they drop into the terminal below.
+import FileCard from "./FileCard.astro";
+import {
+  axisY,
+  narrow,
+  socketX,
+  socketY,
+  wide,
+  wireToBus,
+  wireToRow,
+} from "./geometry";
+import Plate from "./Plate.astro";
+import Terminal from "./Terminal.astro";
+import { acme, branches, emptyPorts, globex, outputRowOf, servers, workFile } from "./world";
+
+interface Props {
+  variant: "wide" | "narrow";
+}
+
+const { variant } = Astro.props;
+const isWide = variant === "wide";
+const { layout } = isWide ? wide : narrow;
+const { plate, stations } = layout;
+
+const columns = servers.map((_, column) => column);
+const ys = columns.map((column) => socketY(layout, column));
+const workX = socketX(layout, 1);
+const branchX = socketX(layout, 2);
+const axis = axisY(layout);
+const guideStart = isWide ? 70 : 58;
+
+// Live from the plate that pins a server to the branch plate, whichever branch is on the axis.
+const pinnedByWork = workFile.ports.map((port) => port.state === "set");
+const sharedWires = columns
+  .filter((column) => pinnedByWork[column])
+  .map((column) => `M${workX} ${ys[column]}H${branchX}`);
+
+// From the branch plate to the result (+1 row for the prompt line).
+const tails = branches.map((branch) => ({
+  id: branch.id,
+  wires: branch.resolution
+    .filter((resolution) => resolution.state === "set")
+    .map((resolution) => {
+      const column = servers.indexOf(resolution.server as (typeof servers)[number]);
+      if (!isWide) {
+        const busX = narrow.busXs[column];
+        return { d: wireToBus(branchX, ys[column], busX, narrow.height), end: { x: busX, y: narrow.height } };
+      }
+      const row = outputRowOf(branch.ls.output, `${resolution.server}:${resolution.account}`) + 1;
+      const end = { x: wide.terminal.left - 4, y: wide.terminal.rowY(row) };
+      return { d: wireToRow(branchX, ys[column], end.x, end.y), end };
+    }),
+}));
+
+const leaving = (ports: typeof workFile.ports, inherited: boolean[]) =>
+  ports.map((port, column) => {
+    if (port.state === "blank") {
+      return "none" as const;
+    }
+    return port.state === "set" || inherited[column] ? ("live" as const) : ("guide" as const);
+  });
+
+const axisPath = isWide
+  ? `M-2400 ${axis}H${wide.terminal.left}`
+  : `M-24 ${axis}H304L312 ${axis + 8}V${narrow.height}`;
+
+// Wide only: leaders from a square node on each plate to its file card.
+const nodeY = layout.plateTop + plate.height - 32;
+const cards = [
+  { left: 148, nodeX: stations[1] + 40, toX: stations[1] + 28 },
+  { left: 372, nodeX: stations[2] + 40, toX: stations[2] + 52 },
+];
+const leaderTo = (card: (typeof cards)[number]) =>
+  `M${card.nodeX} ${nodeY}V${wide.cardTop - Math.abs(card.toX - card.nodeX)}L${card.toX} ${wide.cardTop}`;
+const ghostNode = {
+  x: stations[2] + layout.ghost.x + 16,
+  y: layout.plateTop + layout.ghost.y + 22,
+};
+const ghostCard = { left: 88, top: 204, width: 260 };
+const ghostLeader = `M${ghostNode.x} ${ghostNode.y}L${ghostCard.left + ghostCard.width} ${ghostNode.y - (ghostNode.x - ghostCard.left - ghostCard.width)}`;
+
+const ticks = [
+  { label: "/", x: stations[0] + plate.width / 2 },
+  { label: workFile.directory, x: stations[1] + plate.width / 2 },
+];
+const session = (branch: (typeof branches)[number]) => ({
+  branch: branch.id,
+  command: branch.ls.command,
+  cwd: branch.ls.cwd,
+  mark: `sentry:${branch.id}`,
+  output: branch.ls.output,
+});
+---
+
+<div
+  style={isWide ? undefined : `height:${narrow.height}px;width:${narrow.width}px`}
+  class:list={["asm-assembly", `asm-assembly--${variant}`]}
+>
+  {
+    isWide && (
+      <div class="asm-grid" style={`top:${wide.grid.top}px;height:${wide.grid.bottom - wide.grid.top}px`} />
+    )
+  }
+
+  <svg aria-hidden="true" class="asm-svg asm-fill">
+    <path class="ln-centre" d={axisPath} />
+    {isWide && <path class="ln-centre" d={`M${wide.dropX} ${wide.terminal.bottom}V${wide.height + 136}`} />}
+    {ys.map((y) => <path class="ln-guide" d={`M${guideStart} ${y}H${branchX}`} />)}
+    <g data-wires="shared">
+      {sharedWires.map((d) => <path class="ln-live" d={d} pathLength="1" stroke-dasharray="1" />)}
+    </g>
+    {
+      tails.map((tail) => (
+        <g data-when={tail.id} data-wires={tail.id}>
+          {tail.wires.map((wire) => (
+            <path class="ln-live" d={wire.d} pathLength="1" stroke-dasharray="1" stroke-linejoin="round" />
+          ))}
+        </g>
+      ))
+    }
+  </svg>
+
+  {
+    servers.map((server, column) => (
+      <span class="asm-assembly__server" style={`top:${ys[column]}px`}>
+        {server}
+      </span>
+    ))
+  }
+
+  <Plate id={`${variant}-root`} layout={layout} leaving={["guide", "guide", "guide"]} ports={emptyPorts} station={0} />
+  <Plate
+    id={`${variant}-work`}
+    layout={layout}
+    leaving={leaving(workFile.ports, [false, false, false])}
+    ports={workFile.ports}
+    station={1}
+  />
+  {
+    branches.map((branch) => (
+      <Plate
+        branch={branch.id}
+        id={`${variant}-${branch.id}`}
+        layout={layout}
+        leaving={leaving(branch.file.ports, pinnedByWork)}
+        ports={branch.file.ports}
+        station={2}
+      />
+    ))
+  }
+
+  <!-- Square nodes: where a cable lands, and where a leader starts -->
+  <svg aria-hidden="true" class="asm-svg asm-fill">
+    {
+      tails.map((tail) => (
+        <g data-when={tail.id} data-wires-end={tail.id}>
+          {tail.wires.map((wire) => (
+            <rect class="fill-ink" height="7" width="7" x={wire.end.x - 3.5} y={wire.end.y - 3.5} />
+          ))}
+        </g>
+      ))
+    }
+    {
+      isWide && (
+        <>
+          {/* Leaders let go while the stack is shut, like the cables. */}
+          <g data-wires="shared">
+            {cards.map((card) => (
+              <>
+                <path class="ln-ink" d={leaderTo(card)} />
+                <rect class="fill-ink" height="7" width="7" x={card.nodeX - 3.5} y={nodeY - 3.5} />
+              </>
+            ))}
+          </g>
+          <path class="ln-ink" d={ghostLeader} />
+          <rect class="fill-ink" height="7" width="7" x={ghostNode.x - 3.5} y={ghostNode.y - 3.5} />
+        </>
+      )
+    }
+  </svg>
+
+  {
+    isWide ? (
+      <>
+        <FileCard file={workFile} style={`left:${cards[0].left}px;top:${wide.cardTop}px`} />
+        {branches.map((branch) => (
+          <FileCard file={branch.file} style={`left:${cards[1].left}px;top:${wide.cardTop}px`} when={branch.id} />
+        ))}
+        <FileCard
+          alternate
+          file={globex.file}
+          style={`left:${ghostCard.left}px;top:${ghostCard.top}px;width:${ghostCard.width}px`}
+          when="acme"
+        />
+        <FileCard
+          alternate
+          file={acme.file}
+          style={`left:${ghostCard.left}px;top:${ghostCard.top}px;width:${ghostCard.width}px`}
+          when="globex"
+        />
+
+        {ticks.map((tick) => (
+          <span class="asm-tick" style={`left:${tick.x}px;top:${wide.grid.bottom}px`}>
+            {tick.label}
+          </span>
+        ))}
+        {branches.map((branch) => (
+          <>
+            <span
+              class="asm-tick"
+              data-when={branch.id}
+              style={`left:${stations[2] + plate.width / 2}px;top:${wide.grid.bottom}px`}
+            >
+              {branch.file.directory}
+            </span>
+          </>
+        ))}
+
+        <Terminal class="asm-assembly__term" label="Assembled in" sessions={branches.map(session)} />
+      </>
+    ) : (
+      <>
+        <span class="asm-balloon" style={`left:${stations[1] + 19}px;top:0`}>
+          {workFile.item}
+        </span>
+        {branches.map((branch, index) => (
+          <>
+            <span class="asm-balloon" data-when={branch.id} style={`left:${stations[2] + 19}px;top:0`}>
+              {branch.file.item}
+            </span>
+            <span
+              class="asm-balloon asm-balloon--phantom"
+              data-when={branches[1 - index].id}
+              style={`left:${stations[2] - 28}px;top:0`}
+            >
+              {branch.file.item}
+            </span>
+          </>
+        ))}
+      </>
+    )
+  }
+</div>
+{!isWide && <Terminal class="asm-assembly__term-narrow" label="Assembled in" sessions={branches.map(session)} />}

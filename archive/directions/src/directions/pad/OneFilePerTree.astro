@@ -1,0 +1,167 @@
+---
+// Sheet 2. Given: the tree and its three files, each with the scope it covers.
+// Solution: the files that merge for each repo, added up. Check: plugbay's own answer.
+import { callouts, migrate, steps, terminal } from "../../data/plugbay";
+import { files, sums, tree, withCode } from "./content";
+import Panel from "./Panel.astro";
+import Strike from "./Strike.astro";
+import Terminal from "./Terminal.astro";
+
+const lineNotes = {
+  "linear = false": { key: "B", text: callouts.disable },
+  'sentry = "acme"': { key: "A", text: callouts.account },
+};
+const keyedNotes = Object.values(lineNotes).sort((a, b) => a.key.localeCompare(b.key));
+const generalNotes = [callouts.tools, callouts.secrets, migrate];
+
+// Scope dimensions, in the tree's own pixels: rows are 40 tall, so row n is centred at 40n + 20.
+const rowHeight = 40;
+const rowCentre = (row: number) => row * rowHeight + rowHeight / 2;
+const innerX = 40;
+const outerX = 96;
+const overshoot = 8;
+const scopes = [
+  { balloon: 1, from: rowCentre(1), to: rowCentre(7), x: outerX },
+  { balloon: 2, from: rowCentre(3), to: rowCentre(4), x: innerX },
+  { balloon: 3, from: rowCentre(6), to: rowCentre(7), x: innerX },
+];
+const extensionRows = new Set([1, 3, 4, 6, 7]);
+const extensions = [
+  { to: outerX, y: rowCentre(1) },
+  { to: innerX, y: rowCentre(3) },
+  { to: innerX, y: rowCentre(4) },
+  { to: innerX, y: rowCentre(6) },
+  { to: outerX, y: rowCentre(7) },
+];
+const tick = 4;
+const mono = (sentence: string) => withCode(sentence);
+---
+
+<div class="block" data-draw>
+  <div class="work">
+    <h2 class="title title--section"><span class="title-ink write pass-ink">One file per tree</span></h2>
+    <p class="statement statement--small lead">{callouts.merge}</p>
+  </div>
+</div>
+
+<div class="block" data-draw>
+  <h3 class="step">Given</h3>
+  <div class="work files">
+    <figure class="tree">
+      <div class="tree-rows">
+        {
+          tree.map((row, index) => (
+            <div class="tree-row">
+              {row.guides.map((guide) => (
+                <span aria-hidden="true" class={`tg tg--${guide}`} />
+              ))}
+              <code>{row.file || index === 0 ? row.name : `${row.name}/`}</code>
+              {extensionRows.has(index) && <span aria-hidden="true" class="ext draw-x pass-ink" style={`--i: ${index}`} />}
+            </div>
+          ))
+        }
+      </div>
+      <svg aria-hidden="true" class="dims" height={tree.length * rowHeight} viewBox={`0 0 128 ${tree.length * rowHeight}`} width="128">
+        {extensions.map((line) => <line x1="0" x2={line.to + overshoot} y1={line.y} y2={line.y} />)}
+        {
+          scopes.map((scope) => (
+            <g class="ink-in pass-ink" style={`--i: ${6 + scope.balloon * 2}`}>
+              <line x1={scope.x} x2={scope.x} y1={scope.from} y2={scope.to} />
+              <line x1={scope.x - tick} x2={scope.x + tick} y1={scope.from + tick} y2={scope.from - tick} />
+              <line x1={scope.x - tick} x2={scope.x + tick} y1={scope.to + tick} y2={scope.to - tick} />
+              <circle cx={scope.x} cy={(scope.from + scope.to) / 2} r="10" />
+              <text dy="4.5" x={scope.x} y={(scope.from + scope.to) / 2}>
+                {scope.balloon}
+              </text>
+            </g>
+          ))
+        }
+      </svg>
+      <figcaption class="sr-only">
+        The directory tree under ~/work. Each plugbay.toml covers its own directory and everything below it.
+      </figcaption>
+    </figure>
+
+    <div>
+      <ol class="legend">
+        {
+          files.map((file) => (
+            <li>
+              <p class="caption legend-scope">
+                <span class="balloon">{file.balloon}</span>
+                <span>{mono(file.scope).map((part) => (part.isCode ? <code>{part.text}</code> : part.text))}</span>
+              </p>
+              <Panel lines={file.lines} notes={lineNotes} path={file.path} />
+            </li>
+          ))
+        }
+      </ol>
+      <ul class="keyed-notes caption">
+        {
+          keyedNotes.map((note) => (
+            <li>
+              <span class="balloon">{note.key}</span>
+              <span>{mono(note.text).map((part) => (part.isCode ? <code>{part.text}</code> : part.text))}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="block solution" data-draw>
+  <h3 class="step">Solution</h3>
+  <div class="work">
+    <div class="sums">
+      {
+        sums.map((sum) => (
+          <figure class="sum">
+            <figcaption class="sum-title">
+              <code>{sum.result.directory}</code>
+            </figcaption>
+            {sum.terms.map((file, term) =>
+              file.lines.slice(1).map((line, index) => (
+                <div class="sum-row">
+                  <span class="sum-op">{term > 0 && index === 0 ? "+" : ""}</span>
+                  <span>{index === 0 && <span class="balloon">{file.balloon}</span>}</span>
+                  {(sum.cancelled as readonly string[]).includes(line) ? (
+                    <del class="struck sum-term">
+                      <code>{line}</code>
+                      <Strike />
+                    </del>
+                  ) : (
+                    <code class="sum-term">{line}</code>
+                  )}
+                </div>
+              ))
+            )}
+            <div aria-hidden="true" class="sum-rule draw-x pass-ink" />
+            <div class="sum-equals">
+              <span class="sum-op">=</span>
+              <ul class="boxed cut ink-in pass-ink" style="--i: 6">
+                {sum.result.servers.map((server) => (
+                  <li>{server}</li>
+                ))}
+              </ul>
+            </div>
+          </figure>
+        ))
+      }
+    </div>
+    <section class="notes">
+      <h4 class="caption notes-title">Notes</h4>
+      <ol class="caption">
+        {generalNotes.map((note) => <li><span>{mono(note).map((part) => (part.isCode ? <code>{part.text}</code> : part.text))}</span></li>)}
+      </ol>
+    </section>
+  </div>
+</div>
+
+<div class="block check" data-draw>
+  <h3 class="step">Check</h3>
+  <div class="work">
+    <Terminal caption="Real output, as printed" sessions={[terminal.lsGlobex, terminal.whyLinearGlobex]} />
+    <p class="statement statement--small">{steps[1].body}</p>
+  </div>
+</div>

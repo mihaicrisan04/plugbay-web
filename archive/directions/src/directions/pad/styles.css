@@ -1,0 +1,1539 @@
+@import "tailwindcss";
+
+/* Direction D, "Engineering pad". One pencil does all the work: pressed lightly it is
+   construction (10 and 40 percent), pressed hard it is ink (100 percent). Its other end is
+   red and has one job, the correction. Every line is 1px; emphasis is a solid fill. */
+
+@font-face {
+  font-display: swap;
+  font-family: "Routed Gothic";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/pad/routed-gothic.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Routed Gothic";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/pad/routed-gothic-half-italic.woff2") format("woff2");
+}
+
+/* Arial sets the headline within 2% of Routed Gothic, so the swap does not move the layout. */
+@font-face {
+  ascent-override: 124.7%;
+  descent-override: 37.1%;
+  font-family: "Routed Gothic Fallback";
+  line-gap-override: 0%;
+  src: local("Arial"), local("Helvetica Neue"), local("Liberation Sans");
+}
+
+@theme {
+  --font-display: "Routed Gothic", "Routed Gothic Fallback", sans-serif;
+  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --color-paper: oklch(99% 0.004 95);
+  --color-ink: oklch(40% 0.13 250);
+  --color-red: oklch(55% 0.2 27);
+
+  /* Line draws ease in and out (easeInOutCubic); things that appear ease out. */
+  --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Dark is the same drawing in one light ink on one deep ground. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: oklch(17% 0.035 250);
+    --color-ink: oklch(87% 0.065 238);
+    --color-red: oklch(72% 0.17 30);
+  }
+}
+
+:root {
+  /* The three pressures of the one pencil. 70 is the lightest that still carries text. */
+  --ink-70: color-mix(in oklab, var(--color-ink) 76%, var(--color-paper));
+  --ink-40: color-mix(in oklab, var(--color-ink) 40%, var(--color-paper));
+  --ink-10: color-mix(in oklab, var(--color-ink) 11%, var(--color-paper));
+
+  --margin: 0px;
+  --gutter: 16px;
+  --pad-end: 16px;
+
+  /* Routed Gothic, in em: cap height, and where its baseline falls in the title's line box. */
+  --cap-height: 0.719em;
+  --title-leading: 1.04em;
+  --title-baseline: 0.958em;
+
+  color-scheme: light dark;
+}
+
+@media (min-width: 1180px) {
+  :root {
+    --margin: 120px;
+    --gutter: 32px;
+    --pad-end: 40px;
+  }
+}
+
+html {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  padding: clamp(12px, 1.7vw, 24px) env(safe-area-inset-right, 0px)
+    clamp(24px, 4vw, 56px) env(safe-area-inset-left, 0px);
+}
+
+/* Construction lines and the hand run off the sheet; the page must not scroll sideways for them. */
+main {
+  overflow-x: clip;
+}
+
+::selection {
+  color: var(--color-paper);
+  -webkit-text-stroke-color: var(--color-paper);
+  background: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-variant-ligatures: none;
+}
+
+a,
+button {
+  touch-action: manipulation;
+}
+
+/* The one label voice: small uppercase mono. Code inside a caption keeps its own case. */
+.caption {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.caption code {
+  font-size: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* The statement voice: the display face at reading size. */
+.statement {
+  max-width: 22ch;
+  font-size: clamp(26px, 4.6vw, 40px);
+  font-weight: 400;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.statement--small {
+  max-width: 34ch;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.prose {
+  max-width: 52ch;
+  margin-top: 18px;
+}
+
+/* ---------- The sheet ---------- */
+
+.sheet {
+  width: calc(100% - 24px);
+  max-width: 720px;
+  margin-inline: auto;
+  border: 1px solid var(--ink-40);
+}
+
+.sheet + .sheet {
+  margin-top: clamp(16px, 2.8vw, 40px);
+}
+
+.sheet-body {
+  padding-bottom: 40px;
+}
+
+@media (min-width: 1180px) {
+  .sheet {
+    width: calc(100% - clamp(48px, 5.6vw, 80px));
+    max-width: 1480px;
+  }
+
+  /* The pad's ruled margin: step labels to its left, the work to its right. */
+  .sheet-body {
+    padding-bottom: 56px;
+    background:
+      linear-gradient(var(--ink-40), var(--ink-40)) var(--margin) 0 / 1px 100%
+      no-repeat;
+  }
+}
+
+/* ---------- Header strip and title block: ruled cells, real fields only ---------- */
+
+.strip {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1px;
+  font-family: var(--font-mono);
+  background: var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
+}
+
+.strip--foot {
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--color-ink);
+  border-bottom: 0;
+}
+
+.field {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 14px 4px var(--gutter);
+  background: var(--color-paper);
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field dt {
+  font-size: 11px;
+  color: var(--ink-70);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.field dd {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.field img {
+  width: auto;
+  height: 28px;
+}
+
+.field--project:has(img) {
+  min-height: 56px;
+}
+
+.field a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 1180px) {
+  .strip--head {
+    grid-template-columns: 320px 1fr auto;
+  }
+
+  .strip--foot {
+    grid-template-columns: 320px auto auto 1fr;
+  }
+
+  .field {
+    min-height: 56px;
+    padding-inline: 24px;
+  }
+
+  .field--full {
+    grid-column: auto;
+  }
+
+  .field--project {
+    padding-left: 20px;
+  }
+
+  .field img {
+    height: 30px;
+  }
+}
+
+/* ---------- Blocks: a step label in the margin, the work beside it ---------- */
+
+.block {
+  padding: 48px var(--pad-end) 0 var(--gutter);
+}
+
+.step {
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.step--margin-only {
+  display: none;
+}
+
+@media (min-width: 1180px) {
+  .block {
+    display: grid;
+    grid-template-columns: var(--margin) minmax(0, 1fr);
+    column-gap: var(--gutter);
+    padding: 72px var(--pad-end) 0 0;
+  }
+
+  .step,
+  .step--margin-only {
+    display: block;
+    grid-column: 1;
+    padding-left: 20px;
+    margin: 0;
+  }
+
+  .work {
+    grid-column: 2;
+  }
+}
+
+/* ---------- Titles: template lettering in outline, between its guidelines ---------- */
+
+.title {
+  position: relative;
+  font-size: min(calc((100vw - 58px) / 8.15), 72px);
+  font-weight: 400;
+  line-height: var(--title-leading);
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-ink);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@supports not (-webkit-text-stroke: 1px black) {
+  .title {
+    color: var(--color-ink);
+  }
+}
+
+/* Cap line and baseline, drawn before the letters and left in, as a drafter leaves them. */
+.title::before {
+  --cap-line: calc(var(--title-baseline) - var(--cap-height));
+  position: absolute;
+  inset: 0 -100vw;
+  pointer-events: none;
+  content: "";
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--cap-line) - 1px),
+    var(--ink-40) calc(var(--cap-line) - 1px) var(--cap-line),
+    transparent var(--cap-line) var(--title-baseline),
+    var(--ink-40) var(--title-baseline) calc(var(--title-baseline) + 1px),
+    transparent calc(var(--title-baseline) + 1px) var(--title-leading)
+  );
+}
+
+.title-ink {
+  position: relative;
+  display: block;
+}
+
+.title-ink > span {
+  display: block;
+}
+
+.title--section {
+  font-size: min(calc((100vw - 58px) / 10.2), 56px);
+}
+
+@media (min-width: 720px) {
+  .title {
+    font-size: min(calc((100vw - 58px) / 12.95), 53px);
+  }
+
+  .title-ink > span {
+    display: inline;
+  }
+
+  .title-ink > span:last-child {
+    display: block;
+  }
+
+  .title--section {
+    font-size: 56px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .title {
+    font-size: min(
+      calc((100vw - clamp(48px, 5.6vw, 80px) - 196px) / 12.95),
+      96px
+    );
+  }
+
+  .title--section {
+    font-size: 64px;
+  }
+}
+
+/* ---------- Hero ----------
+   Narrow: one column, and the drawing sits straight under the headline, so the first screen
+   shows the plug going into the right account. */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  padding: 28px var(--pad-end) 0 var(--gutter);
+}
+
+.fig {
+  display: contents;
+}
+
+.fig-stage {
+  order: 1;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  order: 2;
+  margin-top: 28px;
+}
+
+.actions-note {
+  max-width: 44ch;
+  color: var(--ink-70);
+}
+
+.lede {
+  order: 3;
+  max-width: 34ch;
+  margin-top: 28px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.fig-files {
+  order: 4;
+}
+
+.install {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid var(--color-ink);
+}
+
+/* An engineer double-underlines the answer. */
+.install::after {
+  position: absolute;
+  inset: calc(100% + 5px) -1px auto;
+  height: 4px;
+  content: "";
+  border-block: 1px solid var(--color-ink);
+}
+
+.install-command {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 12px;
+  overflow-x: auto;
+  font-size: 13px;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.copy {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 96px;
+  min-height: 44px;
+  padding: 0 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-paper);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  user-select: none;
+  background: var(--color-ink);
+  transition: background-color 160ms ease;
+}
+
+html:not([data-js]) .copy {
+  display: none;
+}
+
+.copy-label {
+  grid-area: 1 / 1;
+  transition:
+    opacity 160ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.copy-label--done,
+.copy[data-copied] .copy-label--idle {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
+.copy[data-copied] .copy-label--done {
+  opacity: 1;
+  transform: none;
+}
+
+.copy:active {
+  background: var(--ink-70);
+}
+
+.copy:active .copy-label {
+  transform: scale(0.96);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .copy:hover {
+    background: var(--ink-70);
+  }
+}
+
+.repo-link {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.repo-link svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 160ms var(--ease-out);
+}
+
+.repo-link:active {
+  color: var(--ink-70);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .repo-link:hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+
+@media (min-width: 440px) {
+  .install {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .install-command {
+    padding: 0 16px;
+    font-size: 15px;
+  }
+
+  .install-command::before {
+    margin-right: 1ch;
+    color: var(--ink-70);
+    user-select: none;
+    content: "$";
+  }
+}
+
+/* ---------- Marks ---------- */
+
+.balloon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0;
+  border: 1px solid var(--color-ink);
+  border-radius: 50%;
+}
+
+/* A red pencil stroke through what no longer holds. The path was drawn in Paper. */
+.struck {
+  position: relative;
+  text-decoration: none;
+}
+
+.strike {
+  position: absolute;
+  inset: 50% -3px auto;
+  width: calc(100% + 6px);
+  height: 11px;
+  overflow: visible;
+  color: var(--color-red);
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.75px;
+  stroke-linecap: round;
+  translate: 0 -45%;
+}
+
+/* The red end writes by hand, so its lettering leans. */
+.pencil {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-red);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.pencil code {
+  font-size: 0.82em;
+  font-style: normal;
+}
+
+/* A callout cuts its corner at 45 degrees, where a card would round it. */
+.cut {
+  position: relative;
+}
+
+.cut::after {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  content: "";
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.6px),
+    var(--color-ink) calc(50% - 0.6px) calc(50% + 0.6px),
+    var(--color-paper) calc(50% + 0.6px)
+  );
+}
+
+/* ---------- Panels: the real file, or the real output, as an instrument window ---------- */
+
+.panel {
+  width: fit-content;
+  background: var(--color-paper);
+  border: 1px solid var(--color-ink);
+}
+
+.panel-bar {
+  padding: 5px 12px 4px;
+  color: var(--color-paper);
+  white-space: nowrap;
+  background: var(--color-ink);
+}
+
+.panel-bar code {
+  font-size: 13px;
+}
+
+.panel-body {
+  padding: 8px 12px 10px;
+}
+
+.line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 22px;
+  white-space: pre;
+}
+
+.line--table {
+  color: var(--ink-70);
+}
+
+.line .balloon {
+  margin-left: 10px;
+}
+
+/* ---------- The hero drawing ---------- */
+
+.fig-stage {
+  --units: 8;
+  --hand-left: 61.16%;
+  --hand-top: 42.49%;
+  --hand-width: 88%;
+  --hand-turn: -48deg;
+  position: relative;
+  aspect-ratio: 336 / 294;
+  margin-top: 28px;
+  container-type: inline-size;
+}
+
+/* The grid belongs to the drawing only. Its cells are the drawing's own unit. */
+.fig-stage::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image:
+    linear-gradient(var(--ink-10) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink-10) 1px, transparent 1px);
+  background-size: calc(100cqw / var(--units)) calc(100cqw / var(--units));
+  border-right: 1px solid var(--ink-10);
+  border-bottom: 1px solid var(--ink-10);
+}
+
+.fig-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.fig-svg--wide {
+  display: none;
+}
+
+.fig-svg * {
+  vector-effect: non-scaling-stroke;
+}
+
+.fig-line,
+.fig-box,
+.fig-ghost {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1;
+}
+
+.fig-box {
+  fill: var(--color-paper);
+}
+
+.fig-ghost {
+  stroke: var(--ink-40);
+}
+
+.fig-solid {
+  fill: var(--color-ink);
+}
+
+.fig-red {
+  fill: none;
+  stroke: var(--color-red);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+}
+
+/* The stippled hand was generated in Paper. It is a mask, so it takes the ink of either theme;
+   the shape under it is paper, so the cable passes behind the hand. */
+.hand {
+  position: absolute;
+  top: var(--hand-top);
+  left: var(--hand-left);
+  width: var(--hand-width);
+  aspect-ratio: 960 / 559;
+  pointer-events: none;
+  transform-origin: 2.2% 37.8%;
+  rotate: var(--hand-turn);
+}
+
+.hand-shape,
+.hand-ink {
+  position: absolute;
+  inset: 0;
+  background: var(--color-paper);
+  mask: var(--hand-shape) center / 100% 100% no-repeat;
+}
+
+.hand-ink {
+  background: var(--color-ink);
+  mask-image: var(--hand-ink);
+}
+
+.jack-label {
+  position: absolute;
+  top: calc(214 / 294 * 100%);
+  left: calc(var(--nx) / 336 * 100%);
+  display: none;
+  line-height: 1;
+  white-space: nowrap;
+  translate: -50% 0;
+}
+
+.jack-label code {
+  font-size: 13px;
+}
+
+.jack-label--narrow {
+  display: block;
+}
+
+.fig-keychain,
+.fig-dim,
+.fig-right {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.fig-keychain {
+  top: 8px;
+  left: 10px;
+  color: var(--ink-70);
+}
+
+.fig-dim {
+  top: calc(266 / 294 * 100%);
+  left: calc(152 / 336 * 100%);
+  translate: -50% 0;
+}
+
+.fig-right {
+  top: calc(170 / 294 * 100%);
+  left: calc(244 / 336 * 100%);
+  font-size: 22px;
+  line-height: 1;
+  rotate: -6deg;
+}
+
+.fig-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+/* Wide: the whole drawing. Files across the top, accounts along the bottom, a cable per line. */
+@media (min-width: 1180px) {
+  .hero {
+    display: grid;
+    grid-template-columns: var(--margin) minmax(0, 1fr);
+    column-gap: var(--gutter);
+    padding: 36px var(--pad-end) 0 0;
+  }
+
+  .step--find {
+    grid-area: 1 / 1;
+    padding-top: 22px;
+  }
+
+  .hero-title {
+    grid-area: 1 / 2;
+  }
+
+  .step--given {
+    grid-area: 2 / 1;
+    margin-top: 28px;
+  }
+
+  .fig {
+    position: relative;
+    display: block;
+    grid-area: 2 / 2;
+    margin-top: 28px;
+  }
+
+  .step--ans {
+    grid-area: 3 / 1;
+    margin-top: 44px;
+  }
+
+  .actions {
+    flex-flow: row wrap;
+    grid-area: 3 / 2;
+    gap: 6px 32px;
+    align-items: center;
+    max-width: 62%;
+    margin-top: 28px;
+  }
+
+  .repo-link {
+    margin: 0;
+  }
+
+  .actions-note {
+    flex-basis: 100%;
+    max-width: none;
+    margin-top: 12px;
+  }
+
+  .lede {
+    grid-area: 3 / 2;
+    align-self: start;
+    justify-self: end;
+    max-width: 30ch;
+    margin-top: 22px;
+  }
+
+  .fig-stage {
+    --units: 29;
+    --hand-left: 71.36%;
+    --hand-top: 46.86%;
+    --hand-width: 48%;
+    --hand-turn: -42deg;
+    aspect-ratio: 1160 / 400;
+    margin: 0;
+  }
+
+  .fig-svg--wide {
+    display: block;
+  }
+
+  .fig-svg--narrow {
+    display: none;
+  }
+
+  .jack-label {
+    top: calc(336 / 400 * 100%);
+    left: calc(var(--x) / 1160 * 100%);
+    display: block;
+  }
+
+  .fig-keychain {
+    top: calc(298 / 400 * 100%);
+    left: calc(44 / 1160 * 100%);
+    width: 9ch;
+    white-space: normal;
+  }
+
+  .fig-dim {
+    top: calc(372 / 400 * 100%);
+    left: calc(730 / 1160 * 100%);
+    padding-inline: 8px;
+    background: var(--color-paper);
+  }
+
+  .fig-right {
+    top: calc(297 / 400 * 100%);
+    left: calc(884 / 1160 * 100%);
+    font-size: 24px;
+  }
+
+  .fig-files {
+    display: block;
+    margin: 0;
+  }
+
+  .fig-files li {
+    position: absolute;
+    bottom: calc(100% - 128 / 400 * 100%);
+    left: calc(var(--x) / 1160 * 100%);
+  }
+}
+
+/* ---------- Before: the old list, corrected ---------- */
+
+.corrections {
+  margin-top: 28px;
+}
+
+.corrections li {
+  padding: 14px 0 15px;
+  border-top: 1px solid var(--ink-40);
+}
+
+.corrections li:last-child {
+  border-bottom: 1px solid var(--ink-40);
+}
+
+.was {
+  display: block;
+  text-decoration: none;
+}
+
+/* One ruled red line per line of text, at the same height whatever the face. */
+.was-text {
+  background:
+    linear-gradient(var(--color-red), var(--color-red)) 0 57% / 100% 1.5px
+    no-repeat;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.was code,
+.now code {
+  font-size: 0.82em;
+}
+
+.now {
+  display: block;
+  margin-top: 6px;
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+/* The key was generated in Paper, as the hand was. It carries the one annotation system. */
+.keyfig {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.keyfig-key {
+  flex: none;
+  width: min(232px, 54%);
+  aspect-ratio: 640 / 253;
+  background: var(--color-ink);
+  mask: var(--key) center / 100% 100% no-repeat;
+}
+
+.keyfig-leader {
+  flex: none;
+  width: 56px;
+  height: 33px;
+  margin: 0 10px 22px -22px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-ink);
+}
+
+.keyfig-node {
+  fill: var(--color-ink);
+  stroke: none;
+}
+
+.keyfig figcaption {
+  max-width: 17ch;
+  margin-bottom: 48px;
+}
+
+@media (min-width: 1180px) {
+  .given .work {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: 72px;
+    align-items: start;
+  }
+
+  .corrections {
+    margin-top: 8px;
+  }
+}
+
+/* ---------- Sheet 2: one file per tree ---------- */
+
+.lead {
+  margin-top: 20px;
+}
+
+/* The tree sits on a grid whose rows are its own: one directory entry per cell. */
+.tree {
+  display: flex;
+  width: fit-content;
+  background:
+    linear-gradient(var(--ink-10) 1px, transparent 1px) 0 0 / 100% 40px;
+  border-bottom: 1px solid var(--ink-10);
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.tree-row code {
+  font-size: 15px;
+}
+
+/* Tree guides: pipe continues past the row, tee branches and continues, ell branches and ends. */
+.tg {
+  position: relative;
+  flex: none;
+  align-self: stretch;
+  width: 28px;
+}
+
+.tg--pipe::before,
+.tg--tee::before,
+.tg--ell::before {
+  position: absolute;
+  inset: 0 auto 0 8px;
+  width: 1px;
+  content: "";
+  background: var(--color-ink);
+}
+
+.tg--ell::before {
+  bottom: 50%;
+}
+
+.tg--tee::after,
+.tg--ell::after {
+  position: absolute;
+  inset: 50% 6px auto 8px;
+  height: 1px;
+  content: "";
+  background: var(--color-ink);
+}
+
+.ext {
+  flex: 1;
+  min-width: 16px;
+  height: 1px;
+  margin-left: 6px;
+  background: var(--color-ink);
+}
+
+.dims {
+  flex: none;
+  overflow: visible;
+}
+
+.dims line,
+.dims circle {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1;
+}
+
+.dims circle {
+  fill: var(--color-paper);
+}
+
+.dims text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-anchor: middle;
+  fill: var(--color-ink);
+}
+
+.legend {
+  display: grid;
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.legend-scope {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.leader,
+.note {
+  display: none;
+}
+
+.keyed-notes {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.keyed-notes li {
+  display: flex;
+  gap: 10px;
+}
+
+@media (min-width: 1180px) {
+  .files {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 104px;
+    align-items: start;
+  }
+
+  .legend {
+    margin-top: 0;
+  }
+
+  .line .balloon,
+  .keyed-notes {
+    display: none;
+  }
+
+  /* The one annotation: a square node on the line, out past the panel's edge,
+     a 45 degree kink, a shoulder, a short caption. */
+  .leader {
+    position: relative;
+    display: block;
+    flex: 1;
+    min-width: 24px;
+    height: 1px;
+    margin: 0 -52px 0 10px;
+    background: var(--color-ink);
+  }
+
+  .leader::before {
+    position: absolute;
+    inset: -3px auto auto -3px;
+    width: 7px;
+    height: 7px;
+    content: "";
+    background: var(--color-ink);
+  }
+
+  .leader svg {
+    position: absolute;
+    bottom: 0;
+    left: 100%;
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 1;
+  }
+
+  .note {
+    position: absolute;
+    bottom: calc(50% + 6px);
+    left: calc(100% + 98px);
+    display: block;
+    width: 31ch;
+    white-space: normal;
+  }
+}
+
+/* Sums: the files that merge for one directory, added like a column of figures. */
+.sums {
+  display: grid;
+  gap: 36px;
+}
+
+.sum {
+  width: fit-content;
+}
+
+.sum-title {
+  margin-bottom: 8px;
+}
+
+.sum-title code {
+  font-size: 15px;
+}
+
+.sum-row {
+  display: grid;
+  grid-template-columns: 20px 28px auto;
+  align-items: center;
+  min-height: 28px;
+}
+
+.sum-op {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.sum-row code {
+  white-space: pre;
+}
+
+.sum-term {
+  justify-self: start;
+}
+
+.sum-rule {
+  min-width: 264px;
+  height: 1px;
+  margin: 6px 0 12px;
+  background: var(--color-ink);
+}
+
+.sum-equals {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-items: start;
+}
+
+.sum-equals .sum-op {
+  padding-top: 12px;
+}
+
+.boxed {
+  display: grid;
+  justify-self: start;
+  padding: 6px 22px 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 24px;
+  border: 1px solid var(--color-ink);
+}
+
+.notes {
+  max-width: 46ch;
+  margin-top: 40px;
+}
+
+.notes ol {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  counter-reset: note;
+}
+
+.notes li {
+  display: grid;
+  grid-template-columns: 2ch 1fr;
+  gap: 8px;
+  counter-increment: note;
+}
+
+.notes li::before {
+  content: counter(note) ".";
+}
+
+@media (min-width: 720px) {
+  .sums {
+    grid-template-columns: auto auto;
+    column-gap: 56px;
+    justify-content: start;
+  }
+}
+
+@media (min-width: 1180px) {
+  .solution .work {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 104px;
+    align-items: start;
+  }
+
+  .sums {
+    column-gap: 72px;
+  }
+
+  .notes {
+    margin-top: 0;
+  }
+}
+
+/* The terminal is a panel whose frame is pinned at its corners: a capture, not a mock. */
+.terminal {
+  max-width: 100%;
+}
+
+.terminal-frame {
+  position: relative;
+}
+
+/* Four corner pins, in two strips, so the output itself keeps a plain paper ground. */
+.terminal-frame::before,
+.terminal-frame::after {
+  --pin: 6px;
+  position: absolute;
+  inset: 6px 6px auto;
+  height: var(--pin);
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(var(--color-ink), var(--color-ink)) left / var(--pin) 100%
+    no-repeat,
+    linear-gradient(var(--color-ink), var(--color-ink)) right / var(--pin) 100%
+    no-repeat;
+}
+
+.terminal-frame::after {
+  inset: auto 6px 6px;
+}
+
+.terminal pre {
+  padding: 20px 22px;
+  overflow-x: auto;
+  line-height: 1.5;
+  scrollbar-color: var(--ink-40) transparent;
+  scrollbar-width: thin;
+}
+
+.terminal .prompt {
+  color: var(--ink-70);
+}
+
+.terminal .panel-bar {
+  padding-inline: 22px;
+}
+
+.terminal-caption {
+  padding: 7px 22px 6px;
+  border-top: 1px solid var(--color-ink);
+}
+
+.check .statement {
+  margin-top: 28px;
+}
+
+@media (max-width: 719px) {
+  /* A scroll cue only: the output is wider than the sheet and is not abridged. */
+  .terminal pre {
+    mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  }
+}
+
+@media (min-width: 1180px) {
+  .check .work {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 72px;
+    align-items: start;
+  }
+
+  .check .statement {
+    margin-top: 0;
+  }
+}
+
+.sheet-end {
+  margin-top: 56px;
+}
+
+.sheet-body--end {
+  padding-bottom: 0;
+}
+
+@media (min-width: 1180px) {
+  .sheet-end {
+    margin-top: 80px;
+  }
+}
+
+/* ---------- Motion: three passes of the one pencil ----------
+   Light construction first, the same lines pressed to ink second, the red end last.
+   Reduced motion shows the finished sheet. */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A block waits for its turn only when the script that will release it has run. */
+  html[data-js] [data-draw]:not([data-inview]) {
+    --play: paused;
+  }
+
+  .pass-cons {
+    --pass: 0ms;
+  }
+
+  /* The headline is the lead: it starts first and takes longest. */
+  .pass-lead {
+    --pass: 120ms;
+  }
+
+  .pass-ink {
+    --pass: 380ms;
+  }
+
+  /* The red end comes last. In the hero it waits for the cables to land. */
+  .pass-pencil {
+    --pass: var(--pencil-at, 700ms);
+  }
+
+  .hero {
+    --pencil-at: 1550ms;
+  }
+
+  .draw-x,
+  .ink-in,
+  .write,
+  .cable,
+  .hand,
+  .title::before {
+    animation-duration: 520ms;
+    animation-timing-function: var(--ease-draw);
+    animation-delay: calc(var(--pass, 0ms) + var(--i, 0) * 70ms);
+    animation-fill-mode: both;
+    animation-play-state: var(--play, running);
+  }
+
+  .draw-x {
+    transform-origin: left center;
+    animation-name: draw-x;
+  }
+
+  .title::before {
+    transform-origin: left center;
+    animation-name: draw-x;
+    animation-duration: 760ms;
+  }
+
+  /* Things placed on the sheet, rather than drawn on it, settle in. */
+  .ink-in {
+    animation-name: ink-in;
+    animation-duration: 360ms;
+    animation-timing-function: var(--ease-out);
+  }
+
+  /* Lettering and pencil strokes are written left to right. */
+  .write {
+    animation-name: write;
+    animation-duration: 700ms;
+  }
+
+  .strike.write,
+  .fig-red.write {
+    animation-duration: 300ms;
+  }
+
+  /* A cable runs from its line of config down to its jack. The dash is longer than the path
+     at any scale of the drawing, so the line is whole once the offset reaches zero. */
+  .cable {
+    stroke-dasharray: 1.6;
+    animation-name: cable;
+    animation-duration: 640ms;
+  }
+
+  .hand {
+    animation-name: hand-in;
+    animation-duration: 560ms;
+    animation-timing-function: var(--ease-out);
+  }
+}
+
+@keyframes draw-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+@keyframes write {
+  from {
+    clip-path: inset(-0.3em 100% -0.3em -0.1em);
+  }
+
+  to {
+    clip-path: inset(-0.3em -0.1em -0.3em -0.1em);
+  }
+}
+
+@keyframes cable {
+  from {
+    stroke-dashoffset: 1.6;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hand-in {
+  from {
+    opacity: 0;
+    translate: 18px -16px;
+  }
+}

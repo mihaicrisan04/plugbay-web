@@ -1,0 +1,51 @@
+---
+import logoDark from "../../assets/logo-dark.svg?url";
+import logoLight from "../../assets/logo-light.svg?url";
+import { hero, install, links } from "../../data/plugbay";
+import CopyCommand from "./CopyCommand.astro";
+import Elevation from "./Elevation.astro";
+import { detailColumns } from "./model";
+import Pictorial from "./Pictorial.astro";
+import ZoneRef from "./ZoneRef.astro";
+
+// The statement is set on three lines. The words are the data's, unchanged.
+const WORDS_PER_LINE = [2, 2];
+const words = hero.headlines[0].split(" ");
+const [first, second] = WORDS_PER_LINE;
+const lines = [
+  words.slice(0, first),
+  words.slice(first, first + second),
+  words.slice(first + second),
+].map((line) => line.join(" "));
+---
+
+<section class="zone hero" id="a" style={`--detail-cols:${detailColumns}`}>
+  <ZoneRef letter="A" />
+
+  <header class="masthead">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset={logoDark}>
+      <img alt="plugbay" class="logo" height="88" src={logoLight} width="376">
+    </picture>
+    <p class="label tagline">{hero.eyebrow}</p>
+  </header>
+
+  <div class="statement">
+    <h1 class="headline">
+      {lines.map((line) => <span>{line} </span>)}
+    </h1>
+    <p class="subhead">{hero.subhead}</p>
+    <div class="actions">
+      <CopyCommand command={install.brew} />
+      <a class="label box-link" href={links.repo}>
+        GitHub
+        <svg aria-hidden="true" fill="none" height="10" viewBox="0 0 10 10" width="10">
+          <path d="M2.5 1.5h6v6M8.5 1.5l-7 7" stroke="currentColor" />
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <Pictorial />
+  <Elevation />
+</section>

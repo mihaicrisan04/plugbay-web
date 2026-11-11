@@ -1,0 +1,50 @@
+---
+import "@fontsource/commit-mono/latin-400.css";
+import "./styles.css";
+
+interface Props {
+  description: string;
+  title: string;
+}
+
+const { title, description } = Astro.props;
+// The paper colour in each scheme, for the browser chrome. Keep in step with --color-paper in styles.css.
+const paper = { dark: "#04101e", light: "#fcfcf9" };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
+    <meta content={description} name="description">
+    <meta content="light dark" name="color-scheme">
+    <meta content={paper.light} media="(prefers-color-scheme: light)" name="theme-color">
+    <meta content={paper.dark} media="(prefers-color-scheme: dark)" name="theme-color">
+    <link as="font" crossorigin href="/fonts/pad/routed-gothic.woff2" rel="preload" type="font/woff2">
+    <title>{title}</title>
+    <script is:inline>
+      document.documentElement.dataset.js = "";
+    </script>
+  </head>
+  <body>
+    <slot />
+    <script>
+      // Each block draws itself the first time it scrolls into view.
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              (entry.target as HTMLElement).dataset.inview = "";
+              observer.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.2 }
+      );
+      for (const block of document.querySelectorAll("[data-draw]")) {
+        observer.observe(block);
+      }
+    </script>
+  </body>
+</html>

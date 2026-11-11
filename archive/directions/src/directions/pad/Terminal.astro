@@ -1,0 +1,23 @@
+---
+// Real plugbay output, one colour, as the tool prints it. Only the prompt is styled.
+interface Session {
+  command: string;
+  cwd: string;
+  output: string;
+}
+
+interface Props {
+  caption: string;
+  sessions: readonly Session[];
+}
+
+const { caption, sessions } = Astro.props;
+---
+
+<figure class="terminal panel ink-in pass-ink">
+  <figcaption class="panel-bar"><code>{sessions[0].cwd}</code></figcaption>
+  <div class="terminal-frame">
+    <pre>{sessions.map((session, index) => <>{index > 0 ? "\n\n" : ""}<span class="prompt">{`${session.cwd} $ `}</span>{`${session.command}\n${session.output}`}</>)}</pre>
+  </div>
+  <p class="caption terminal-caption">{caption}</p>
+</figure>

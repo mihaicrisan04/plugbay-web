@@ -1,0 +1,230 @@
+---
+// The model-space drawing. Walls are directories, the text inside a wall is
+// that directory's plugbay.toml, the stippled patch bay in the middle holds one
+// socket per server (rows) and tree (columns). A cable runs from the config
+// line that pins a server to its socket. Drawing units are px: 960 x 460.
+import patchbay from "../../assets/directions/model-space/patchbay.webp";
+import { fileFor, type Linetype, type StopId, stops } from "./world";
+
+const W = 960;
+const H = 460;
+const at = (x: number, y: number, w?: number, h?: number) =>
+  [
+    `--x:${x}px`,
+    `--y:${y}px`,
+    w === undefined ? "" : `--w:${w}px`,
+    h === undefined ? "" : `--h:${h}px`,
+  ]
+    .filter(Boolean)
+    .join(";");
+
+// Directory levels, labelled along the left edge of the grid.
+const levels = [
+  { label: "~/work", y: 20 },
+  { label: "~/work/*", y: 120 },
+  { label: "~/work/*/*", y: 260 },
+];
+
+const work = { h: 420, w: 859, x: 100, y: 20 };
+const bayBox = { h: 240, w: 280, y: 120 };
+const roomBox = { h: 80, w: 230, y: 260 };
+const art = { h: 331, w: 179, x: 440, y: 100 };
+
+// Socket centres measured on the generated plate, as fractions of the art box.
+const socketX = { acme: 0.273, globex: 0.729 };
+const socketY = [0.2407, 0.495, 0.7487];
+const servers = ["linear", "sentry", "posthog"] as const;
+
+interface Cable {
+  balloon: number;
+  /** Rendering when this tree is not the working directory. */
+  ghost: Linetype;
+  path: string;
+  server: (typeof servers)[number];
+  tree: StopId;
+}
+
+// One cable per pinned server: config line, one 45 degree kink, socket.
+const cables: Cable[] = [
+  {
+    balloon: 1,
+    ghost: "hidden",
+    path: "M296,84 H393 L477.7,168.7",
+    server: "linear",
+    tree: "acme",
+  },
+  {
+    balloon: 2,
+    ghost: "phantom",
+    path: "M283,190 H415 L477.7,252.7",
+    server: "sentry",
+    tree: "acme",
+  },
+  {
+    balloon: 3,
+    ghost: "hidden",
+    path: "M291,210 H351 L477.7,336.7",
+    server: "posthog",
+    tree: "acme",
+  },
+  {
+    balloon: 4,
+    ghost: "phantom",
+    path: "M667,190 H645 L582.3,252.7",
+    server: "sentry",
+    tree: "globex",
+  },
+];
+
+// linear reaches the Globex column too, and ~/work/globex/plugbay.toml cuts it.
+const cutPath = "M393,84 H667 L603,148";
+const nodes = [
+  [292, 84],
+  [279, 190],
+  [287, 210],
+  [671, 190],
+];
+
+const bays = [
+  { directory: "~/work/acme", roomX: 140, stop: stops[0], x: 120 },
+  { directory: "~/work/globex", roomX: 690, stop: stops[1], x: 660 },
+];
+
+const balloonFor = (directory: string, line: string) => {
+  if (line.endsWith("false")) {
+    return 5;
+  }
+  return cables.find(
+    (cable) =>
+      line.startsWith(cable.server) &&
+      (directory === "~/work" || directory.endsWith(cable.tree))
+  )?.balloon;
+};
+
+// Stagger steps for the three cables of a tree: the gaps shrink, so the group
+// lands as one gesture instead of ticking like a metronome.
+const stagger = [0, 1, 1.7];
+
+const lines = (directory: string) =>
+  (fileFor(directory)?.source ?? "").split("\n");
+---
+
+<figure class="plan" style={`--plan-w:${W}px;--plan-h:${H}px`}>
+  <figcaption class="sr-only">
+    Plan of ~/work. ~/work/plugbay.toml pins linear to the agency account.
+    ~/work/acme/plugbay.toml pins sentry and posthog to acme.
+    ~/work/globex/plugbay.toml pins sentry to globex and switches linear off.
+    An agent started in ~/work/acme/api gets linear:agency, posthog:acme and
+    sentry:acme. An agent started in ~/work/globex/web gets sentry:globex.
+  </figcaption>
+
+  <svg aria-hidden="true" class="plan-lines" focusable="false" height={H} viewBox={`0 0 ${W} ${H}`} width={W}>
+    <rect class="ln" height={work.h} width={work.w} x={work.x + 0.5} y={work.y + 0.5} />
+    {
+      bays.map((bay) => (
+        <>
+          <rect class="ln" height={bayBox.h} width={bayBox.w} x={bay.x + 0.5} y={bayBox.y + 0.5} />
+          <rect class="ln" height={roomBox.h} width={roomBox.w} x={bay.roomX + 0.5} y={roomBox.y + 0.5} />
+        </>
+      ))
+    }
+    {levels.map((level) => <path class="ln" d={`M90,${level.y + 0.5} H100`} />)}
+
+    <path class="ln cable-ghost lt-hidden" d={cutPath} />
+    {
+      cables.map((cable, index) => (
+        <>
+          <path class:list={["ln cable-ghost", `lt-${cable.ghost}`, `off-${cable.tree}`, "beat-ls"]} d={cable.path} />
+          <path
+            class:list={["ln cable-live", `live-${cable.tree}`]}
+            d={cable.path}
+            pathLength="1"
+            style={`--i:${stagger[index % 3]}`}
+          />
+        </>
+      ))
+    }
+    {nodes.map(([x, y]) => <rect class="node" height="7" width="7" x={x - 3.5} y={y - 3.5} />)}
+  </svg>
+
+  <ol aria-hidden="true" class="levels">
+    {levels.map((level) => <li style={at(0, level.y)}>{level.label}</li>)}
+  </ol>
+
+  <div class="dir dir-work">
+    <p class="tag" style={at(120, work.y)}>~/work</p>
+    <div class="file" style={at(140, 34)}>
+      <span class="file-name">plugbay.toml</span>
+      {
+        lines("~/work").map((line) => (
+          <code class="fl">
+            <span>{line}</span>
+            {balloonFor("~/work", line) ? <span class="balloon">{balloonFor("~/work", line)}</span> : null}
+          </code>
+        ))
+      }
+    </div>
+
+    {
+      bays.map((bay, index) => (
+        <>
+          <div class="dir dir-bay">
+            <p class="tag" style={at(bay.x + 20, bayBox.y)}>
+              {bay.directory}
+            </p>
+            <div class="file" style={at(bay.x + 20, 140)}>
+              <span class="file-name">plugbay.toml</span>
+              {lines(bay.directory).map((line) => (
+                <code class="fl">
+                  <span>{line}</span>
+                  {line.endsWith("false") ? <span class="hatch hatch-key" /> : null}
+                  {balloonFor(bay.directory, line) ? (
+                    <span class="balloon">{balloonFor(bay.directory, line)}</span>
+                  ) : null}
+                </code>
+              ))}
+            </div>
+
+            <label
+              class:list={["room", `room-${bay.stop.id}`]}
+              for={`cwd-${bay.stop.id}`}
+              style={at(bay.roomX, roomBox.y, roomBox.w, roomBox.h)}
+            >
+              <span class="tag room-tag">
+                <span>{bay.stop.directory}</span>
+                <span class="cursor" />
+              </span>
+              <span class="hint">
+                <span class:list={["hint-here", `on-${bay.stop.id}`, "beat-cd"]}>agent starts here</span>
+                <span class:list={["hint-cd", `off-${bay.stop.id}`, "beat-cd"]}>cd here</span>
+              </span>
+            </label>
+          </div>
+
+          {index === 0 ? (
+            <div class="bay-art" style={at(art.x, art.y, art.w, art.h)}>
+              <span
+                aria-label="Patch bay: three rows of sockets, linear, sentry and posthog, one column per client"
+                class="bay-ink"
+                role="img"
+                style={`--art:url(${patchbay.src})`}
+              />
+              {cables.map((cable, cableIndex) => (
+                <span
+                  class:list={["plug", `plug-${cable.tree}`]}
+                  style={`--sx:${socketX[cable.tree]};--sy:${socketY[servers.indexOf(cable.server)]};--i:${stagger[cableIndex % 3]}`}
+                >
+                  <span class="balloon">{cable.balloon}</span>
+                </span>
+              ))}
+              <span class="plug plug-cut" style={`--sx:${socketX.globex};--sy:${socketY[0]}`}>
+                <span class="hatch" />
+                <span class="balloon">5</span>
+              </span>
+            </div>
+          ) : null}
+        </>
+      ))
+    }
+  </div>
+</figure>

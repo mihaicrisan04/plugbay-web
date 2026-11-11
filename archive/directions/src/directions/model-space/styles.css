@@ -1,0 +1,1484 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* One ink on one ground. The ink is plugbay's violet taken down to a drawing
+   ink. Hierarchy is size, solid fill and these steps, never a second hue.
+   Contrast on the ground, light / dark: ink 9.5 / 10.8, quiet 5.4 / 6.0,
+   ghost 3.4 / 3.5 (lines only), grid 1.2 (grid only). */
+:root {
+  --bg: #ffffff;
+  --ink: #432bb0;
+  --ink-quiet: color-mix(in srgb, var(--ink) 78%, var(--bg));
+  --ink-ghost: color-mix(in srgb, var(--ink) 60%, var(--bg));
+  --ink-rule: color-mix(in srgb, var(--ink) 24%, var(--bg));
+  --ink-grid: color-mix(in srgb, var(--ink) 10%, var(--bg));
+
+  --gutter: 16px;
+  --col: 1344px;
+  --module: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #100e1d;
+    --ink: #c3bbff;
+    --ink-quiet: color-mix(in srgb, var(--ink) 72%, var(--bg));
+    --ink-ghost: color-mix(in srgb, var(--ink) 50%, var(--bg));
+    --ink-grid: color-mix(in srgb, var(--ink) 11%, var(--bg));
+  }
+}
+
+@media (min-width: 1100px) {
+  :root {
+    --gutter: 48px;
+  }
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  scrollbar-color: var(--ink-ghost) transparent;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+::selection {
+  color: var(--bg);
+  background: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  touch-action: manipulation;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+/* ---- Drawing primitives ---- */
+
+/* Structure is 1px at full ink. */
+.ln {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+
+/* A square node anchors a leader on the thing it points at. */
+.node {
+  fill: var(--ink);
+}
+
+/* Ghost lines: not live for the agent here. Dash pattern says why
+   (ISO 128-20 at d = 1px). */
+.cable-ghost {
+  stroke: var(--ink-ghost);
+}
+
+.lt-hidden {
+  stroke-dasharray: 12 3;
+}
+
+.lt-phantom {
+  stroke-dasharray: 24 3 1 3 1 3;
+}
+
+/* Hatch: removed by this file. */
+.hatch {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--ink) 0 1px,
+    transparent 1px 4px
+  );
+  border: 1px solid var(--ink);
+}
+
+.hatch-key {
+  display: inline-block;
+  width: 20px;
+  height: 12px;
+  margin-left: 8px;
+  vertical-align: -1px;
+}
+
+/* Socket, in the logo's language: solid is plugged in, outline is free. */
+.socket {
+  display: inline-block;
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+}
+
+.socket.is-plugged {
+  background: var(--ink);
+}
+
+.balloon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+}
+
+/* Instrument window: 1px box, solid title bar, reversed mono caps. */
+.win {
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--ink);
+}
+
+.win-bar {
+  display: flex;
+  gap: 8px 16px;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--bg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  background: var(--ink);
+}
+
+/* Paths are values, they keep their case. */
+p.win-bar,
+figcaption.win-bar {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Callout card: one corner cut at 45 degrees. */
+.cut {
+  position: relative;
+  padding: 9px 12px 10px;
+  isolation: isolate;
+}
+
+.cut::before,
+.cut::after {
+  --c: 12px;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background: var(--ink);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--c)),
+    calc(100% - var(--c)) 100%,
+    0 100%
+  );
+}
+
+.cut::after {
+  --c: 11.6px;
+  inset: 1px;
+  background: var(--bg);
+}
+
+/* ---- Top bar and offer ---- */
+
+.top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  height: 56px;
+  padding-inline: max(var(--gutter), (100% - var(--col)) / 2);
+  border-bottom: 1px solid var(--ink-grid);
+}
+
+.logo {
+  flex: none;
+}
+
+.logo img {
+  width: auto;
+  height: 24px;
+}
+
+.logo-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo-light {
+    display: none;
+  }
+
+  .logo-dark {
+    display: block;
+  }
+}
+
+.top-line,
+.top-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.top-line {
+  color: var(--ink-quiet);
+}
+
+.top-link {
+  display: none;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+  margin-left: auto;
+}
+
+.offer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px 48px;
+  max-width: calc(var(--col) + 2 * var(--gutter));
+  padding: 28px var(--gutter) 36px;
+  margin-inline: auto;
+}
+
+.offer h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 1.4rem + 6.4vw, 6.25rem);
+  font-weight: 300;
+  line-height: 0.86;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.offer-side {
+  display: grid;
+  gap: 16px;
+}
+
+.offer-sub {
+  max-width: 44ch;
+}
+
+.install {
+  display: grid;
+  grid-template-rows: 46px 44px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  border: 1px solid var(--ink);
+}
+
+.install-ps {
+  align-self: center;
+  padding-left: 12px;
+  color: var(--ink-quiet);
+  user-select: none;
+}
+
+.install-cmd {
+  align-self: center;
+  min-width: 0;
+  padding-inline: 1ch 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.copy {
+  display: inline-flex;
+  grid-column: 1 / -1;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  padding-inline: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--bg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+  background: var(--ink);
+  transition: transform 140ms var(--ease-out);
+}
+
+.copy:active {
+  transform: scale(0.97);
+}
+
+.copy:focus-visible {
+  outline-offset: 3px;
+}
+
+.copy-done,
+.copy[data-state="copied"] .copy-idle {
+  opacity: 0;
+}
+
+.copy[data-state="copied"] .copy-done {
+  opacity: 1;
+}
+
+.copy svg path {
+  transition: opacity 140ms var(--ease-out);
+}
+
+.offer-meta,
+.offer-works {
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink-quiet);
+}
+
+.offer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 20px;
+}
+
+.offer-meta a {
+  flex-basis: 100%;
+  color: var(--ink);
+}
+
+.offer-works {
+  margin-top: -8px;
+}
+
+@media (min-width: 1100px) {
+  .logo img {
+    height: 28px;
+  }
+
+  .offer {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+    align-items: start;
+    padding: 32px var(--gutter) 36px;
+  }
+
+  .offer-side {
+    padding-top: 6px;
+  }
+
+  .top-link {
+    display: inline-flex;
+  }
+
+  .install {
+    grid-template-rows: 46px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .copy {
+    grid-column: auto;
+  }
+}
+
+/* ---- The session: two radio inputs drive everything below ---- */
+
+.ms {
+  --acme: 1;
+  --globex: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  max-width: calc(var(--col) + 2 * var(--gutter));
+  padding-inline: var(--gutter);
+  margin-inline: auto;
+}
+
+.ms:has(#cwd-globex:checked) {
+  --acme: 0;
+  --globex: 1;
+}
+
+.ms > * {
+  min-width: 0;
+}
+
+.on-acme,
+.off-globex {
+  opacity: var(--acme);
+}
+
+.on-globex,
+.off-acme {
+  opacity: var(--globex);
+}
+
+.ms:has(#cwd-globex:checked) .only-acme,
+.ms:not(:has(#cwd-globex:checked)) .only-globex {
+  display: none;
+}
+
+/* cd moves the prompt at once. The cables re-patch when cd has been typed. */
+.beat-cd,
+.beat-ls {
+  transition: opacity 120ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .beat-cd {
+    transition: opacity 160ms var(--ease-out);
+  }
+
+  .beat-ls {
+    transition: opacity 200ms var(--ease-out) 200ms;
+  }
+}
+
+/* The grid belongs to the drawing and ends where the drawing ends. */
+.field {
+  background-image:
+    linear-gradient(var(--ink-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink-grid) 1px, transparent 1px);
+  background-size: var(--module) var(--module);
+  border-right: 1px solid var(--ink-grid);
+  border-bottom: 1px solid var(--ink-grid);
+}
+
+/* ---- Plan: narrow layout first (nested boxes, balloons instead of cables) ---- */
+
+.plan {
+  position: relative;
+  padding: 20px 10px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.plan-lines,
+.levels {
+  display: none;
+}
+
+.dir {
+  position: relative;
+  padding: 20px 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--ink);
+}
+
+.dir-bay {
+  margin-top: 20px;
+}
+
+.tag {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  padding-inline: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+  background: var(--bg);
+  transform: translateY(-50%);
+}
+
+.file {
+  display: grid;
+  justify-items: start;
+}
+
+.file-name {
+  font-size: 13px;
+  color: var(--ink-quiet);
+}
+
+.fl {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.fl .balloon {
+  margin-left: 10px;
+}
+
+.room {
+  position: relative;
+  display: block;
+  min-height: 64px;
+  padding: 20px 10px 8px;
+  margin-top: 20px;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid var(--ink);
+}
+
+/* Grips: the corner squares CAD puts on the selected object. Here, the
+   directory the agent starts in. */
+.room::after {
+  --g: 7px;
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(var(--ink), var(--ink)) top left,
+    linear-gradient(var(--ink), var(--ink)) top right,
+    linear-gradient(var(--ink), var(--ink)) bottom left,
+    linear-gradient(var(--ink), var(--ink)) bottom right;
+  background-repeat: no-repeat;
+  background-size: var(--g) var(--g);
+  opacity: 0;
+  transition: opacity 160ms var(--ease-out);
+}
+
+.room-tag {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  transition:
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out);
+}
+
+.cursor {
+  display: none;
+  width: 7px;
+  height: 12px;
+  background: currentColor;
+}
+
+.ms:not(:has(#cwd-globex:checked)) .room-acme::after,
+.ms:has(#cwd-globex:checked) .room-globex::after {
+  opacity: 1;
+}
+
+.ms:not(:has(#cwd-globex:checked)) .room-acme .room-tag,
+.ms:has(#cwd-globex:checked) .room-globex .room-tag {
+  color: var(--bg);
+  background: var(--ink);
+}
+
+.ms:not(:has(#cwd-globex:checked)) .room-acme .cursor,
+.ms:has(#cwd-globex:checked) .room-globex .cursor {
+  display: block;
+}
+
+.room:active {
+  background: var(--ink-grid);
+}
+
+.hint {
+  display: grid;
+  justify-items: end;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.hint > * {
+  grid-area: 1 / 1;
+}
+
+.hint-cd {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+/* The patch bay: generated stipple, used as a mask so it prints in the ink. */
+.bay-art {
+  position: relative;
+  width: 179px;
+  aspect-ratio: 179 / 331;
+  margin: 24px auto 4px;
+}
+
+.bay-ink {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  mask: var(--art) center / 100% 100% no-repeat;
+}
+
+.plug {
+  position: absolute;
+  top: calc(var(--sy) * 100%);
+  left: calc(var(--sx) * 100%);
+  width: 0;
+  height: 0;
+}
+
+/* The plug: a solid disc in the socket. */
+.plug::before {
+  position: absolute;
+  top: -11px;
+  left: -11px;
+  width: 22px;
+  height: 22px;
+  content: "";
+  background: var(--ink);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.92);
+  transition:
+    opacity 120ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.plug-cut::before {
+  content: none;
+}
+
+.plug .hatch {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+}
+
+.plug .balloon {
+  position: absolute;
+  top: -9px;
+  left: -52px;
+}
+
+.plug-globex .balloon,
+.plug-cut .balloon {
+  left: 34px;
+}
+
+.ms:not(:has(#cwd-globex:checked)) .plug-acme::before,
+.ms:has(#cwd-globex:checked) .plug-globex::before {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ms:not(:has(#cwd-globex:checked)) .plug-acme::before,
+  .ms:has(#cwd-globex:checked) .plug-globex::before {
+    transition:
+      opacity 160ms var(--ease-out) calc(620ms + var(--i, 0) * 60ms),
+      transform 160ms var(--ease-out) calc(620ms + var(--i, 0) * 60ms);
+  }
+}
+
+@media (max-width: 1099.98px) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ms:not(:has(#cwd-globex:checked)) .plug-acme::before,
+    .ms:has(#cwd-globex:checked) .plug-globex::before {
+      transition-delay: calc(260ms + var(--i, 0) * 60ms);
+    }
+  }
+}
+
+/* ---- Plan: drawing layout ---- */
+
+@media (min-width: 1100px) {
+  .plan {
+    width: var(--plan-w);
+    height: var(--plan-h);
+    padding: 0;
+    margin-inline: auto;
+    cursor: crosshair;
+  }
+
+  .plan-lines {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .cable-live {
+    opacity: 0;
+    stroke-width: 2;
+    transition: opacity 120ms var(--ease-out);
+  }
+
+  .ms:not(:has(#cwd-globex:checked)) .live-acme,
+  .ms:has(#cwd-globex:checked) .live-globex {
+    opacity: 1;
+  }
+
+  .levels {
+    display: block;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--ink-quiet);
+  }
+
+  .levels li {
+    position: absolute;
+    top: var(--y);
+    left: 0;
+    width: 84px;
+    text-align: right;
+    transform: translateY(-50%);
+  }
+
+  .plan .dir {
+    display: contents;
+  }
+
+  .plan .tag,
+  .plan .file,
+  .plan .room,
+  .plan .bay-art {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    margin: 0;
+  }
+
+  .plan .tag {
+    margin-left: -6px;
+  }
+
+  /* The level label on the grid edge already names this wall. */
+  .plan .dir-work > .tag {
+    display: none;
+  }
+
+  .plan .file {
+    padding-right: 4px;
+    background: var(--bg);
+  }
+
+  .plan .room {
+    width: var(--w);
+    height: var(--h);
+    min-height: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .plan .room .room-tag {
+    top: 0;
+    left: 14px;
+  }
+
+  .hint {
+    position: absolute;
+    right: 10px;
+    bottom: 12px;
+    padding-inline: 4px;
+    background: var(--bg);
+  }
+
+  .plan .bay-art {
+    width: var(--w);
+    height: var(--h);
+  }
+
+  .plan .balloon {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Unplug: gone at once. Plug in: the cable draws from the config line. */
+    .cable-live {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      transition:
+        opacity 120ms var(--ease-out),
+        stroke-dashoffset 0s linear 120ms;
+    }
+
+    .ms:not(:has(#cwd-globex:checked)) .live-acme,
+    .ms:has(#cwd-globex:checked) .live-globex {
+      stroke-dashoffset: 0;
+      transition:
+        opacity 0s linear 260ms,
+        stroke-dashoffset 420ms var(--ease-draw)
+        calc(260ms + var(--i, 0) * 60ms);
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 1100px) {
+  .room:hover {
+    background: var(--ink-grid);
+  }
+}
+
+/* ---- Windows: layers and command line ---- */
+
+.win-bar h2 {
+  font: inherit;
+}
+
+.layer-stack {
+  display: grid;
+  padding: 10px 12px 12px;
+}
+
+.layer-table {
+  visibility: hidden;
+  grid-area: 1 / 1;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  border-collapse: collapse;
+  opacity: 0;
+}
+
+.ms:not(:has(#cwd-globex:checked)) .layers-acme,
+.ms:has(#cwd-globex:checked) .layers-globex {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .layer-table {
+    transition:
+      opacity 100ms linear 260ms,
+      visibility 0s linear 360ms;
+  }
+
+  .ms:not(:has(#cwd-globex:checked)) .layers-acme,
+  .ms:has(#cwd-globex:checked) .layers-globex {
+    transition:
+      opacity 200ms var(--ease-out) 360ms,
+      visibility 0s linear 360ms;
+  }
+}
+
+.layer-table caption {
+  padding-bottom: 10px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 22px;
+  text-align: left;
+  caption-side: top;
+}
+
+.layer-table caption code {
+  font-size: 13px;
+}
+
+.layer-table th {
+  height: 26px;
+  padding: 0 10px 0 0;
+  font-weight: 400;
+  color: var(--ink-quiet);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--ink);
+}
+
+.layer-table td {
+  height: 34px;
+  padding: 0 10px 0 0;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--ink-rule);
+}
+
+.layer-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.layer-table td:first-child,
+.layer-table th:first-child {
+  width: 20px;
+}
+
+.layer-table td:last-child,
+.layer-table th:last-child {
+  padding-right: 0;
+}
+
+.layer-table .layer-note {
+  line-height: 16px;
+  white-space: normal;
+}
+
+.layer-table .socket {
+  vertical-align: -1px;
+}
+
+.layer-table .is-off {
+  color: var(--ink-quiet);
+}
+
+.swatch {
+  display: block;
+}
+
+.swatch-live {
+  stroke-width: 2;
+}
+
+/* cd options live in the command line's title bar, reversed like the bar. */
+.cmd .win-bar {
+  flex-wrap: wrap;
+  padding-block: 4px;
+  white-space: normal;
+}
+
+.cd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding-inline: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid var(--bg);
+  transition: transform 140ms var(--ease-out);
+}
+
+.chip input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  appearance: none;
+  cursor: pointer;
+}
+
+.chip input:focus-visible {
+  outline: 2px solid var(--bg);
+  outline-offset: 1px;
+}
+
+.chip:has(input:checked) {
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+.term {
+  min-height: calc(14 * 18px + 24px);
+  padding: 12px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  scrollbar-width: thin;
+}
+
+.tx {
+  width: max-content;
+}
+
+.tx-line,
+.tx-out {
+  white-space: pre;
+}
+
+.ps {
+  margin-right: 1ch;
+  color: var(--ink-quiet);
+  user-select: none;
+}
+
+.typed {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+@keyframes ms-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ms-print {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ms-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .typed {
+    animation: ms-type calc(var(--n) * 14ms) steps(var(--n), end) both;
+    animation-delay: var(--at);
+  }
+
+  .printed {
+    animation: ms-print 1ms steps(1, end) both;
+    animation-delay: var(--at);
+  }
+}
+
+@media (max-width: 1099.98px) {
+  .term {
+    mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  }
+
+  .tx {
+    padding-right: 24px;
+  }
+
+  .chip {
+    min-height: 44px;
+  }
+
+  .cd {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .chip {
+    flex: 1 1 auto;
+  }
+}
+
+@media (min-width: 1100px) {
+  .ms {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+  }
+
+  .field {
+    grid-column: 1 / -1;
+  }
+
+  .cmd {
+    grid-row: 2;
+    grid-column: 1;
+  }
+}
+
+/* Wide: the layer window floats beside the drawing, as its legend. */
+@media (min-width: 1440px) {
+  .ms {
+    grid-template-columns: 960px minmax(0, 1fr);
+  }
+
+  .field {
+    grid-column: 1;
+  }
+
+  .layers {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: end;
+    width: 360px;
+  }
+}
+
+/* ---- One file per tree ---- */
+
+.files {
+  padding-top: 120px;
+}
+
+.files-head {
+  display: grid;
+  gap: 16px 48px;
+  max-width: calc(var(--col) + 2 * var(--gutter));
+  padding: 0 var(--gutter) 32px;
+  margin-inline: auto;
+}
+
+.files-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 1.9rem + 3.6vw, 5rem);
+  font-weight: 300;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.files-head p {
+  max-width: 44ch;
+}
+
+@media (min-width: 1100px) {
+  .files-head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    align-items: end;
+  }
+}
+
+.elev-wrap {
+  display: grid;
+  gap: 32px;
+  max-width: calc(var(--col) + 2 * var(--gutter));
+  padding-inline: var(--gutter);
+  margin-inline: auto;
+}
+
+.elev {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.elev-lines {
+  display: none;
+}
+
+.tree ul:not(.gets) {
+  padding-left: 22px;
+}
+
+.node-item {
+  position: relative;
+}
+
+.node-label {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  height: 36px;
+}
+
+.node-label::before {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  content: "";
+  background: var(--ink);
+}
+
+/* Narrow: the scope dimension is a bracket down the left of what it covers. */
+.node-scope::before {
+  position: absolute;
+  top: 18px;
+  bottom: 12px;
+  left: -14px;
+  width: 8px;
+  content: "";
+  border: 1px solid var(--ink);
+  border-right: 0;
+}
+
+.scope {
+  margin-left: 10px;
+  font-size: 13px;
+  color: var(--ink-quiet);
+}
+
+.fpanel {
+  max-width: 280px;
+  margin: 2px 0 10px;
+}
+
+.fpanel-code {
+  padding: 9px 11px 8px;
+}
+
+.fpanel .fl .balloon {
+  margin-left: auto;
+}
+
+.gets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 0 0 12px;
+}
+
+.gets li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gets .is-off {
+  color: var(--ink-quiet);
+}
+
+.gets .hatch-key {
+  margin-left: 0;
+}
+
+.notes {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.notes li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+}
+
+.caps {
+  display: grid;
+  gap: 24px;
+}
+
+.cap-scroll {
+  padding: 12px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 899.98px) {
+  .cap-scroll {
+    mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  }
+
+  .cap-scroll > * {
+    width: max-content;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 900px) {
+  .elev {
+    width: var(--elev-w);
+    height: var(--elev-h);
+    background-image:
+      linear-gradient(var(--ink-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--ink-grid) 1px, transparent 1px);
+    background-size: var(--module) var(--module);
+    border-right: 1px solid var(--ink-grid);
+    border-bottom: 1px solid var(--ink-grid);
+  }
+
+  .elev-lines {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .tree,
+  .tree ul:not(.gets),
+  .node-item {
+    display: contents;
+  }
+
+  .elev-leaders {
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .node-scope::before {
+    content: none;
+  }
+
+  .node-label,
+  .scope,
+  .fpanel,
+  .gets,
+  .notes li {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    margin: 0;
+  }
+
+  .node-label {
+    height: 20px;
+    padding-right: 6px;
+    margin-left: -4px;
+    background: var(--bg);
+    transform: translateY(-50%);
+  }
+
+  .node-label::before {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Dimension value: reads along the dimension line, left of it. */
+  .scope {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--ink);
+    white-space: nowrap;
+    transform: translate(-50%, -50%) translateX(-12px) rotate(-90deg);
+  }
+
+  .fpanel {
+    width: 240px;
+    max-width: none;
+  }
+
+  .gets {
+    flex-wrap: nowrap;
+    padding: 0 6px 0 0;
+    white-space: nowrap;
+    background: var(--bg);
+    transform: translateY(-50%);
+  }
+
+  .notes {
+    display: contents;
+  }
+
+  .notes li {
+    display: block;
+    width: 200px;
+    transform: translateY(-20px);
+  }
+
+  .elev .balloon {
+    display: none;
+  }
+
+  .caps {
+    grid-template-columns: repeat(2, minmax(0, 536px));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .elev.is-waiting .draw {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+    }
+
+    .elev.is-waiting .tick,
+    .elev.is-waiting .scope {
+      opacity: 0;
+    }
+
+    .elev.is-drawing .draw {
+      stroke-dasharray: 1;
+      animation: ms-draw 420ms var(--ease-draw) both;
+      animation-delay: calc(var(--i) * 160ms + var(--step, 0) * 110ms);
+    }
+
+    .elev.is-drawing .tick,
+    .elev.is-drawing .scope {
+      animation: ms-print 180ms linear both;
+      animation-delay: calc(var(--i) * 160ms + 520ms);
+    }
+  }
+}
+
+@media (min-width: 1440px) {
+  .elev-wrap {
+    grid-template-columns: 800px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+  }
+
+  .caps {
+    grid-template-columns: minmax(0, 536px);
+    justify-content: end;
+  }
+}
+
+/* ---- Title block: real fields only ---- */
+
+.titleblock {
+  max-width: calc(var(--col) + 2 * var(--gutter));
+  padding: 96px var(--gutter) 48px;
+  margin-inline: auto;
+}
+
+.titleblock dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--ink);
+}
+
+.titleblock dl > div {
+  min-width: 0;
+  padding: 8px 12px 10px;
+  margin: 0 -1px -1px 0;
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.titleblock .tb-wide,
+.titleblock .tb-title {
+  grid-column: 1 / -1;
+}
+
+.titleblock dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.titleblock dd {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 900px) {
+  .titleblock dl {
+    grid-template-columns: 1fr 1.6fr 1fr 1fr 2.2fr 0.6fr;
+  }
+
+  .titleblock .tb-wide,
+  .titleblock .tb-title {
+    grid-column: auto;
+  }
+}

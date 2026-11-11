@@ -1,0 +1,95 @@
+---
+// One directory, drawn as a patch-bay faceplate standing on the axis. Its three
+// sockets are the three servers. Plugged = this file pins it, capped with a
+// hatch = this file switches it off, empty = this file says nothing.
+// The stipple is a Paper-generated illustration used as a mask, so it takes the
+// page's one ink in both themes.
+import plateMask from "../../assets/directions/assembly/plate.webp";
+import type { AssemblyLayout } from "./geometry";
+import type { BranchId, Port } from "./world";
+
+interface Props {
+  branch?: BranchId;
+  id: string;
+  layout: AssemblyLayout;
+  /** Per socket: a pinned server's cable leaves this plate, or only its guide does. */
+  leaving: ("live" | "guide" | "none")[];
+  ports: Port[];
+  station: number;
+}
+
+const { branch, id, leaving, layout, ports, station } = Astro.props;
+const { plate } = layout;
+
+const outline = `M${plate.outline.map(([x, y]) => `${x} ${y}`).join("L")}Z`;
+const clip = `polygon(${plate.outline.map(([x, y]) => `${x}px ${y}px`).join(",")})`;
+const hole = { rx: plate.width * 0.1, ry: plate.width * 0.12 };
+const plug = { height: Math.round(plate.width * 0.11), length: Math.round(plate.width * 0.26) };
+
+const style = [
+  `left:${layout.stations[station]}px`,
+  `top:${layout.plateTop}px`,
+  `width:${plate.width}px`,
+  `height:${plate.height}px`,
+  `--press-x:${layout.press[station]}px`,
+  `--alt-x:${layout.ghost.x}px`,
+  `--alt-y:${layout.ghost.y}px`,
+  `--plate-mask:url(${plateMask.src})`,
+  `--plate-clip:${clip}`,
+].join(";");
+---
+
+<div class="asm-plate" data-branch={branch} data-press={branch ? undefined : ""} style={style}>
+  <div class="asm-plate__body"></div>
+  <div class="asm-plate__stipple"></div>
+  <svg aria-hidden="true" height={plate.height} width={plate.width}>
+    <path class="asm-plate__ghost-line ln-phantom" d={outline} />
+    <g class="asm-plate__fittings">
+      <path class="ln-centre" d={`M${plate.bore.x} ${plate.bore.y}H${plate.width}`} />
+      {
+        ports.map((port, column) => {
+          const y = plate.socketYs[column];
+          return (
+            <>
+              {leaving[column] !== "none" && (
+                <path
+                  class={leaving[column] === "live" ? "ln-live" : "ln-guide"}
+                  d={`M${plate.socketX} ${y}H${plate.width}`}
+                />
+              )}
+              {port.state === "set" && (
+                <>
+                  <ellipse class="fill-ink" cx={plate.socketX} cy={y} rx={hole.rx + 1} ry={hole.ry + 1} />
+                  <rect
+                    class="fill-ink"
+                    height={plug.height}
+                    width={plug.length}
+                    x={plate.socketX}
+                    y={y - plug.height / 2}
+                  />
+                </>
+              )}
+              {port.state === "blank" && (
+                <>
+                  <clipPath id={`${id}-cap-${column}`}>
+                    <ellipse cx={plate.socketX} cy={y} rx={hole.rx + 4} ry={hole.ry + 4} />
+                  </clipPath>
+                  <ellipse class="fill-paper" cx={plate.socketX} cy={y} rx={hole.rx + 4} ry={hole.ry + 4} />
+                  <rect
+                    clip-path={`url(#${id}-cap-${column})`}
+                    fill="url(#asm-hatch)"
+                    height={hole.ry * 2 + 10}
+                    width={hole.rx * 2 + 10}
+                    x={plate.socketX - hole.rx - 5}
+                    y={y - hole.ry - 5}
+                  />
+                  <ellipse class="ln-ink" cx={plate.socketX} cy={y} rx={hole.rx + 4} ry={hole.ry + 4} />
+                </>
+              )}
+            </>
+          );
+        })
+      }
+    </g>
+  </svg>
+</div>

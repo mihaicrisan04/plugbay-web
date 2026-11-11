@@ -1,0 +1,27 @@
+---
+// The primary action: the install command as selectable text, with a copy button.
+import { install, links } from "../../data/plugbay";
+---
+
+<div class="asm-win asm-install">
+  <div class="asm-win__bar">
+    <span class="asm-win__title">Install</span>
+    <a class="asm-win__meta asm-win__link" href={links.repo}>
+      GitHub
+      <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 12 12">
+        <path d="M3 9 9.5 2.5M4 2.5h5.5V8"></path>
+      </svg>
+    </a>
+  </div>
+  <div class="asm-install__row">
+    <div class="asm-install__cmd">
+      <span aria-hidden="true" class="asm-term__prompt">$</span>
+      <code>{install.brew}</code>
+    </div>
+    <button class="asm-copy" data-copy={install.brew} type="button">
+      <span data-copy-label>Copy</span>
+      <span data-copied-label>Copied</span>
+    </button>
+    <span aria-live="polite" class="asm-sr" data-copy-status></span>
+  </div>
+</div>

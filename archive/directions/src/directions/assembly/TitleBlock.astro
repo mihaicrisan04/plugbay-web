@@ -1,0 +1,39 @@
+---
+// Title block: only fields that are true today. No drawing number, date or
+// revision, because plugbay has no release yet.
+import { facts, hero, links } from "../../data/plugbay";
+
+const fields = [
+  { label: "Title", value: "plugbay" },
+  { label: "Subtitle", value: hero.eyebrow },
+  { label: "Creator", value: "mihaicrisan04" },
+  { label: "Licence", value: "Apache-2.0" },
+];
+---
+
+<footer class="asm-foot">
+  <div class="asm-notes">
+    <p class="asm-label">Notes</p>
+    <ol>
+      {facts.map((fact) => <li>{fact}</li>)}
+    </ol>
+  </div>
+  <dl class="asm-title-block">
+    {
+      fields.map((field) => (
+        <div>
+          <dt class="asm-label">{field.label}</dt>
+          <dd>{field.value}</dd>
+        </div>
+      ))
+    }
+    <div>
+      <dt class="asm-label">Repository</dt>
+      <dd><a href={links.repo}>{links.repo.replace("https://", "")}</a></dd>
+    </div>
+    <div>
+      <dt class="asm-label">Sheet</dt>
+      <dd>1 / 1</dd>
+    </div>
+  </dl>
+</footer>

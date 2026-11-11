@@ -1,0 +1,31 @@
+---
+import commitMono from "@fontsource/commit-mono/files/commit-mono-latin-400-normal.woff2?url";
+import "./styles.css";
+
+interface Props {
+  description: string;
+  title: string;
+}
+
+const { title, description } = Astro.props;
+const preloads = ["/fonts/sheet/BigShoulders.woff2", commitMono];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content={description} name="description">
+    <meta content="light dark" name="color-scheme">
+    <meta content="#ffffff" media="(prefers-color-scheme: light)" name="theme-color">
+    <meta content="#09081d" media="(prefers-color-scheme: dark)" name="theme-color">
+    {preloads.map((href) => (
+      <link as="font" crossorigin href={href} rel="preload" type="font/woff2">
+    ))}
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

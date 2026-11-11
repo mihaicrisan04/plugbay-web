@@ -1,0 +1,67 @@
+---
+// Zone B. The walk plugbay makes: from / down to where the agent started,
+// merging every plugbay.toml on the way. The dash-dot line is that walk. Each
+// branch ends in the real `plugbay why` output for its directory.
+import { callouts } from "../../data/plugbay";
+import Capture from "./Capture.astro";
+import { captureNote, oneFilePerTree } from "./content";
+import FilePanel, { type Note } from "./FilePanel.astro";
+import Keys from "./Keys.astro";
+import { branches, trunk } from "./model";
+import ZoneRef from "./ZoneRef.astro";
+
+const notes: Note[] = [
+  { line: 'sentry = "acme"', text: callouts.account },
+  { line: "linear = false", text: callouts.disable },
+].map((note, index) => ({ ...note, number: index + 1 }));
+---
+
+<section class="zone" id="b">
+  <ZoneRef letter="B" />
+
+  <div class="walk">
+    <header class="walk-intro">
+      <h2 class="section-title">{oneFilePerTree}</h2>
+      <p class="section-lead">{callouts.merge}</p>
+      <Keys />
+      <ul class="notes">
+        <li>{callouts.secrets}</li>
+        <li>{callouts.tools}</li>
+        <li>{captureNote}</li>
+      </ul>
+    </header>
+
+    <ol class="stations walk-trunk">
+      <li class="station"><span class="station-name">/</span></li>
+      {trunk.map((file) => (
+        <li class="station">
+          <span class="station-name">{file.directory}</span>
+          <FilePanel file={file} />
+        </li>
+      ))}
+    </ol>
+
+    <span aria-hidden="true" class="walk-fork"></span>
+
+    {branches.map((branch) => (
+      <ol class="stations walk-branch">
+        {branch.files.map((file) => (
+          <li class="station">
+            <span class="station-name">{file.directory}</span>
+            <FilePanel file={file} notes={notes} />
+          </li>
+        ))}
+        <li class="station station-end">
+          <span class="station-name">{branch.detail.directory}</span>
+          <Capture sessions={branch.why}>
+            <div class="contents" slot="bar">
+              <a aria-label={`Detail ${branch.detail.letter} in zone A`} class="balloon" href="#a">{branch.detail.letter}</a>
+              <span class="bar-subject">{branch.detail.directory}</span>
+              <span class="label bar-end">Scale 1:1</span>
+            </div>
+          </Capture>
+        </li>
+      </ol>
+    ))}
+  </div>
+</section>

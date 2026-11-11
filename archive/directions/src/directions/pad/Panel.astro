@@ -1,0 +1,51 @@
+---
+// A plugbay.toml drawn as an instrument panel: a hairline box under a solid title bar.
+// A line can carry a keyed note: a leader on wide sheets, a lettered balloon with a legend on narrow ones.
+import { withCode } from "./content";
+
+interface Note {
+  key: string;
+  text: string;
+}
+
+interface Props {
+  class?: string;
+  lines: readonly string[];
+  notes?: Record<string, Note>;
+  path: string;
+  style?: string;
+}
+
+const { path, lines, notes = {}, class: className, style } = Astro.props;
+---
+
+<figure style={style} class:list={["panel", className]} >
+  <figcaption class="panel-bar"><code>{path}</code></figcaption>
+  <div class="panel-body">
+    {
+      lines.map((line) => {
+        const note = notes[line];
+        return (
+          <div class:list={["line", { "line--table": line.startsWith("[") }]}>
+            <code>{line}</code>
+            {note ? (
+              <>
+                <span aria-hidden="true" class="leader draw-x pass-ink">
+                  <svg aria-hidden="true" height="17" viewBox="0 0 30 17" width="30">
+                    <path d="M0 16.5 16 0.5H30" />
+                  </svg>
+                </span>
+                <span aria-hidden="true" class="balloon">
+                  {note.key}
+                </span>
+                <span class="note caption ink-in pass-ink" style="--i: 6">
+                  {withCode(note.text).map((part) => (part.isCode ? <code>{part.text}</code> : part.text))}
+                </span>
+              </>
+            ) : null}
+          </div>
+        );
+      })
+    }
+  </div>
+</figure>

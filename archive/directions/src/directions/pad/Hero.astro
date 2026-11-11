@@ -1,0 +1,31 @@
+---
+// Sheet 1, top. Find: the headline. Given: the files and the accounts, patched together.
+// Ans.: the command, boxed and double underlined.
+import { hero, links } from "../../data/plugbay";
+import { titleBlock } from "./content";
+import InstallCommand from "./InstallCommand.astro";
+import PatchFigure from "./PatchFigure.astro";
+---
+
+<div class="hero" data-draw>
+  <p aria-hidden="true" class="step step--margin-only step--find">Find</p>
+  <h1 class="title hero-title">
+    <span class="title-ink write pass-lead"><span>The right</span>{" "}<span>MCP account</span>{" "}<span>in every repo.</span></span>
+  </h1>
+  <p class="lede">{hero.subhead}</p>
+
+  <p aria-hidden="true" class="step step--margin-only step--given">Given</p>
+  <PatchFigure />
+
+  <p aria-hidden="true" class="step step--margin-only step--ans">Ans.</p>
+  <div class="actions">
+    <InstallCommand />
+    <a class="repo-link" href={links.repo}>
+      {titleBlock.repoLabel}
+      <svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 12 12">
+        <path d="M3 9 9.5 2.5M4 2.5h5.5V8" />
+      </svg>
+    </a>
+    <p class="caption actions-note">{hero.worksWith}</p>
+  </div>
+</div>

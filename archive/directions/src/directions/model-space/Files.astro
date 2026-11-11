@@ -1,0 +1,202 @@
+---
+// Elevation of the same tree. Rows are directories, a vertical dimension is
+// the scope of one plugbay.toml, and the rows at the bottom of a scope show
+// what an agent started there gets. Geometry is in px on an 800 x 580 drawing.
+import { callouts, configFiles, resolved } from "../../data/plugbay";
+import { stops } from "./world";
+
+const W = 800;
+const H = 580;
+const at = (x: number, y: number) => `--x:${x}px;--y:${y}px`;
+
+const [workFile, acmeFile, globexFile] = configFiles;
+
+const clients = [
+  {
+    file: acmeFile,
+    lane: 220,
+    leaf: { label: "api", y: 340 },
+    name: "acme",
+    note: { text: callouts.account, y: 242 },
+    noteLine: 1,
+    result: resolved[0],
+    y: 220,
+  },
+  {
+    file: globexFile,
+    lane: 220,
+    leaf: { label: "web", y: 540 },
+    name: "globex",
+    note: { text: callouts.disable, y: 462 },
+    noteLine: 2,
+    result: resolved[1],
+    y: 420,
+  },
+];
+
+const work = { lane: 260, leafY: 540, y: 100 };
+const panelX = 300;
+const mid = (a: number, b: number) => (a + b) / 2;
+const tick = (x: number, y: number) =>
+  `M${x - 4},${y + 4} L${x + 4},${y - 4}`;
+---
+
+<section aria-labelledby="files-title" class="files" id="files">
+  <header class="files-head">
+    <h2 id="files-title">One file per tree</h2>
+    <p>{callouts.merge} {callouts.secrets}</p>
+  </header>
+
+  <div class="sheet">
+    <div class="elev-wrap">
+      <figure class="elev" style={`--elev-w:${W}px;--elev-h:${H}px`}>
+        <figcaption class="sr-only">
+          The directory tree under ~/work, the plugbay.toml in each directory, the
+          directories each file covers, and the servers an agent gets in
+          ~/work/acme/api and ~/work/globex/web.
+        </figcaption>
+
+        <svg aria-hidden="true" class="elev-lines" focusable="false" height={H} viewBox={`0 0 ${W} ${H}`} width={W}>
+          <!-- tree -->
+          <path class="ln" d="M20,48 V100 H32 M40,108 V420 H52 M40,220 H52 M60,228 V340 H72 M60,428 V540 H72" />
+
+          <!-- scope of ~/work/plugbay.toml -->
+          <g class="dim" style="--i:0">
+            <path class="ln draw" d={`M116,${work.y} H${work.lane + 8}`} pathLength="1" />
+            <path class="ln draw" d={`M${work.lane},${work.y} V${work.leafY}`} pathLength="1" style="--step:1" />
+            <path class="ln draw" d={`M132,${work.leafY} H${work.lane + 8}`} pathLength="1" style="--step:2" />
+            <path class="ln tick" d={`${tick(work.lane, work.y)} ${tick(work.lane, work.leafY)}`} />
+          </g>
+          {
+            clients.map((client, index) => (
+              <g class="dim" style={`--i:${index + 1}`}>
+                <path class="ln draw" d={`M${client.name === "acme" ? 120 : 136},${client.y} H${client.lane + 8}`} pathLength="1" />
+                <path
+                  class="ln draw"
+                  d={`M${client.lane},${client.y} V${client.leaf.y}`}
+                  pathLength="1"
+                  style="--step:1"
+                />
+                {client.name === "acme" && (
+                  <path class="ln draw" d={`M132,${client.leaf.y} H${client.lane + 8}`} pathLength="1" style="--step:2" />
+                )}
+                <path
+                  class="ln tick"
+                  d={`${tick(client.lane, client.y)} ${tick(client.lane, client.leaf.y)}`}
+                />
+              </g>
+            ))
+          }
+
+        </svg>
+
+        <ul class="tree">
+          <li class="node-item">
+            <span class="node-label" style={at(20, 40)}>/</span>
+            <ul>
+              <li class="node-item node-scope">
+                <span class="node-label" style={at(40, work.y)}>~/work</span>
+                <span class="scope" style={`${at(work.lane, mid(work.y, work.leafY))};--i:0`}>{workFile.scope}</span>
+                <div class="win fpanel" style={at(panelX, work.y - 14)}>
+                  <p class="win-bar">{workFile.path}</p>
+                  <div class="fpanel-code">
+                    {workFile.source.split("\n").map((line) => (
+                      <code class="fl">
+                        <span>{line}</span>
+                      </code>
+                    ))}
+                  </div>
+                </div>
+                <ul>
+                  {
+                    clients.map((client, index) => (
+                      <li class="node-item node-scope">
+                        <span class="node-label" style={at(60, client.y)}>
+                          {client.name}
+                        </span>
+                        <span class="scope" style={`${at(client.lane, mid(client.y, client.leaf.y))};--i:${index + 1}`}>
+                          {client.file.scope}
+                        </span>
+                        <div class="win fpanel" style={at(panelX, client.y - 14)}>
+                          <p class="win-bar">{client.file.path}</p>
+                          <div class="fpanel-code">
+                            {client.file.source.split("\n").map((line, lineIndex) => (
+                              <code class="fl">
+                                <span>{line}</span>
+                                {line.endsWith("false") ? <span class="hatch hatch-key" /> : null}
+                                {lineIndex === client.noteLine ? <span class="balloon">{index + 1}</span> : null}
+                              </code>
+                            ))}
+                          </div>
+                        </div>
+                        <ul>
+                          <li class="node-item">
+                            <span class="node-label" style={at(80, client.leaf.y)}>
+                              {client.leaf.label}
+                            </span>
+                            <ul aria-label={`${client.result.directory} gets`} class="gets" style={at(panelX, client.leaf.y)}>
+                              {client.result.servers.map((server) => (
+                                <li>
+                                  <span class="socket is-plugged" />
+                                  <code>{server}</code>
+                                </li>
+                              ))}
+                              {client.result.disabled.map((entry) => (
+                                <li class="is-off">
+                                  <span class="socket" />
+                                  <code>{entry.server}</code>
+                                  <span class="hatch hatch-key" />
+                                  <span>off</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+        <!-- Leaders: square node on the config line, one 45 degree kink, caption card. -->
+        <svg aria-hidden="true" class="elev-lines elev-leaders" focusable="false" height={H} viewBox={`0 0 ${W} ${H}`} width={W}>
+          <path class="ln" d="M448,272 L478,242 H580" />
+          <path class="ln" d="M468,492 L498,462 H580" />
+          <rect class="node" height="7" width="7" x="444.5" y="268.5" />
+          <rect class="node" height="7" width="7" x="464.5" y="488.5" />
+        </svg>
+
+        <ol class="notes">
+          {
+            clients.map((client, index) => (
+              <li class="cut" style={at(580, client.note.y)}>
+                <span class="balloon">{index + 1}</span>
+                <span>{client.note.text}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </figure>
+
+      <div class="caps">
+        {
+          stops.map((stop) => (
+            <figure class="win cap">
+              <figcaption class="win-bar">{stop.directory}</figcaption>
+              <div class="cap-scroll" tabindex="0">
+                <p class="tx-line">
+                  <span class="ps">$</span>
+                  <span>{stop.why.command}</span>
+                </p>
+                <pre class="tx-out">{stop.why.output}</pre>
+              </div>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

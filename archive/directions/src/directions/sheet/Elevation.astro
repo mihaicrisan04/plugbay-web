@@ -1,0 +1,141 @@
+---
+// The hero drawing. The ~/work tree in elevation, one lane per server, and one
+// dimension per setting: the run of directories a single line of a plugbay.toml
+// governs. Picking a directory projects it into its detail view, the real
+// `plugbay ls` there. Everything is placed by the grid, from src/data.
+import Capture from "./Capture.astro";
+import FileGlyph from "./FileGlyph.astro";
+import { details, ports, root, rows, servers, spans } from "./model";
+
+// Above the directory rows: the window's title bar, then the lane heads.
+const HEAD_ROWS = 2;
+const TREE_COLUMNS = 1;
+const gridRow = (index: number) => index + HEAD_ROWS + 1;
+const lane = (server: string) => servers.indexOf(server) + TREE_COLUMNS + 1;
+const depthOf = (index: number) => rows[index].connectors.length;
+
+const summary = details
+  .map((detail) => {
+    const off = detail.disabled.map(
+      (entry) => `${entry.server} is switched off by ${entry.by}`
+    );
+    return `${detail.directory} gets ${[...detail.servers, ...off].join(", ")}.`;
+  })
+  .join(" ");
+---
+
+<figure
+  aria-label={`Elevation of ${root}: the server and account each directory gets`}
+  class="drawing"
+  style={`--rows:${rows.length};--lanes:${servers.length}`}
+>
+  <p class="sr-only">{summary}</p>
+
+  <figcaption class="window-bar elevation-bar">
+    <span class="label">Elevation</span>
+    <span class="bar-subject">{root}</span>
+    <span class="label bar-end">Not to scale</span>
+  </figcaption>
+
+  <span aria-hidden="true" class="paper paper-tree"></span>
+  <span aria-hidden="true" class="paper paper-lanes"></span>
+  <span aria-hidden="true" class="elevation-frame"></span>
+
+  <p class="lane-key">[servers]</p>
+  {servers.map((server) => (
+    <p class="lane-head" style={`grid-column:${lane(server)}`}>{server}</p>
+  ))}
+
+  {rows.map((row, index) => {
+    const Row = row.detail ? "label" : "div";
+    return (
+      <Row
+        class:list={["row", row.detail && `row-leaf is-${row.detail.id}`]}
+        style={`grid-row:${gridRow(index)}`}
+      >
+        {row.connectors.map((kind) => <span class={`rail rail-${kind}`} />)}
+        <span class:list={["node", row.hasChildren && "node-parent"]} />
+        {row.detail ? (
+          <input
+            aria-label={`Detail ${row.detail.letter}: ${row.detail.directory}`}
+            checked={row.detail === details[0]}
+            class="sr-only"
+            id={`detail-${row.detail.id}`}
+            name="detail"
+            type="radio"
+            value={row.detail.id}
+          />
+        ) : null}
+        <span class="row-name">{row.label}</span>
+        {row.file ? (
+          <span class="file-tag">
+            <FileGlyph />
+            <span class="file-tag-name">plugbay.toml</span>
+          </span>
+        ) : null}
+        {row.detail ? <span class="balloon">{row.detail.letter}</span> : null}
+      </Row>
+    );
+  })}
+
+  {spans.map((span) => (
+    <p
+      class:list={["dim", !span.enabled && "dim-off"]}
+      style={[
+        `grid-column:${lane(span.server)}`,
+        `grid-row:${gridRow(span.start)} / ${gridRow(span.end) + 1}`,
+        ...details.map((detail) => `--on-${detail.id}:${span.covers.includes(detail.id) ? 1 : 0}`),
+        `--order:${span.start}`,
+      ].join(";")}
+    >
+      {!span.enabled && <span class="hatch" />}
+      <span class="dim-rule dim-solid" />
+      <span class="dim-rule dim-phantom" />
+      <span class="dim-end dim-end-top" />
+      <span class="dim-end dim-end-bottom" />
+      <span class="dim-value">
+        <span class="sr-only">{span.server} = </span>{span.literal}
+      </span>
+    </p>
+  ))}
+
+  {details.map((detail) => {
+    const index = rows.findIndex((row) => row.path === detail.directory);
+    return (
+      <span
+        aria-hidden="true"
+        class={`projection is-${detail.id}`}
+        style={`grid-row:${gridRow(index)};--depth:${depthOf(index)};--name:${rows[index].label.length}`}
+      />
+    );
+  })}
+
+  {ports.map((port) => (
+    <span
+      aria-hidden="true"
+      class={`port port-${port.state}`}
+      style={`grid-column:${lane(port.server)};grid-row:${gridRow(port.row)};--order:${port.row}`}
+    />
+  ))}
+
+  <p class="file-key"><FileGlyph /> plugbay.toml</p>
+
+  <div class="views">
+    {details.map((detail) => (
+      <Capture class={`view is-${detail.id}`} sessions={[detail.capture]}>
+        <div class="contents" slot="bar">
+          <span class="label">Detail</span>
+          {details.map((tab) => (
+            <label
+              aria-label={`Detail ${tab.letter}: ${tab.directory}`}
+              class:list={["balloon", tab === detail && "balloon-current"]}
+              for={`detail-${tab.id}`}
+            >{tab.letter}</label>
+          ))}
+          <span class="bar-subject">{detail.directory}</span>
+          <span class="label bar-end">Scale 1:1</span>
+        </div>
+      </Capture>
+    ))}
+  </div>
+</figure>

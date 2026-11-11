@@ -1,0 +1,65 @@
+---
+import bayMask from "../../assets/directions/assembly/patch-bay.webp";
+import { callouts } from "../../data/plugbay";
+import Terminal from "./Terminal.astro";
+import Tree from "./Tree.astro";
+import { branches, files } from "./world";
+---
+
+<section aria-labelledby="one-file-per-tree" class="asm-section">
+  <div class="asm-section__lead">
+    <h2 class="asm-h2" id="one-file-per-tree">One file per tree.</h2>
+    <p class="asm-body">{callouts.merge}</p>
+
+    <table class="asm-parts">
+      <caption class="asm-label">Parts list</caption>
+      <thead>
+        <tr>
+          <th class="asm-label" scope="col">Item</th>
+          <th class="asm-label" scope="col">File</th>
+          <th class="asm-label" scope="col">Covers</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          files.map((file) => (
+            <tr>
+              <td>
+                <span class="asm-balloon">{file.item}</span>
+              </td>
+              <td class="asm-parts__path">{file.path}</td>
+              <td class="asm-note">{file.scope}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+
+    <div class="asm-notes asm-callouts">
+      <p class="asm-label">Notes</p>
+      <ol>
+        <li>{callouts.account}</li>
+        <li>{callouts.disable}</li>
+      </ol>
+    </div>
+
+    <figure class="asm-bay">
+      <div class="asm-bay__art asm-stipple" style={`--mask:url(${bayMask.src})`}></div>
+      <figcaption class="asm-note">{callouts.tools}</figcaption>
+    </figure>
+  </div>
+
+  <Tree layout="wide" />
+  <Tree layout="narrow" />
+
+  <div class="asm-tree-terms">
+    {
+      branches.map((branch) => (
+        <Terminal
+          label="In"
+          sessions={[{ command: branch.why.command, cwd: branch.why.cwd, mark: `sentry:${branch.id}`, output: branch.why.output }]}
+        />
+      ))
+    }
+  </div>
+</section>

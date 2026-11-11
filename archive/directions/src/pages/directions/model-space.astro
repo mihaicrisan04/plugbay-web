@@ -1,0 +1,23 @@
+---
+import Files from "../../directions/model-space/Files.astro";
+import Hero from "../../directions/model-space/Hero.astro";
+import Layout from "../../directions/model-space/Layout.astro";
+import TitleBlock from "../../directions/model-space/TitleBlock.astro";
+---
+
+<Layout
+  description="The right MCP servers, logged in to the right account, in every directory and every agent."
+  title="plugbay: mise for MCP servers"
+>
+  <div class="page">
+    <Hero />
+    <main>
+      <Files />
+    </main>
+    <TitleBlock />
+  </div>
+</Layout>
+
+<script>
+  import "../../directions/model-space/session.ts";
+</script>

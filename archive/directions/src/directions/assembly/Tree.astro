@@ -1,0 +1,194 @@
+---
+// The same world in elevation: the directory tree, the file each directory
+// carries, a dimension line for what each file covers, and the result per directory.
+import { wide } from "./geometry";
+import { acme, globex, workFile } from "./world";
+
+interface Props {
+  layout: "wide" | "narrow";
+}
+
+const { layout } = Astro.props;
+const isWide = layout === "wide";
+
+// Row positions. Wide rows sit on the 40px grid; narrow rows make room for the
+// file printed under each directory name.
+const rowYs = isWide ? [40, 120, 200, 280, 360, 440] : [20, 68, 172, 296, 416, 540];
+const height = isWide ? 520 : 630;
+const axisX = isWide ? wide.dropX : 11;
+const indent = isWide ? 40 : 20;
+const [rootY, workY, acmeY, apiY, globexY, webY] = rowYs;
+const childX = axisX + indent;
+const leafX = axisX + 2 * indent;
+
+const rows = [
+  { name: "/", x: axisX, y: rootY },
+  { file: workFile, name: workFile.directory, x: axisX, y: workY },
+  { file: acme.file, name: acme.file.directory, x: childX, y: acmeY },
+  { branch: acme, name: acme.ls.cwd, x: leafX, y: apiY },
+  { file: globex.file, name: globex.file.directory, x: childX, y: globexY },
+  { branch: globex, name: globex.ls.cwd, x: leafX, y: webY },
+];
+
+// Thin tree lines: parent down, then across to the child.
+const elbow = (fromX: number, fromY: number, toX: number, toY: number) =>
+  `M${fromX} ${fromY}V${toY}H${toX}`;
+const treeLines = [
+  elbow(axisX, workY, childX, acmeY),
+  elbow(axisX, acmeY, childX, globexY),
+  elbow(childX, acmeY, leafX, apiY),
+  elbow(childX, globexY, leafX, webY),
+];
+
+// The walk from / to where the agent started, one per branch.
+const walks = [
+  { d: `M${axisX} ${rootY}V${acmeY}H${childX}V${apiY}H${leafX}`, id: acme.id },
+  { d: `M${axisX} ${rootY}V${globexY}H${childX}V${webY}H${leafX}`, id: globex.id },
+];
+
+// Scope dimensions: from the row that holds the file to the last row it covers.
+const OVERSHOOT = 8;
+const TICK = 4;
+const outerX = isWide ? axisX - 80 : -12;
+const innerX = isWide ? axisX - 40 : -38;
+const dimensions = [
+  { from: workY, item: workFile.item, to: webY, x: outerX },
+  { from: acmeY, item: acme.file.item, to: apiY, x: innerX },
+  { from: globexY, item: globex.file.item, to: webY, x: innerX },
+];
+const objectXAt = (y: number) => rows.find((row) => row.y === y)?.x ?? axisX;
+const extension = (x: number, y: number) =>
+  isWide ? `M${objectXAt(y) - 12} ${y}H${x - OVERSHOOT}` : `M${x + OVERSHOOT} ${y}H${x - OVERSHOOT}`;
+const tick = (x: number, y: number) => `M${x - TICK} ${y + TICK}L${x + TICK} ${y - TICK}`;
+
+const nameLeft = (x: number) => x + 12;
+const detailLeft = isWide ? axisX + 280 : 0;
+---
+
+<div
+  style={`height:${height}px;--tree-grid-left:${isWide ? axisX - 120 : 0}px`}
+  class:list={["asm-tree", `asm-tree--${layout}`]}
+>
+  {isWide && <div class="asm-tree__grid" />}
+
+  <svg aria-hidden="true" class="asm-svg asm-fill">
+    {treeLines.map((d) => <path class="ln-guide" d={d} />)}
+    {isWide && <path class="ln-centre" d={`M${axisX} 0V${rootY}`} />}
+    {walks.map((walk) => <path class="ln-centre" d={walk.d} data-when={walk.id} />)}
+    {
+      
+      rows.map((row) =>
+        row.file ? (
+          <rect class="fill-ink" height="9" width="9" x={row.x - 4.5} y={row.y - 4.5} />
+        ) : (
+          <rect class="ln-ink fill-paper" height="8" width="8" x={row.x - 4} y={row.y - 4} />
+        )
+      )
+    }
+  </svg>
+
+  <svg
+    aria-hidden="true"
+    class="asm-svg"
+    style={isWide ? "inset:0;width:100%;height:100%" : "right:0;top:0;width:1px;height:100%"}
+  >
+    {
+      dimensions.map((dimension) => (
+        <>
+          <path
+            class="ln-ink"
+            d={`${extension(dimension.x, dimension.from)}${extension(dimension.x, dimension.to)}`}
+            data-draw
+            pathLength="1"
+          />
+          <path
+            class="ln-ink"
+            d={`M${dimension.x} ${dimension.from}V${dimension.to}`}
+            data-draw="late"
+            pathLength="1"
+          />
+          <path
+            class="ln-ink"
+            d={`${tick(dimension.x, dimension.from)}${tick(dimension.x, dimension.to)}`}
+            data-fade
+          />
+        </>
+      ))
+    }
+  </svg>
+  {
+    dimensions.map((dimension) => (
+      <span
+        class="asm-balloon asm-tree__dim-balloon"
+        data-fade
+        style={`${isWide ? `left:${dimension.x}px` : `right:${-dimension.x}px;translate:50% -50%`};top:${(dimension.from + dimension.to) / 2}px`}
+      >
+        {dimension.item}
+      </span>
+    ))
+  }
+
+  {
+    rows.map((row) => (
+      <div class="asm-tree__row" style={`top:${row.y}px;padding-left:${nameLeft(row.x)}px`}>
+        <span class="asm-tree__name">{row.name}</span>
+        {row.file ? (
+          <>
+            {isWide ? (
+              <span class="asm-note asm-tree__filename" style={`left:${detailLeft - 116}px`}>
+                plugbay.toml
+              </span>
+            ) : null}
+            <div
+              class="asm-card"
+              style={isWide ? `left:${detailLeft}px;top:-18px` : `left:${nameLeft(row.x) + 6}px;top:16px`}
+            >
+              <pre class="asm-card__source asm-tree__source"><code>{!isWide && <span>plugbay.toml{"\n"}</span>}{row.file.source}</code></pre>
+            </div>
+          </>
+        ) : null}
+        {row.branch ? (
+          <>
+            <span class="asm-label asm-tree__here" style={`left:${nameLeft(row.x)}px;top:12px`}>
+              Agent starts here
+            </span>
+            <ul
+              aria-label={`Servers in ${row.name}`}
+              class="asm-tree__result"
+              style={`left:${nameLeft(row.x)}px;top:32px;right:${isWide ? 0 : 64}px`}
+            >
+              {row.branch.resolution
+                .filter((resolution) => resolution.state !== "open")
+                .map((resolution) => (
+                  <li class="asm-tree__server">
+                    <svg aria-hidden="true" viewBox="0 0 12 12">
+                      {resolution.state === "set" ? (
+                        <rect class="fill-ink" height="9" width="9" x="1.5" y="1.5" />
+                      ) : (
+                        <>
+                          <rect fill="url(#asm-hatch)" height="9" width="9" x="1.5" y="1.5" />
+                          <rect class="ln-ink" height="9" width="9" x="1.5" y="1.5" />
+                        </>
+                      )}
+                    </svg>
+                    {resolution.state === "set" ? (
+                      <span>
+                        {resolution.server}:
+                        <span class:list={{ "asm-mark": resolution.server === "sentry" }}>{resolution.account}</span>
+                      </span>
+                    ) : (
+                      <span>{resolution.server} off</span>
+                    )}
+                    <span class="asm-balloon">
+                      <span class="asm-sr">set by item </span>
+                      {resolution.item}
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </>
+        ) : null}
+      </div>
+    ))
+  }
+</div>

@@ -1,0 +1,31 @@
+---
+import "@fontsource/barlow-condensed/latin-300.css";
+import "@fontsource/barlow/latin-400.css";
+import "@fontsource/barlow/latin-500.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
+import "@fontsource/ibm-plex-mono/latin-500.css";
+import "./styles.css";
+
+interface Props {
+  description: string;
+  title: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
+    <meta content={description} name="description">
+    <meta content="light dark" name="color-scheme">
+    <meta content="#ffffff" media="(prefers-color-scheme: light)" name="theme-color">
+    <meta content="#100e1d" media="(prefers-color-scheme: dark)" name="theme-color">
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

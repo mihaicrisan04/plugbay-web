@@ -1,0 +1,13 @@
+---
+// A zone letter on the sheet border. It rides the edge while its zone is on
+// screen, and it is the anchor for that zone.
+interface Props {
+  letter: string;
+}
+
+const { letter } = Astro.props;
+---
+
+<p class="zone-ref">
+  <a aria-label={`Zone ${letter}`} href={`#${letter.toLowerCase()}`}>{letter}</a>
+</p>

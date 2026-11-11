@@ -1,0 +1,133 @@
+---
+// The hero drawing. Top row: the three plugbay.toml files. Bottom row: the accounts you are
+// logged in to, as jacks. Each line of config is one patch cable. The hand is the correction:
+// the Globex repo's Sentry plug goes into the Globex account, not the one used last.
+import handSilhouette from "../../assets/directions/pad/hand-silhouette.webp";
+import handStipple from "../../assets/directions/pad/hand-stipple.webp";
+import { cables, corrected, heldCable, jackSize, jacks, narrow, narrowJackY, panelBottom, panels, pins, wide } from "./figure";
+import Panel from "./Panel.astro";
+
+const [, rightAccount] = corrected.to.split(":");
+const wrongJack = jacks.find((jack) => jack.account === corrected.from);
+const rightJack = jacks.find((jack) => jack.account === corrected.to);
+// The Paper-generated cancel slash, used twice to make the cross: red-pencil-marks.svg, #slash.
+const slash = "m-3.04 2.95c2.05-2.03 4.21-4.11 6.08-5.89";
+const pinSize = 7;
+const bay = { bottom: 368, left: 30, right: 960, top: 268 };
+const dimY = 392;
+// The plug as it would sit in the wrong jack: tip, shaft, barrel, along its own axis.
+const ghostPlug = { barrel: { height: 16, width: 46, x: 46 }, shaft: "M0 0l8-5h38v10h-38z", turn: -58 };
+const crossAt = { x: 37, y: -59 };
+const tick = 4;
+const narrowBay = { bottom: 240, left: 8, right: 328, top: 150 };
+const narrowDimY = 258;
+const handImages = `--hand-ink: url(${handStipple.src}); --hand-shape: url(${handSilhouette.src})`;
+---
+
+<figure class="fig">
+  <div class="fig-stage" style={handImages}>
+    <svg aria-hidden="true" class="fig-svg fig-svg--wide" preserveAspectRatio="none" viewBox={`0 0 ${wide.width} ${wide.height}`}>
+      <g class="fig-box ink-in pass-cons">
+        <path d={`M${bay.left + 10} ${bay.top}H${bay.right}V${bay.bottom - 10}L${bay.right - 10} ${bay.bottom}H${bay.left}V${bay.top + 10}Z`} />
+        {jacks.map((jack) => <circle cx={jack.x} cy={jack.y} r={jackSize.radius} />)}
+      </g>
+      {pins.map((x) => <rect class="fig-solid ink-in pass-ink" height={pinSize} width={pinSize} x={x - pinSize / 2} y={panelBottom - pinSize / 2} />)}
+      {
+        cables.map((cable, index) => (
+          <>
+            <path class="fig-line cable pass-ink" d={cable.path} pathLength="1" style={`--i: ${4 + index * 2}`} />
+            <circle
+              class="fig-solid ink-in pass-ink"
+              cx={jacks.find((jack) => jack.account === cable.account)?.x}
+              cy={jacks[0].y}
+              r={jackSize.hole}
+              style={`--i: ${11 + index * 2}`}
+            />
+          </>
+        ))
+      }
+      {
+        wrongJack && rightJack && (
+          <>
+            <g class="fig-ghost ink-in pass-ink" style="--i: 12" transform={`translate(${wrongJack.x} ${wrongJack.y - 6}) rotate(${ghostPlug.turn})`}>
+              <path d={ghostPlug.shaft} />
+              <rect height={ghostPlug.barrel.height} width={ghostPlug.barrel.width} x={ghostPlug.barrel.x} y={-ghostPlug.barrel.height / 2} />
+            </g>
+            <path class="fig-line cable pass-pencil" d={heldCable} pathLength="1" style="--i: 2" />
+            <circle class="fig-solid ink-in pass-pencil" cx={rightJack.x} cy={rightJack.y} r={jackSize.hole} style="--i: 6" />
+            <g class="fig-red write pass-pencil" transform={`translate(${wrongJack.x + crossAt.x} ${wrongJack.y + crossAt.y}) scale(7.5)`}>
+              <path d={slash} />
+              <path d={slash} transform="scale(-1 1)" />
+            </g>
+          </>
+        )
+      }
+      {
+        wrongJack && rightJack && (
+          <g class="fig-line ink-in pass-ink" style="--i: 14">
+            <path d={`M${wrongJack.x} ${dimY}H${rightJack.x}M${wrongJack.x} ${bay.bottom + 4}V${dimY + 8}M${rightJack.x} ${bay.bottom + 4}V${dimY + 8}`} />
+            <path d={`M${wrongJack.x - tick} ${dimY + tick}l${tick * 2} ${-tick * 2}M${rightJack.x - tick} ${dimY + tick}l${tick * 2} ${-tick * 2}`} />
+          </g>
+        )
+      }
+    </svg>
+
+    <svg aria-hidden="true" class="fig-svg fig-svg--narrow" viewBox={`0 0 ${narrow.width} ${narrow.height}`}>
+      <g class="fig-box">
+        <path d={`M${narrowBay.left + 8} ${narrowBay.top}H${narrowBay.right}V${narrowBay.bottom - 8}L${narrowBay.right - 8} ${narrowBay.bottom}H${narrowBay.left}V${narrowBay.top + 8}Z`} />
+        {jacks.filter((jack) => jack.narrowX).map((jack) => <circle cx={jack.narrowX} cy={narrowJackY} r={jackSize.radius} />)}
+      </g>
+      {jacks.filter((jack) => jack.narrowX).map((jack) => <circle class="fig-solid" cx={jack.narrowX} cy={narrowJackY} r={jackSize.hole} />)}
+      {
+        wrongJack?.narrowX && rightJack?.narrowX && (
+          <>
+            <g class="fig-ghost" transform={`translate(${wrongJack.narrowX} ${narrowJackY - 6}) rotate(${ghostPlug.turn})`}>
+              <path d={ghostPlug.shaft} />
+              <rect height={ghostPlug.barrel.height} width={ghostPlug.barrel.width} x={ghostPlug.barrel.x} y={-ghostPlug.barrel.height / 2} />
+            </g>
+            <g class="fig-red" transform={`translate(${wrongJack.narrowX + crossAt.x} ${narrowJackY + crossAt.y}) scale(7.5)`}>
+              <path d={slash} />
+              <path d={slash} transform="scale(-1 1)" />
+            </g>
+            <g class="fig-line">
+              <path d={`M${wrongJack.narrowX} ${narrowDimY}H${rightJack.narrowX}M${wrongJack.narrowX} ${narrowBay.bottom + 4}V${narrowDimY + 8}M${rightJack.narrowX} ${narrowBay.bottom + 4}V${narrowDimY + 8}`} />
+              <path d={`M${wrongJack.narrowX - tick} ${narrowDimY + tick}l${tick * 2} ${-tick * 2}M${rightJack.narrowX - tick} ${narrowDimY + tick}l${tick * 2} ${-tick * 2}`} />
+            </g>
+          </>
+        )
+      }
+    </svg>
+
+    <div aria-hidden="true" class="hand pass-pencil" style="--i: 3">
+      <span class="hand-shape"></span>
+      <span class="hand-ink"></span>
+    </div>
+
+    <ul class="jack-labels">
+      {
+        jacks.map((jack, index) => (
+          <li class:list={["jack-label ink-in pass-cons", { "jack-label--narrow": jack.narrowX }]} style={`--x: ${jack.x}; --nx: ${jack.narrowX ?? 0}; --i: ${index}`}>
+            <code>{jack.account}</code>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="caption fig-keychain ink-in pass-cons">OS keychain</p>
+    <p class="caption fig-dim ink-in pass-ink" style="--i: 15">One server, two accounts</p>
+    <span aria-hidden="true" class="pencil fig-right write pass-pencil" style="--i: 9">{rightAccount}</span>
+  </div>
+
+  <ol class="fig-files">
+    {
+      panels.map((panel, index) => (
+        <li style={`--x: ${panel.left}`}>
+          <Panel class="ink-in pass-ink" lines={panel.lines} path={panel.path} style={`--i: ${index}`} />
+        </li>
+      ))
+    }
+  </ol>
+  <figcaption class="sr-only">
+    Each line of a plugbay.toml is drawn as a patch cable from the file to the account it names. In the Globex tree the
+    Sentry plug goes into the globex account, not the acme one.
+  </figcaption>
+</figure>

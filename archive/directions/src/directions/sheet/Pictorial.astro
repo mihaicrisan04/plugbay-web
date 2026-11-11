@@ -1,0 +1,36 @@
+---
+// Pictorial view: plugbay's own metaphor, drawn as the object. The patch bay
+// has one column per server and one row per directory, so it shows the same
+// result as the elevation: three cables in for ~/work/acme/api, one for
+// ~/work/globex/web. Stippled in Paper, shipped as a one-bit mask so it prints
+// in the sheet's single ink in both themes.
+import art from "../../assets/directions/sheet/patch-bay.png";
+import { details, ports, servers } from "./model";
+
+// Socket centres in the artwork, as a percentage of its box.
+const columns = [14.8, 32.6, 50.4];
+const rows = [17, 40.4];
+
+const summary = details
+  .map((detail) => {
+    const plugged = ports
+      .filter((port) => port.detail === detail && port.state === "on")
+      .map((port) => port.server);
+    return `Row ${detail.letter}, ${detail.directory}: ${plugged.join(", ")} plugged in.`;
+  })
+  .join(" ");
+---
+
+<figure
+  aria-label={`Pictorial view: a hand patching cables into a patch bay with a column for each of ${servers.join(", ")}. ${summary}`}
+  class="pictorial"
+  style={`--art:url(${art.src});aspect-ratio:${art.width} / ${art.height}`}
+>
+  <span aria-hidden="true" class="pictorial-art"></span>
+  {servers.map((server, index) => (
+    <span aria-hidden="true" class="pictorial-column" style={`left:${columns[index]}%`}>{server}</span>
+  ))}
+  {details.map((detail, index) => (
+    <span aria-hidden="true" class="balloon pictorial-row" style={`top:${rows[index]}%`}>{detail.letter}</span>
+  ))}
+</figure>

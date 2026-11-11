@@ -1,0 +1,46 @@
+---
+import { install } from "../../data/plugbay";
+---
+
+<div class="install">
+  <code class="install-command" data-install-command>{install.brew}</code>
+  <button class="copy" data-copy={install.brew} type="button">
+    <span class="copy-label copy-label--idle">Copy</span>
+    <span aria-hidden="true" class="copy-label copy-label--done">Copied</span>
+  </button>
+  <span aria-live="polite" class="sr-only" data-copy-status></span>
+</div>
+
+<script>
+  const copiedFor = 2000;
+
+  function selectCommand() {
+    const command = document.querySelector("[data-install-command]");
+    if (command) {
+      window.getSelection()?.selectAllChildren(command);
+    }
+  }
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy]")) {
+    const status = button.parentElement?.querySelector("[data-copy-status]");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+      } catch {
+        // No clipboard access (an insecure origin, a denied permission): leave the command selected.
+        selectCommand();
+        return;
+      }
+      button.dataset.copied = "";
+      if (status) {
+        status.textContent = "Copied";
+      }
+      window.setTimeout(() => {
+        delete button.dataset.copied;
+        if (status) {
+          status.textContent = "";
+        }
+      }, copiedFor);
+    });
+  }
+</script>
