@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T23:30:33+00:00",
+  "title": "Design System: plugbay-web",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#fff",
+        "srgbApprox": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.01 284)",
+          "oklch(27% 0.016 284)",
+          "oklch(39% 0.02 284)",
+          "oklch(51% 0.02 284)",
+          "oklch(63% 0.017 284)",
+          "oklch(75% 0.012 284)",
+          "oklch(86% 0.007 284)",
+          "oklch(95% 0.003 284)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Violet Ink",
+        "canonical": "oklch(42% 0.24 284)",
+        "srgbApprox": "#4b0cc7",
+        "tonalRamp": [
+          "oklch(15% 0.12 284)",
+          "oklch(27% 0.192 284)",
+          "oklch(39% 0.24 284)",
+          "oklch(51% 0.24 284)",
+          "oklch(63% 0.204 284)",
+          "oklch(75% 0.144 284)",
+          "oklch(86% 0.084 284)",
+          "oklch(95% 0.036 284)"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted (72%)",
+        "canonical": "color-mix(in srgb, oklch(42% 0.24 284) 72%, #fff)",
+        "srgbApprox": "#7e50d7",
+        "tonalRamp": [
+          "oklch(15% 0.09 284)",
+          "oklch(27% 0.144 284)",
+          "oklch(39% 0.18 284)",
+          "oklch(51% 0.18 284)",
+          "oklch(63% 0.153 284)",
+          "oklch(75% 0.108 284)",
+          "oklch(86% 0.063 284)",
+          "oklch(95% 0.027 284)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft (54%)",
+        "canonical": "color-mix(in srgb, oklch(42% 0.24 284) 54%, #fff)",
+        "srgbApprox": "#9e7ce1",
+        "tonalRamp": [
+          "oklch(15% 0.07 284)",
+          "oklch(27% 0.112 284)",
+          "oklch(39% 0.14 284)",
+          "oklch(51% 0.14 284)",
+          "oklch(63% 0.119 284)",
+          "oklch(75% 0.084 284)",
+          "oklch(86% 0.049 284)",
+          "oklch(95% 0.021 284)"
+        ]
+      },
+      "ink-grid": {
+        "role": "neutral",
+        "displayName": "Ink Grid (12%)",
+        "canonical": "color-mix(in srgb, oklch(42% 0.24 284) 12%, #fff)",
+        "srgbApprox": "#e9e2f8",
+        "tonalRamp": [
+          "oklch(15% 0.02 284)",
+          "oklch(27% 0.032 284)",
+          "oklch(39% 0.04 284)",
+          "oklch(51% 0.04 284)",
+          "oklch(63% 0.034 284)",
+          "oklch(75% 0.024 284)",
+          "oklch(86% 0.014 284)",
+          "oklch(95% 0.006 284)"
+        ]
+      },
+      "red": {
+        "role": "tertiary",
+        "displayName": "Red Pencil",
+        "canonical": "oklch(55% 0.2 27)",
+        "srgbApprox": "#cc2827",
+        "tonalRamp": [
+          "oklch(15% 0.1 27)",
+          "oklch(27% 0.16 27)",
+          "oklch(39% 0.2 27)",
+          "oklch(51% 0.2 27)",
+          "oklch(63% 0.17 27)",
+          "oklch(75% 0.12 27)",
+          "oklch(86% 0.07 27)",
+          "oklch(95% 0.03 27)"
+        ]
+      },
+      "paper-dark": {
+        "role": "neutral",
+        "displayName": "Night Ground",
+        "canonical": "oklch(15% 0.045 283)",
+        "srgbApprox": "#09081d",
+        "tonalRamp": [
+          "oklch(15% 0.022 283)",
+          "oklch(27% 0.036 283)",
+          "oklch(39% 0.045 283)",
+          "oklch(51% 0.045 283)",
+          "oklch(63% 0.038 283)",
+          "oklch(75% 0.027 283)",
+          "oklch(86% 0.016 283)",
+          "oklch(95% 0.007 283)"
+        ]
+      },
+      "ink-dark": {
+        "role": "primary",
+        "displayName": "Night Ink",
+        "canonical": "oklch(82% 0.115 290)",
+        "srgbApprox": "#c3b7ff",
+        "tonalRamp": [
+          "oklch(15% 0.058 290)",
+          "oklch(27% 0.092 290)",
+          "oklch(39% 0.115 290)",
+          "oklch(51% 0.115 290)",
+          "oklch(63% 0.098 290)",
+          "oklch(75% 0.069 290)",
+          "oklch(86% 0.04 290)",
+          "oklch(95% 0.017 290)"
+        ]
+      },
+      "ink-muted-dark": {
+        "role": "neutral",
+        "displayName": "Night Ink Muted (70%)",
+        "canonical": "color-mix(in srgb, oklch(82% 0.115 290) 70%, oklch(15% 0.045 283))",
+        "srgbApprox": "#8b83bb",
+        "tonalRamp": [
+          "oklch(15% 0.045 288)",
+          "oklch(27% 0.072 288)",
+          "oklch(39% 0.09 288)",
+          "oklch(51% 0.09 288)",
+          "oklch(63% 0.076 288)",
+          "oklch(75% 0.054 288)",
+          "oklch(86% 0.032 288)",
+          "oklch(95% 0.013 288)"
+        ]
+      },
+      "ink-soft-dark": {
+        "role": "neutral",
+        "displayName": "Night Ink Soft (54%)",
+        "canonical": "color-mix(in srgb, oklch(82% 0.115 290) 54%, oklch(15% 0.045 283))",
+        "srgbApprox": "#6d6797",
+        "tonalRamp": [
+          "oklch(15% 0.037 288)",
+          "oklch(27% 0.06 288)",
+          "oklch(39% 0.075 288)",
+          "oklch(51% 0.075 288)",
+          "oklch(63% 0.064 288)",
+          "oklch(75% 0.045 288)",
+          "oklch(86% 0.026 288)",
+          "oklch(95% 0.011 288)"
+        ]
+      },
+      "ink-grid-dark": {
+        "role": "neutral",
+        "displayName": "Night Ink Grid (15%)",
+        "canonical": "color-mix(in srgb, oklch(82% 0.115 290) 15%, oklch(15% 0.045 283))",
+        "srgbApprox": "#25223f",
+        "tonalRamp": [
+          "oklch(15% 0.025 285)",
+          "oklch(27% 0.04 285)",
+          "oklch(39% 0.05 285)",
+          "oklch(51% 0.05 285)",
+          "oklch(63% 0.043 285)",
+          "oklch(75% 0.03 285)",
+          "oklch(86% 0.017 285)",
+          "oklch(95% 0.007 285)"
+        ]
+      },
+      "red-dark": {
+        "role": "tertiary",
+        "displayName": "Night Red Pencil",
+        "canonical": "oklch(72% 0.17 30)",
+        "srgbApprox": "#fd7562",
+        "tonalRamp": [
+          "oklch(15% 0.085 30)",
+          "oklch(27% 0.136 30)",
+          "oklch(39% 0.17 30)",
+          "oklch(51% 0.17 30)",
+          "oklch(63% 0.145 30)",
+          "oklch(75% 0.102 30)",
+          "oklch(86% 0.059 30)",
+          "oklch(95% 0.026 30)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero statement only, Big Shoulders 300 caps on three lines."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "One title per zone; the title block name at 40px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Step titles in zone E, led by a numbered balloon."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Sentences in Barlow, max 46ch. Hero subhead is 19px at 40ch."
+      },
+      "note": {
+        "displayName": "Note",
+        "purpose": "One sentence after a square node, ink muted. Leader captions and legends at 15px."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Files, commands, terminal output, paths. 14px from 1560px. Ligatures off."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Mono caps: bar titles, scale notes, button text, legends."
+      },
+      "label-title-block": {
+        "displayName": "Title block label",
+        "purpose": "The only text under 13px: caps field labels in the title block."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Things arriving and press feedback (--ease-out)."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.77, 0, 0.175, 1)",
+        "purpose": "Lines being drawn and parts travelling (--ease-in-out)."
+      },
+      {
+        "name": "state",
+        "value": "150ms ease",
+        "purpose": "Colour and fill changes on controls; capture fade on directory change."
+      },
+      {
+        "name": "press",
+        "value": "160ms var(--ease-out), scale(0.97)",
+        "purpose": "Pressed state of the copy button and box link."
+      },
+      {
+        "name": "line-swap",
+        "value": "200ms ease",
+        "purpose": "Solid and phantom dimension lines trading places on directory change."
+      },
+      {
+        "name": "projection",
+        "value": "calc(150ms + 250ms * var(--sel)) var(--ease-in-out)",
+        "purpose": "Projection line: 400ms running out, 150ms withdrawing."
+      },
+      {
+        "name": "elevation-draw",
+        "value": "520ms var(--ease-in-out), delay 100ms + order * 110ms",
+        "purpose": "Dimensions run down in merge order, once, on first view."
+      },
+      {
+        "name": "correction-sequence",
+        "value": "about 2.8s total: stray 1500ms, cross 280ms at 1200ms, hand 560ms at 1700ms, written 420ms at 2300ms",
+        "purpose": "The correction in zone B, once, on first view."
+      },
+      {
+        "name": "stack-press",
+        "value": "240ms var(--ease-in-out) shut, 380ms var(--ease-out) open, 280ms hold",
+        "purpose": "The stack shuts, swaps and opens on directory change."
+      },
+      {
+        "name": "arm-draw",
+        "value": "IntersectionObserver threshold 0.4, once; data-draw armed then drawn",
+        "purpose": "Shared draw-in arming. Never set with reduced motion or without script, so the figure is simply drawn."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-wide",
+        "value": "480px"
+      },
+      {
+        "name": "frame",
+        "value": "720px"
+      },
+      {
+        "name": "hero-split",
+        "value": "960px"
+      },
+      {
+        "name": "files-row",
+        "value": "1024px"
+      },
+      {
+        "name": "two-column",
+        "value": "1280px"
+      },
+      {
+        "name": "captures-row",
+        "value": "1340px"
+      },
+      {
+        "name": "leaders",
+        "value": "1440px"
+      },
+      {
+        "name": "sheet-max",
+        "value": "1560px"
+      },
+      {
+        "name": "sheet-centred",
+        "value": "1616px"
+      },
+      {
+        "name": "figure-container",
+        "value": "640px (container query on the correction and the stack)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Command with Copy",
+      "kind": "button",
+      "refersTo": "button-copy",
+      "description": "The primary action: a command as selectable text joined to a solid ink Copy button.",
+      "html": "<div class=\"ds-command\"><code class=\"ds-command-text\"><span class=\"ds-command-prompt\">$ </span>brew install mihaicrisan04/tap/plugbay</code><button class=\"ds-copy\" type=\"button\">Copy</button></div>",
+      "css": ".ds-command{display:flex;width:fit-content;max-width:100%;font-family:var(--font-mono);font-size:14px;color:var(--color-ink);border:1px solid var(--color-ink);}.ds-command-text{display:flex;align-items:center;min-height:48px;padding:10px 16px;overflow-wrap:anywhere;}.ds-command-prompt{margin-right:1ch;color:var(--color-ink-muted);user-select:none;}.ds-copy{min-width:84px;min-height:48px;font-family:var(--font-mono);font-size:13px;line-height:1;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-paper);background:var(--color-ink);border:0;border-radius:0;cursor:pointer;transition:transform 160ms var(--ease-out);}.ds-copy:active{transform:scale(0.97);}.ds-copy:focus-visible{outline:1px solid var(--color-paper);outline-offset:-5px;}"
+    },
+    {
+      "name": "Box Link",
+      "kind": "button",
+      "refersTo": "box-link",
+      "description": "Outlined link, the quiet partner of the solid button (GitHub).",
+      "html": "<a class=\"ds-box-link\" href=\"#\">GitHub <svg aria-hidden=\"true\" fill=\"none\" height=\"10\" viewBox=\"0 0 10 10\" width=\"10\"><path d=\"M2.5 1.5h6v6M8.5 1.5l-7 7\" stroke=\"currentColor\"/></svg></a>",
+      "css": ".ds-box-link{display:inline-flex;gap:8px;align-items:center;justify-content:center;min-height:48px;padding-inline:18px;font-family:var(--font-mono);font-size:13px;line-height:1;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;color:var(--color-ink);border:1px solid var(--color-ink);transition:background-color 150ms ease,color 150ms ease,transform 160ms var(--ease-out);}.ds-box-link:hover{color:var(--color-paper);background:var(--color-ink);}.ds-box-link:active{transform:scale(0.97);}.ds-box-link:focus-visible{outline:1px solid var(--color-ink);outline-offset:3px;}"
+    },
+    {
+      "name": "Directory Chooser",
+      "kind": "input",
+      "refersTo": "choice",
+      "description": "The page's one radio group: boxes sharing an edge, the solid one is where the agent starts.",
+      "html": "<fieldset class=\"ds-chooser\"><legend class=\"ds-chooser-legend\">Agent starts in</legend><div class=\"ds-choices\"><label class=\"ds-choice\"><input checked name=\"ds-detail\" type=\"radio\"><span class=\"ds-balloon\">A</span>~/work/acme/api</label><label class=\"ds-choice\"><input name=\"ds-detail\" type=\"radio\"><span class=\"ds-balloon\">B</span>~/work/globex/web</label></div></fieldset>",
+      "css": ".ds-chooser{padding:0;margin:0;border:0;font-family:var(--font-mono);color:var(--color-ink);}.ds-chooser-legend{font-size:13px;line-height:1;letter-spacing:0.04em;text-transform:uppercase;}.ds-choices{display:flex;margin-top:12px;}.ds-choice{display:flex;gap:10px;align-items:center;min-height:48px;padding-inline:18px;font-size:13px;cursor:pointer;border:1px solid var(--color-ink);transition:background-color 150ms ease,color 150ms ease;}.ds-choice+.ds-choice{border-left:0;}.ds-choice input{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}.ds-choice:not(:has(:checked)):hover,.ds-choice:active{background:var(--color-ink-grid);}.ds-choice:has(:checked){color:var(--color-paper);background:var(--color-ink);}.ds-choice:has(:focus-visible){outline:1px solid var(--color-ink);outline-offset:3px;}.ds-balloon{display:inline-grid;place-items:center;width:20px;height:20px;font-size:13px;line-height:1;border:1px solid currentcolor;border-radius:50%;}"
+    },
+    {
+      "name": "File Panel",
+      "kind": "card",
+      "refersTo": "window-bar",
+      "description": "An instrument window holding one plugbay.toml at 1:1, with the folded corner of the file mark and its scope underneath.",
+      "html": "<div class=\"ds-file\"><figure class=\"ds-file-panel\"><figcaption class=\"ds-file-bar\">~/work/acme/plugbay.toml</figcaption><div class=\"ds-file-source\"><code>[servers]</code><code>sentry = \"acme\"</code><code>posthog = \"acme\"</code></div></figure><p class=\"ds-file-scope\">every Acme repo</p></div>",
+      "css": ".ds-file{font-family:var(--font-mono);font-size:13px;color:var(--color-ink);}.ds-file-panel{position:relative;width:fit-content;margin:0;border:1px solid var(--color-ink);}.ds-file-bar{display:flex;align-items:center;height:28px;padding:0 22px 0 10px;margin:-1px -1px 0;line-height:1;white-space:nowrap;color:var(--color-paper);background:var(--color-ink);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);}.ds-file-panel::before{position:absolute;top:-3px;right:-3px;width:16px;height:16px;content:\"\";background:var(--color-paper);clip-path:polygon(0 0,100% 0,100% 100%);}.ds-file-source{padding:8px 16px 10px 10px;}.ds-file-source code{display:block;font-family:inherit;line-height:22px;white-space:pre;}.ds-file-scope{margin:6px 0 0;color:var(--color-ink-muted);}"
+    },
+    {
+      "name": "Terminal Capture",
+      "kind": "card",
+      "refersTo": "window-bar",
+      "description": "An instrument window cut from a real session: solid bar, corner squares, output in one colour with a muted prompt.",
+      "html": "<figure class=\"ds-capture\"><figcaption class=\"ds-capture-bar\"><span>plugbay why linear</span><span class=\"ds-capture-end\">Scale 1:1</span></figcaption><div class=\"ds-capture-body\"><span class=\"ds-capture-squares\"></span><pre class=\"ds-capture-scroll\" tabindex=\"0\"><span class=\"ds-capture-prompt\">~/work/globex/web $</span> plugbay why linear\nlinear is disabled by ~/work/globex/plugbay.toml</pre></div></figure>",
+      "css": ".ds-capture{width:fit-content;max-width:100%;margin:0;font-family:var(--font-mono);font-size:13px;color:var(--color-ink);border:1px solid var(--color-ink);}.ds-capture-bar{display:flex;gap:10px;align-items:center;height:28px;padding-inline:10px;line-height:1;white-space:nowrap;color:var(--color-paper);background:var(--color-ink);}.ds-capture-end{margin-left:auto;letter-spacing:0.04em;text-transform:uppercase;}.ds-capture-body{position:relative;}.ds-capture-squares{--ds-square:linear-gradient(var(--color-ink),var(--color-ink)) no-repeat;position:absolute;inset:0;pointer-events:none;background:var(--ds-square) 0 0/5px 5px,var(--ds-square) 100% 0/5px 5px,var(--ds-square) 0 100%/5px 5px,var(--ds-square) 100% 100%/5px 5px;}.ds-capture-scroll{margin:0;padding:14px 26px 14px 18px;overflow-x:auto;font-family:inherit;line-height:1.5;white-space:pre;scrollbar-width:thin;}.ds-capture-scroll:focus-visible{outline:1px solid var(--color-ink);outline-offset:-5px;}.ds-capture-prompt{color:var(--color-ink-muted);user-select:none;}"
+    },
+    {
+      "name": "Leader",
+      "kind": "custom",
+      "description": "The one annotation: a square node on the subject, one 45 degree kink, a shoulder, a caption.",
+      "html": "<span class=\"ds-leader\"><svg aria-hidden=\"true\" fill=\"none\" height=\"34\" viewBox=\"0 0 48 34\" width=\"48\"><path d=\"M0 28h6v6H0z\" fill=\"currentColor\"/><path d=\"M3 31 31 3h17\" stroke=\"currentColor\"/></svg><span class=\"ds-leader-note\"><code>sentry = \"acme\"</code> means server sentry, account acme.</span></span>",
+      "css": ".ds-leader{display:inline-flex;gap:8px;align-items:flex-start;color:var(--color-ink);}.ds-leader svg{flex:none;}.ds-leader-note{max-width:23ch;margin-top:-7px;font-family:var(--font-sans);font-size:15px;line-height:20px;}.ds-leader-note code{font-family:var(--font-mono);font-size:13px;}"
+    },
+    {
+      "name": "Note",
+      "kind": "custom",
+      "description": "A short note: a 5px square node, then one sentence in ink muted.",
+      "html": "<p class=\"ds-note\">Config files never hold secrets.</p>",
+      "css": ".ds-note{position:relative;max-width:44ch;margin:0;padding-left:16px;font-family:var(--font-sans);font-size:16px;line-height:1.45;color:var(--color-ink-muted);}.ds-note::before{position:absolute;top:0.55em;left:0;width:5px;height:5px;content:\"\";background:var(--color-ink);}"
+    },
+    {
+      "name": "Marks Legend",
+      "kind": "chip",
+      "refersTo": "balloon",
+      "description": "The line types and marks of the elevation and stack, each with one meaning.",
+      "html": "<ul class=\"ds-marks\"><li><span class=\"ds-mark ds-mark-solid\"></span>applies here</li><li><span class=\"ds-mark ds-mark-phantom\"></span>applies elsewhere</li><li><span class=\"ds-mark ds-mark-hatch\"></span>switched off</li><li><span class=\"ds-mark ds-mark-port\"></span>plugged in</li><li><span class=\"ds-mark ds-mark-ring\"></span>off here</li><li><span class=\"ds-mark-balloon\">A</span>keys a directory</li></ul>",
+      "css": ".ds-marks{display:flex;flex-wrap:wrap;gap:6px 24px;margin:0;padding:0;list-style:none;font-family:var(--font-mono);font-size:13px;color:var(--color-ink-muted);}.ds-marks li{display:inline-flex;gap:8px;align-items:center;line-height:1.6;}.ds-mark{flex:none;width:24px;height:1px;}.ds-mark-solid{background:var(--color-ink);}.ds-mark-phantom{background:linear-gradient(to right,var(--color-ink-soft) 0 14px,transparent 14px 17px,var(--color-ink-soft) 17px 18px,transparent 18px 21px,var(--color-ink-soft) 21px 22px,transparent 22px);}.ds-mark-hatch{height:12px;background:repeating-linear-gradient(135deg,var(--color-ink-soft) 0 1px,transparent 1px 6px);}.ds-mark-port{width:11px;height:11px;background:var(--color-ink);border-radius:50%;}.ds-mark-ring{width:11px;height:11px;border:1px solid var(--color-ink);border-radius:50%;}.ds-mark-balloon{display:inline-grid;place-items:center;width:20px;height:20px;line-height:1;color:var(--color-ink);border:1px solid currentcolor;border-radius:50%;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Drawing Sheet",
+    "overview": "The page is one engineering drawing sheet, and the drawing is the argument. It has a frame, zone letters on the border, instrument windows, dimension lines, leaders and a title block. One violet ink prints everything on white paper. Dark mode is the night print: one light ink on one deep violet ground.\n\nHierarchy comes from size, solid fills and three tints of the same ink. It never comes from a second colour, a shadow or a heavier line. The product is a terminal and a `plugbay.toml` file, so both are shown as real, selectable text at 1:1 and annotated like a drawing. Imagery is single-ink stipple of plugbay's own metaphor: a patch bay, plugs, a key ring.\n\nThe system refuses the dev-tool template: a centred headline over a glowing terminal and a row of feature cards.",
+    "keyCharacteristics": [
+      "One ink, one paper, three tints of the ink, one red with one job",
+      "Every line 1px, square corners, no shadows",
+      "Three type voices with fixed jobs: display states, mono is literal, sans speaks",
+      "Drawings are computed from the page data and fail the build if they disagree with it",
+      "Stipple art ships as masks and prints in the theme's ink",
+      "Motion explains or it is cut; without script or with reduced motion the sheet is simply drawn"
+    ],
+    "rules": [
+      {
+        "name": "The Truth Rule",
+        "body": "Every product value on the sheet (server, account, path, setting, command, terminal output) comes from `src/data/plugbay.ts`, through `src/lib/model.ts` and `src/lib/content.ts`. Nothing is typed by hand into a drawing. The build throws when a drawing and the data disagree: the elevation against the resolved result, the hero grid and the socket and key drawings against the counts of servers, directories, agents and accounts, the correction captions against the pain copy and the `plugbay ls` capture. Drawing labels (view names, \"Scale 1:1\", \"Not to scale\", the legend words) are the sheet's own and say only what is true of the view.",
+        "section": "overview"
+      },
+      {
+        "name": "The One Ink Rule",
+        "body": "One hue prints the sheet. A new level of emphasis is a size, a solid fill or one of the three tints. It is never a new colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Red Rule",
+        "body": "Red marks the correction in zone B and nothing else. No red links, errors, badges or highlights.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Voices Rule",
+        "body": "Display states. Mono is literal: code, paths, values and labels. Sans speaks in sentences. A literal quoted inside a sentence stays in mono, and code inside a caps caption keeps its own case.",
+        "section": "typography"
+      },
+      {
+        "name": "The 13px Floor Rule",
+        "body": "No text under 13px. The one exception is the 11px caps label in the title block.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Sheet Rule",
+        "body": "Nothing lifts off the paper. State is shown by a solid fill, a line type or a tint.",
+        "section": "elevation"
+      },
+      {
+        "name": "The 1px Line Rule",
+        "body": "Every line is 1px, including borders, underlines, the focus outline and SVG strokes (non-scaling). The exceptions are named and each has one job: the live cable in the stack is 2px, and the red pencil strokes of the correction's cross are 1.75px with round caps.",
+        "section": "shapes"
+      },
+      {
+        "name": "The One Leader Rule",
+        "body": "One annotation system: square node, one 45 degree kink, shoulder, caption. No arrows, no curved callouts, no second style.",
+        "section": "components"
+      },
+      {
+        "name": "The Mask Rule",
+        "body": "Raster art is never shown as an image with its own colours. It is a mask printed in the ink.",
+        "section": "components"
+      },
+      {
+        "name": "The Explain Or Cut Rule",
+        "body": "At most one explaining motion per zone. An animation that does not show how plugbay works is removed.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do print everything in the one ink and build emphasis from size, solid fills and the three tints.",
+      "Do keep every line 1px. A new exception needs one job and a name next to the 2px live cable and the red pencil.",
+      "Do use ink muted as the lightest text tint and keep ink soft and ink grid for lines and fills.",
+      "Do set literals in mono, sentences in Barlow and statements in Big Shoulders 300 caps.",
+      "Do derive every product value from `src/data/plugbay.ts` and add a build-time check when a drawing depends on a count or a merge.",
+      "Do annotate with the one leader on wide screens and a numbered balloon with a legend on narrow ones.",
+      "Do ship stipple art as a mask, with a `-dark` mask where the negative reads wrong.",
+      "Do keep each line type and mark to its meaning: solid applies here, phantom applies elsewhere, hatch is off, filled dot is plugged in, ring is not.",
+      "Do give every animation a drawn final state that shows with reduced motion and with no script.",
+      "Do design both themes and check 390px and wide desktop."
+    ],
+    "donts": [
+      "Don't add glow, shadows or blur to lift anything off the paper.",
+      "Don't use a gradient as a colour or a surface. `linear-gradient` is a drawing tool here: hard-stop lines, hatching, corner squares and the one alpha fade that cues a scrolling capture.",
+      "Don't add a second accent, and don't use the red outside the correction in zone B.",
+      "Don't round a box or build feature cards. Circles are balloons and ports; cut corners are folds.",
+      "Don't invent readouts: no coordinates, drawing numbers, dates, revisions or measurements that are not real plugbay values.",
+      "Don't state a version, release, badge, star count or any number the product repo cannot back.",
+      "Don't set text under 13px, apart from the 11px title block labels.",
+      "Don't abridge, recolour or wrap terminal output. plugbay prints no colour, so the output is one colour and only the prompt is muted.",
+      "Don't draw the grid as wallpaper. A grid line that is not a labelled server or directory goes.",
+      "Don't redraw the logo. Read the current files from the product repo."
+    ]
+  }
+}
