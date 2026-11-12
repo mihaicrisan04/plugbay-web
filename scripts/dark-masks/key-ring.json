@@ -1,9 +1,0 @@
-{
-  "scale": 0.64,
-  "window": 44,
-  "quantile": 35,
-  "ceiling": 0.42,
-  "range": 0.5,
-  "sigma": 2.2,
-  "edge": 1
-}

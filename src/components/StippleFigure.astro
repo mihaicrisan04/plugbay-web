@@ -1,25 +1,9 @@
 ---
 // A stipple illustration, drawn in Paper and shipped as a one-bit mask so it
-// prints in the sheet's ink. Notes name real things on it: a square node on
-// the subject, one 45 degree kink, a caption. Narrow screens list the same
-// captions under the figure instead.
+// prints in the sheet's ink. The `marks` slot places things on the artwork.
 import "./stipple-figure.css";
 import type { ImageMetadata } from "astro";
 import { maskStyle } from "../lib/art";
-
-export interface ArtPlace {
-  // How far the leader runs sideways before the caption, in px.
-  reach?: number;
-  side: "left" | "right";
-  turn?: "down" | "up";
-  // Where the node sits, as a percentage of the artwork's box.
-  x: number;
-  y: number;
-}
-
-export interface ArtNote extends ArtPlace {
-  text: string;
-}
 
 interface Props {
   art: ImageMetadata;
@@ -28,10 +12,9 @@ interface Props {
   // The artwork's file name without its extension: `name-dark.png`, where it
   // exists, is the mask for the dark theme.
   name: string;
-  notes?: ArtNote[];
 }
 
-const { art, label, name, notes = [], class: className } = Astro.props;
+const { art, label, name, class: className } = Astro.props;
 ---
 
 <figure class:list={["stipple-figure", className]}>
@@ -42,26 +25,6 @@ const { art, label, name, notes = [], class: className } = Astro.props;
     style={`${maskStyle(art, name)};aspect-ratio:${art.width} / ${art.height}`}
   >
     <span class="stipple"></span>
-    {notes.map((note) => (
-      <span
-        aria-hidden="true"
-        class={`art-note art-note-${note.side} art-note-${note.turn ?? "down"}`}
-        style={`left:${note.x}%;top:${note.y}%;--reach:${note.reach ?? 17}px`}
-      >
-        <svg aria-hidden="true" fill="none" height="24" viewBox="0 0 24 24" width="24">
-          <path d="M0 0h6v6H0z" fill="currentColor" />
-          <path d="M3 3 21 21h3" stroke="currentColor" />
-        </svg>
-        <span class="art-note-shoulder" />
-        <span class="art-note-text">{note.text}</span>
-      </span>
-    ))}
     <slot name="marks" />
   </div>
-  {notes.length > 0 ? (
-    <ul aria-hidden="true" class="art-list">
-      {notes.map((note) => <li>{note.text}</li>)}
-    </ul>
-  ) : null}
-  <slot />
 </figure>

@@ -2,7 +2,7 @@
 
 /* The correction figure. It draws in the sheet's one ink and one red pencil
    (--color-red, whose only job this is), and is built from the sheet's shared
-   parts: window, bar, label, balloon, leader. Correction.astro passes each
+   parts: window, bar, label, leader. Correction.astro passes each
    drawing's size and the places both of them share as variables: --n-* for the
    narrow drawing (360 by 440), --w-* for the wide one (1100 by 400). */
 @layer components {
@@ -124,8 +124,7 @@
 
   .correction-accounts,
   .correction-jack,
-  .correction-written,
-  .correction-key {
+  .correction-written {
     position: absolute;
     white-space: nowrap;
   }
@@ -163,31 +162,9 @@
     rotate: -5deg;
   }
 
-  .correction-balloon {
-    background: var(--color-paper);
-  }
-
-  .correction-key-1 {
-    top: calc(236 * var(--v));
-    left: calc(108 * var(--u));
-  }
-
-  .correction-key-2 {
-    top: calc(112 * var(--v));
-    left: calc(146 * var(--u));
-  }
-
-  /* Narrow: the notes are a keyed legend under the drawing. */
-  .correction-notes {
-    display: grid;
-    gap: 10px;
-    margin-top: 16px;
-  }
-
+  /* Narrow: the file that fixes it is a caption under the drawing. */
   .correction-note {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
+    margin-top: 16px;
   }
 
   .correction-leader {
@@ -197,14 +174,7 @@
   .correction-caption {
     display: grid;
     gap: 5px;
-    padding-top: 4px;
     line-height: 1.25;
-  }
-
-  /* Code keeps its own case inside a caps caption. */
-  .correction-caption code {
-    text-transform: none;
-    letter-spacing: 0;
   }
 
   /* Wide: the whole drawing, with each note on a leader: a square node on the cable,
@@ -226,10 +196,7 @@
       display: block;
     }
 
-    /* (.correction ...: the balloon is a shared part with its own display, so
-       hiding it here has to outrank that.) */
-    .correction-drawing-narrow,
-    .correction .correction-balloon {
+    .correction-drawing-narrow {
       display: none;
     }
 
@@ -245,30 +212,17 @@
       font-size: 24px;
     }
 
-    .correction-notes {
-      position: absolute;
-      inset: 0;
-      display: block;
-      margin: 0;
-      pointer-events: none;
-    }
-
-    /* A note is placed by the centre of its node. */
+    /* The note is placed by the centre of its node, on the cable. */
     .correction-note {
+      --node-x: 420;
+      --node-y: 130;
       position: absolute;
       top: calc(var(--node-y) * 100% / var(--w-h) - 31px);
       left: calc(var(--node-x) * 100% / var(--w-w) - 3px);
-      pointer-events: auto;
-    }
-
-    .correction-note-1 {
-      --node-x: 500;
-      --node-y: 222;
-    }
-
-    .correction-note-2 {
-      --node-x: 420;
-      --node-y: 130;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin: 0;
     }
 
     .correction-leader {
@@ -276,21 +230,15 @@
       flex: none;
     }
 
+    /* Its cable runs on to the right, so the caption stands above the shoulder. */
     .correction-caption {
       width: max-content;
-      max-width: 30ch;
-      padding: 0;
-      margin-top: -5px;
-    }
-
-    /* Its cable runs on to the right, so this caption stands on the shoulder, not under it. */
-    .correction-note-2 > .correction-caption {
-      translate: 0 calc(-100% + 16px);
+      translate: 0 calc(-100% - 6px);
     }
   }
 
   /* The sequence, once, when the figure scrolls into view: the cable in the wrong account,
-   the red cross, the hand with the plug, the right name written in. It runs only when the
+   the red cross, the hand with the plug, the right name written in, the file that fixes it. It runs only when the
    helper has armed it (ArmDraw.astro). With reduced motion or no script the figure is simply finished. */
   @media (prefers-reduced-motion: no-preference) {
     .correction[data-draw] {
@@ -310,8 +258,7 @@
         .correction-plugged,
         .correction-hand,
         .correction-written,
-        .correction-note,
-        .correction-key
+        .correction-note
       ) {
       /* Backwards only: every step ends on its resting style, so once it has
          played the animation lets go and nothing is left on its own layer. */
@@ -326,13 +273,6 @@
       animation-duration: 1500ms;
       animation-timing-function: var(--ease-in-out);
       animation-delay: 100ms;
-    }
-
-    .correction[data-draw] :is(.correction-note-1, .correction-key-1) {
-      animation-name: correction-appear;
-      animation-duration: 240ms;
-      animation-timing-function: var(--ease-out);
-      animation-delay: 760ms;
     }
 
     /* 2. It is crossed out, and drops back to the soft ink. */
@@ -381,7 +321,7 @@
       animation-delay: 2300ms;
     }
 
-    .correction[data-draw] :is(.correction-note-2, .correction-key-2) {
+    .correction[data-draw] .correction-note {
       animation-name: correction-appear;
       animation-duration: 240ms;
       animation-timing-function: var(--ease-out);

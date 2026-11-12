@@ -1,27 +1,32 @@
 ---
-// Zone F. The install commands again, and the plain facts.
+// Zone D. The three steps as a ruled list, the install commands, and the
+// plain facts on one line.
 import "./install.css";
-import { facts, install, migrate } from "../data/plugbay";
+import { facts, install, steps } from "../data/plugbay";
 import { zoneTitles } from "../lib/content";
 import CopyCommand from "./CopyCommand.astro";
 import ZoneRef from "./ZoneRef.astro";
+
+const numberOf = (index: number) => String(index + 1).padStart(2, "0");
 ---
 
-<section class="zone install" id="f">
-  <ZoneRef letter="F" />
+<section class="zone install" id="d">
+  <ZoneRef letter="D" />
   <h2 class="section-title">{zoneTitles.install}</h2>
-  <div class="install-body">
-    <div class="install-commands">
-      <h3 class="label">Homebrew</h3>
-      <CopyCommand class="command-primary" command={install.brew} />
-      <h3 class="label">Cargo</h3>
-      <CopyCommand command={install.cargo} />
-    </div>
-    <div class="install-facts">
-      <ul class="facts">
-        {facts.map((fact) => <li class="note">{fact}</li>)}
-      </ul>
-      <p class="prose">{migrate}</p>
-    </div>
+  <ol class="steps">
+    {steps.map((step, index) => (
+      <li class="step">
+        <span aria-hidden="true" class="label step-number">{numberOf(index)}</span>
+        <h3 class="step-title">{step.title}</h3>
+        <code class="step-command"><span aria-hidden="true" class="command-prompt">$ </span>{step.command}</code>
+      </li>
+    ))}
+  </ol>
+  <div class="install-commands">
+    <CopyCommand class="command-primary" command={install.brew} />
+    <CopyCommand command={install.cargo} />
   </div>
+  <ul class="facts">
+    {facts.map((fact) => <li>{fact}</li>)}
+  </ul>
 </section>

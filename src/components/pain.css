@@ -11,19 +11,25 @@
     max-width: 18ch;
   }
 
+  /* One line where the sheet is wide enough for it.
+     (.pain > ...: must outrank the shared class it adjusts.) */
+  .pain > .pain-line {
+    max-width: 80ch;
+  }
+
   /* The figure is drawn 1100 wide. It gets the full sheet, and air above it. */
   .pain > .correction {
     max-width: 1100px;
-    margin-top: 32px;
+    margin-top: 24px;
   }
 
   @media (min-width: 720px) {
     .pain {
-      gap: 32px;
+      gap: 28px;
     }
 
     .pain > .correction {
-      margin-top: 56px;
+      margin-top: 36px;
     }
   }
 }

@@ -7,7 +7,7 @@ The landing page for [plugbay](https://github.com/mihaicrisan04/plugbay), mise f
   <img alt="The plugbay landing page: a headline, the install command and a stippled drawing of a patch bay" src="docs/screenshot-light.png">
 </picture>
 
-One static page, drawn as an engineering sheet: one ink, 1px lines, and the real `plugbay.toml` files and terminal output annotated like a drawing.
+One static page, drawn as an engineering sheet: one ink, 1px lines, and the real `plugbay.toml` files and commands set like a drawing.
 
 ## Stack
 
@@ -34,8 +34,8 @@ bun run verify                     # lint, types, build, browser tests
 
 | Path | What |
 | --- | --- |
-| `src/data/plugbay.ts` | Every command, config and terminal capture on the page. The build fails if a drawing and this file disagree. |
-| `src/components/` | The zones of the sheet, A to F, and their figures. |
+| `src/data/plugbay.ts` | Every command and config on the page. The build fails if a drawing and this file disagree. |
+| `src/components/` | The zones of the sheet, A to D, and their figures. |
 | `src/styles/global.css` | Colour and type tokens, and the parts every zone shares. |
 | `DESIGN.md` | The design system, written from the shipped page. |
 | `scripts/` | Screenshot tool and the dark-theme illustration build. |
