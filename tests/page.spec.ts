@@ -1,49 +1,93 @@
 import { expect, type Page, test } from "@playwright/test";
 import { install, resolved } from "../src/data/plugbay";
 
-const globexLinearOff = /linear\s+by ~\/work\/globex\/plugbay\.toml/;
-const acmeSentryRow = /sentry:acme\s+http/;
+const [acme, globex] = resolved;
 
-async function startAgentInGlobex(page: Page) {
+// A setting's dimension is drawn solid when it applies to the directory on
+// show. Both directories pin sentry, each to its own account.
+const solidLine = (page: Page, account: string) =>
+  page
+    .locator(".elevation .dim")
+    .filter({ hasText: `sentry = "${account}"` })
+    .locator(".dim-solid");
+
+const choice = (page: Page, directory: string) =>
+  page.getByRole("radio", { name: directory });
+
+async function startAgentIn(page: Page, directory: string) {
   await page
     .getByRole("group", { name: "Agent starts in" })
-    .getByText(resolved[1].directory)
+    .getByText(directory)
     .click();
 }
 
-test("choosing ~/work/globex/web swaps the terminal output", async ({
+async function expectElevationFor(page: Page, on: string, off: string) {
+  await expect(solidLine(page, on)).toHaveCSS("opacity", "1");
+  await expect(solidLine(page, off)).toHaveCSS("opacity", "0");
+}
+
+test("choosing ~/work/globex/web redraws the elevation for it", async ({
   page,
 }) => {
   await page.goto("/");
-  await expect(page.getByText(acmeSentryRow)).toBeVisible();
+  await expect(choice(page, acme.directory)).toBeChecked();
+  await expectElevationFor(page, "acme", "globex");
 
-  await startAgentInGlobex(page);
+  await startAgentIn(page, globex.directory);
 
-  await expect(page.getByText(globexLinearOff)).toBeVisible();
-  await expect(page.getByText(acmeSentryRow)).toBeHidden();
+  await expect(choice(page, globex.directory)).toBeChecked();
+  await expectElevationFor(page, "globex", "acme");
 });
 
-test("the first copy button copies the brew command", async ({
-  context,
+test("a directory row of the elevation chooses that directory", async ({
   page,
 }) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
 
-  await page.locator("[data-copy]").first().click();
+  await page.locator(".elevation .row-leaf.is-b").click();
 
-  const copied = await page.evaluate(() => navigator.clipboard.readText());
-  expect(copied).toBe(install.brew);
+  await expect(choice(page, globex.directory)).toBeChecked();
+  await expectElevationFor(page, "globex", "acme");
+});
+
+test("the arrow keys switch the directory", async ({ page }) => {
+  await page.goto("/");
+  await choice(page, acme.directory).focus();
+
+  await page.keyboard.press("ArrowRight");
+
+  await expect(choice(page, globex.directory)).toBeChecked();
+  await expectElevationFor(page, "globex", "acme");
+});
+
+test("every copy button copies its command", async ({ context, page }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/");
+  const buttons = page.locator("[data-copy]");
+  await expect(buttons).toHaveCount(3);
+
+  async function expectCopies(index: number, command: string) {
+    await page.evaluate(() => navigator.clipboard.writeText(""));
+    await buttons.nth(index).click();
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toBe(command);
+  }
+
+  await expectCopies(0, install.brew);
+  await expectCopies(1, install.brew);
+  await expectCopies(2, install.cargo);
 });
 
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("the directory choice still works", async ({ page }) => {
+  test("the directory choice still redraws the elevation", async ({ page }) => {
     await page.goto("/");
+    await expectElevationFor(page, "acme", "globex");
 
-    await startAgentInGlobex(page);
+    await startAgentIn(page, globex.directory);
 
-    await expect(page.getByText(globexLinearOff)).toBeVisible();
+    await expectElevationFor(page, "globex", "acme");
   });
 });

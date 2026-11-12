@@ -1,7 +1,8 @@
 ---
-// Zone A. The statement, the install command and one drawing: plugbay's own
-// metaphor, a patch bay being patched by hand. The bay stands on a measured
-// grid: one line per server, one per directory, and nothing unlabelled.
+// Zone A. The statement, what it is in one line, the install command and one
+// drawing: plugbay's own
+// metaphor, a patch bay being patched by hand. No grid: each server is named
+// over its column of sockets, each directory lettered on its row.
 import "./hero.css";
 import logoDark from "../assets/logo-dark.svg?url";
 import logoLight from "../assets/logo-light.svg?url";
@@ -14,7 +15,7 @@ import ZoneRef from "./ZoneRef.astro";
 
 // The statement is set on three lines. The words are the data's, unchanged.
 const WORDS_PER_LINE = [2, 2];
-const words = hero.headlines[0].split(" ");
+const words = hero.statement.split(" ");
 const [first, second] = WORDS_PER_LINE;
 const lines = [
   words.slice(0, first),
@@ -22,10 +23,17 @@ const lines = [
   words.slice(first + second),
 ].map((line) => line.join(" "));
 
-// Where the artwork's sockets sit, as a percentage of its box: one column per
-// server, one row per directory.
-const columns = [14.8, 32.6, 50.4];
-const rows = [17, 40.4];
+// The one-line what names the file, and a literal stays in mono.
+const FILE_NAME = "plugbay.toml";
+const [beforeFile, afterFile, ...rest] = hero.what.split(FILE_NAME);
+if (afterFile === undefined || rest.length > 0) {
+  throw new Error(`The one-line what no longer names ${FILE_NAME} once`);
+}
+
+// Where the artwork's socket centres sit, as a percentage of its box: one
+// column per server, one row per directory.
+const columns = [14.94, 32.73, 50.17];
+const rows = [17.64, 41.46];
 
 if (columns.length !== servers.length || rows.length !== details.length) {
   throw new Error(
@@ -49,7 +57,7 @@ if (columns.length !== servers.length || rows.length !== details.length) {
     <h1 class="headline">
       {lines.map((line) => <span>{line} </span>)}
     </h1>
-    <p class="prose subhead">{hero.subhead}</p>
+    <p class="prose subhead">{beforeFile}<code>{FILE_NAME}</code>{afterFile}</p>
     <div class="actions">
       <CopyCommand command={install.brew} />
       <a class="label box-link" href={links.repo}>
@@ -59,7 +67,6 @@ if (columns.length !== servers.length || rows.length !== details.length) {
         </svg>
       </a>
     </div>
-    <p class="note works-with">{hero.worksWith}</p>
   </div>
 
   <StippleFigure
@@ -70,15 +77,10 @@ if (columns.length !== servers.length || rows.length !== details.length) {
   >
     <div aria-hidden="true" class="contents" slot="marks">
       {servers.map((server, index) => (
-        <span class="bay-line bay-column" style={`left:${columns[index]}%`}>
-          <span class="bay-name">{server}</span>
-        </span>
+        <span class="bay-name" style={`left:${columns[index]}%`}>{server}</span>
       ))}
       {details.map((detail, index) => (
-        <>
-          <span class="bay-line bay-row" style={`top:${rows[index]}%`} />
-          <span class="balloon bay-mark" style={`top:${rows[index]}%`}>{detail.letter}</span>
-        </>
+        <span class="balloon bay-mark" style={`top:${rows[index]}%`}>{detail.letter}</span>
       ))}
       <span class="bay-key">
         {details.map((detail) => (

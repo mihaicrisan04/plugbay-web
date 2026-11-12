@@ -1,7 +1,6 @@
 /* plugbay.mihaicrisan.com. One drawing sheet: one ink on white, every line 1px.
    Hierarchy comes from size, solid fills and three tints of the same ink.
-   Two things break the rule, each with one job: a live cable in the stack
-   figure is 2px, and the correction in zone B is red.
+   One thing breaks the rule, with one job: the correction in zone B is red.
    This file holds the tokens, the base and the parts every zone shares.
    Each component keeps its own styles next to it in src/components. */
 
@@ -257,17 +256,11 @@
     }
 
     .zone {
-      padding-block: 96px 112px;
+      padding-block: 96px;
     }
 
     .zone + .zone::after {
       display: block;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .zone {
-      padding-block: 128px 144px;
     }
   }
 
@@ -304,28 +297,6 @@
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-  }
-
-  /* A short note: a square node, then one sentence. */
-  .note {
-    position: relative;
-    max-width: 44ch;
-    padding-left: 16px;
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.45;
-    color: var(--color-ink-muted);
-    text-wrap: pretty;
-  }
-
-  .note::before {
-    position: absolute;
-    top: 0.55em;
-    left: 0;
-    width: 5px;
-    height: 5px;
-    content: "";
-    background: var(--color-ink);
   }
 
   /* ---------- Shared drawing parts ---------- */
@@ -379,13 +350,6 @@
     border-radius: 50%;
   }
 
-  /* On a solid bar the balloon is reversed. */
-  .balloon-reversed {
-    color: var(--color-ink);
-    background: var(--color-paper);
-    border-color: var(--color-paper);
-  }
-
   /* Stipple artwork ships as a one-bit mask, so it prints in the theme's ink. */
   .stipple {
     position: absolute;
@@ -436,8 +400,9 @@
 
   /* ---------- The directory on show ---------- */
 
-  /* One radio group for the page (#detail-a, #detail-b, in zone D) says which
-     directory the agent starts in. Everything keyed to a directory reads it. */
+  /* One radio group for the page (#detail-a, #detail-b, the tab on the
+     elevation in zone C) says which directory the agent starts in. Everything
+     keyed to a directory reads it. */
   main {
     --sel-a: 1;
     --sel-b: 0;

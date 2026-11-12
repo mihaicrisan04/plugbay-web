@@ -35,11 +35,6 @@ typography:
     fontSize: "18px"
     fontWeight: 400
     lineHeight: 1.5
-  note:
-    fontFamily: "Barlow, Barlow Fallback, sans-serif"
-    fontSize: "16px"
-    fontWeight: 400
-    lineHeight: 1.45
   code:
     fontFamily: "Commit Mono, ui-monospace, SF Mono, Menlo, monospace"
     fontSize: "13px"
@@ -104,7 +99,7 @@ components:
     typography: "{typography.code}"
     rounded: "{rounded.none}"
     height: "48px"
-    padding: "0 14px"
+    padding: "0 18px"
   choice-hover:
     backgroundColor: "{colors.ink-grid}"
   choice-checked:
@@ -115,9 +110,6 @@ components:
     typography: "{typography.label}"
     rounded: "{rounded.full}"
     size: "{spacing.balloon}"
-  balloon-reversed:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
 ---
 
 # Design System: plugbay-web
@@ -128,7 +120,9 @@ components:
 
 The page is one engineering drawing sheet, and the drawing is the argument. It has a frame, zone letters on the border, instrument windows, dimension lines, leaders and a title block. One violet ink prints everything on white paper. Dark mode is the night print: one light ink on one deep violet ground.
 
-Hierarchy comes from size, solid fills and three tints of the same ink. It never comes from a second colour, a shadow or a heavier line. The product is a terminal and a `plugbay.toml` file, so both are shown as real, selectable text at 1:1 and annotated like a drawing. Imagery is single-ink stipple of plugbay's own metaphor: a patch bay, plugs, a key ring.
+Hierarchy comes from size, solid fills and three tints of the same ink. It never comes from a second colour, a shadow or a heavier line. The product is a terminal and a `plugbay.toml` file, so the files and the commands are shown as real, selectable text at 1:1. Imagery is single-ink stipple of plugbay's own metaphor: a patch bay and a hand with a plug.
+
+The sheet says each thing once. A heading that states the point replaces the paragraph under it, and a drawing carries no caption it does not need.
 
 The system refuses the dev-tool template: a centred headline over a glowing terminal and a row of feature cards.
 
@@ -138,9 +132,9 @@ The system refuses the dev-tool template: a centred headline over a glowing term
 - Three type voices with fixed jobs: display states, mono is literal, sans speaks
 - Drawings are computed from the page data and fail the build if they disagree with it
 - Stipple art ships as masks and prints in the theme's ink
-- Motion explains or it is cut; without script or with reduced motion the sheet is simply drawn
+- Two drawings move once, the correction and the elevation; without script or with reduced motion the sheet is simply drawn
 
-**The Truth Rule.** Every product value on the sheet (server, account, path, setting, command, terminal output) comes from `src/data/plugbay.ts`, through `src/lib/model.ts` and `src/lib/content.ts`. Nothing is typed by hand into a drawing. The build throws when a drawing and the data disagree: the elevation against the resolved result, the hero grid and the socket and key drawings against the counts of servers, directories, agents and accounts, the correction captions against the pain copy and the `plugbay ls` capture. Drawing labels (view names, "Scale 1:1", "Not to scale", the legend words) are the sheet's own and say only what is true of the view.
+**The Truth Rule.** Every product value on the sheet (server, account, path, setting, command) comes from `src/data/plugbay.ts`, through `src/lib/model.ts` and `src/lib/content.ts`. Nothing is typed by hand into a drawing. The build throws when a drawing and the data disagree: the elevation against the resolved result, the hero's socket marks against the counts of servers and directories, the correction against the resolved accounts, the merge and the `plugbay ls` capture, the one-line what against the file name it sets in mono. Drawing labels (view names, "Not to scale") are the sheet's own and say only what is true of the view.
 
 ## Colors
 
@@ -154,9 +148,9 @@ One violet ink on white, with the tints mixed from that ink and the paper. The d
 
 ### Neutral
 - **Paper** (`paper`, `paper-dark`): the ground. Also the fill that lets one part pass in front of another (a balloon over a line, a plate over a cable).
-- **Ink muted** (`ink-muted`, 72% ink in light, 70% in dark): the lightest tint allowed as text. Notes, scopes, prompts, legend text, title block labels, values of settings that do not apply to the directory on show.
-- **Ink soft** (`ink-soft`, 54% ink): lines only. Phantom lines, hatching, guide cables, the old cable under the cross, the scrollbar. The one text use is the pressed state of a link.
-- **Ink grid** (`ink-grid`, 12% ink in light, 15% in dark): grid lines behind a drawing, row dividers in the resolved list, the hover and pressed fill of an unchosen directory.
+- **Ink muted** (`ink-muted`, 72% ink in light, 70% in dark): the lightest tint allowed as text. The tagline, prompts, title block labels, values of settings that do not apply to the directory on show.
+- **Ink soft** (`ink-soft`, 54% ink): lines only. Phantom lines, hatching, the old cable under the cross, the scrollbar. The one text use is the pressed state of a link.
+- **Ink grid** (`ink-grid`, 12% ink in light, 15% in dark): grid lines behind a drawing, the hover and pressed fill of an unchosen directory.
 
 Contrast, computed from the token values: ink on paper 9.6:1 light and 10.9:1 dark; ink muted 5.2:1 and 5.7:1; red 5.4:1 and 7.4:1. Ink soft is 3.3:1 and 3.8:1, which is why it carries lines and not reading text.
 
@@ -176,11 +170,10 @@ Contrast, computed from the token values: ink on paper 9.6:1 light and 10.9:1 da
 ### Hierarchy
 - **Display** (300, clamp(68px, 9.4vw, 136px), 0.88, caps): the hero statement, set on three lines.
 - **Headline** (300, clamp(44px, 6vw, 88px), 0.9, caps, balanced): one title per zone. The title block name uses the same voice at 40px.
-- **Title** (300, clamp(32px, 3.2vw, 44px), 0.95, caps): step titles in zone E, each led by a numbered balloon.
-- **Body** (Barlow 400, 18px, 1.5, max 46ch): sentences. The hero subhead is 19px at 40ch.
-- **Note** (Barlow 400, 16px, 1.45, max 44ch, ink muted): one sentence after a 5px square node. Leader captions and legends are Barlow 15px.
-- **Code** (Commit Mono 400, 13px, 14px from 1560px): files, commands, terminal output, tree names, paths. The page base is mono 14px at 1.55.
-- **Label** (Commit Mono 400, 13px, line-height 1, caps, 0.04em): every label on the sheet: bar titles, scale notes, button text, legends of controls.
+- **Title** (300, clamp(32px, 3.2vw, 44px), 0.95, caps): step titles in zone D, each after its number (01, 02, 03) in mono.
+- **Body** (Barlow 400, 18px, 1.5, max 46ch): the one line under a zone title. The hero's one-line what is 19px at 380px, with `plugbay.toml` in mono 16px.
+- **Code** (Commit Mono 400, 13px, 14px from 1560px): files, commands, tree names, paths, the facts line. The page base is mono 14px at 1.55.
+- **Label** (Commit Mono 400, 13px, line-height 1, caps, 0.04em): every label on the sheet: bar titles, scale notes, button text, step numbers.
 
 ### Named Rules
 **The Three Voices Rule.** Display states. Mono is literal: code, paths, values and labels. Sans speaks in sentences. A literal quoted inside a sentence stays in mono, and code inside a caps caption keeps its own case.
@@ -189,18 +182,19 @@ Contrast, computed from the token values: ink on paper 9.6:1 light and 10.9:1 da
 
 ## Layout
 
-The page is one sheet, max 1560px wide, with six zones A to F and a title block. One idea per zone, with generous space around it.
+The page is one sheet, max 1560px wide, with four zones A to D and a title block: A hero, B problem, C one file per tree, D install. One idea per zone, with generous space around it. Everything starts on the left edge of the sheet, ragged right; nothing is centred.
 
 - **Frame.** From 720px the sheet has a 1px border on all sides and a margin equal to the strip (28px). On a phone the frame is its left edge only, with a 20px strip. From 1616px the sheet centres.
 - **Zone letters.** Each zone has its letter in the strip. The letter is a link to the zone and rides the edge (sticky at mid-viewport) while its zone is on screen. A 9px tick crosses the frame where one zone ends and the next begins.
-- **Zone rhythm.** Zone padding is 56px above and 72px below on a phone, 96 and 112 from 720px, 128 and 144 from 1280px. Side padding is 14px, then 32px from 720px. The hero is the exception: it fills the first viewport from 960px, and its drawing stands on a 1px ground line at the bottom of the zone.
-- **Grid as structure.** A grid appears only where it is the drawing's own coordinates: one line per server and one per directory, every line labelled. There is no page-wide grid wallpaper.
+- **Zone rhythm.** Zone padding is 56px above and 72px below on a phone, 96px above and below from 720px. Inside a zone the parts sit 64px apart (48px on a phone), a title and its line 28px. Side padding is 14px, then 32px from 720px. The hero is the exception: it fills the first viewport from 960px, and its drawing stands on a 1px ground line at the bottom of the zone. The tick after the hero sits on that line.
+- **Labels, not grid lines.** The hero's patch bay has no grid: each server is named over its column of sockets, each directory lettered on its row (balloons A and B), and the key to the right of the plate spells out the paths (above the names when the drawing is under 520px wide). There is no page-wide grid wallpaper.
 - **Title block.** Bottom of the sheet, real fields only: mark, title, sheet, creator, licence, repository. From 1024px it sits in the bottom right corner with its top left corner cut.
-- **Placed drawings.** The correction and the stack are each drawn twice, a narrow drawing and a wide one, in their own units, and switch by container width at 640px. Lettering stays in CSS pixels while the lines scale.
+- **Ruled list.** The steps in zone D are a list ruled in 1px ink, 88px a row from 1024px: the number in a 72px column, the title, and the command starting on the sheet's centre line. Below 1024px the command sits under its title.
+- **Placed drawings.** The correction is drawn twice, a narrow drawing and a wide one, in their own units, and switches by container width at 640px. Lettering stays in CSS pixels while the lines scale.
 
-Breakpoints in use: 480px (command and actions go inline), 720px (full frame, wider pad, leaders on stipple figures, capture scroll hint goes), 960px (hero side by side), 1024px (three files in a row, title block corner), 1280px (step copy beside its figure, install in two columns), 1340px (both captures side by side), 1440px (file notes move from numbered balloons to leaders), 1560px (code at 14px), 1616px (sheet centres). Container queries: 640px on the correction and on the stack.
+Breakpoints in use: 480px (command and actions go inline, the chooser's boxes go side by side), 720px (full frame, wider pad, facts on one line), 960px (hero side by side), 1024px (step commands on the centre line, title block corner), 1280px (taller elevation rows), 1560px (code at 14px), 1616px (sheet centres). Container queries: 640px on the correction, 520px on the patch bay (its key moves right of the plate).
 
-Supported from 390px with no horizontal scroll. A terminal capture is never abridged or wrapped: where the window is narrower than the output it scrolls sideways, says so on its bar, and repeats the one line that matters under it.
+Supported from 390px with no horizontal scroll. A command too long for the screen wraps; it never hides its end.
 
 ## Elevation & Depth
 
@@ -213,21 +207,17 @@ Flat. There are no shadows, no blur as depth and no tonal layering. Order is sho
 
 Square corners everywhere (radius 0). Circles are the only curves, and each has a meaning: a balloon keys one thing to another, a filled dot is plugged in, a ring is not. A cut corner (12px on a file panel's bar, 10px on the correction's bay, 16px on the title block) is the fold of the file mark or the corner of the block, never a card style.
 
-**The 1px Line Rule.** Every line is 1px, including borders, underlines, the focus outline and SVG strokes (non-scaling). The exceptions are named and each has one job: the live cable in the stack is 2px, and the red pencil strokes of the correction's cross are 1.75px with round caps.
+**The 1px Line Rule.** Every line is 1px, including borders, underlines, the focus outline and SVG strokes (non-scaling). The one exception has one job: the red pencil strokes of the correction's cross are 1.75px with round caps.
 
-**Line types and marks.** These hold across the elevation and the stack:
+**Line types and marks.** The elevation carries no legend, so each of these keeps one meaning:
 - **Solid line:** the setting applies to the directory on show.
-- **Phantom line** (long dash and two dots, ink soft): it applies somewhere else. In the stack, the outline of the ghost plate: the same slot under the other client.
-- **Centre line** (long dash and one dot): the stack's axis, the walk from `/` to the project directory.
-- **Soft solid line:** a guide, the same socket on every plate whether or not a file fills it.
-- **2px line:** a live cable, a server pinned from here on.
+- **Phantom line** (long dash and two dots, ink soft): it applies somewhere else.
 - **Hatching** (1px at 135 degrees every 6px, ink soft): switched off by this file.
 - **Filled dot:** plugged in. **Ring:** off here. Same code as the logo's sockets.
-- **Square node** (7px, 5px in notes): a directory, the subject end of a leader, or where a lane meets the result (solid if a cable arrives, hollow if not).
+- **Square node** (7px, 6px on a leader): a directory, or the subject end of a leader.
 - **Oblique tick on a short extension line:** each end of a dimension. One dimension per setting, as long as the run of directories it governs.
 - **Projection line:** reads the directory on show across every lane.
-- **Balloon:** solid ring normally, filled when it is the directory on show, reversed on a solid bar, dashed while its plate is the ghost.
-- **Corner squares** (5px): the view is cut from a real session.
+- **Balloon:** solid ring normally, filled when it is the directory on show.
 - **File glyph** (11 by 14 with a folded corner): a `plugbay.toml` lives in this directory.
 
 ## Components
@@ -242,36 +232,38 @@ Parts are drawn, not styled: 1px boxes, solid bars, mono labels.
 - **Focus:** 1px ink outline, 3px offset. On a solid fill the outline is paper, inset 5px.
 
 ### Command
-- **Style:** a 1px box holding the command as selectable mono text with a muted `$` prompt from 480px, and the Copy button on its right. A command too long for the screen stacks the button under it and wraps; it never hides its end.
+- **Style:** a 1px box holding the command as selectable mono text with a muted `$` prompt from 480px, and the Copy button on its right. A command too long for the screen stacks the button under it and wraps; it never hides its end. The brew command in zone D is the primary: 17px in a 60px box from 720px.
+- **Step command:** in the ruled list a command is plain mono text after its muted `$`, with no box and no button.
 
 ### Directory chooser
-- **Style:** one radio group in zone D, drawn as boxes sharing an edge (stacked on a phone, side by side from 720px), 48px high, each led by a lettered balloon. The chosen one is solid ink. Hover and pressed on the other are ink grid.
-- **Behaviour:** CSS first. `main:has(#detail-b:checked)` sets `--sel-a` and `--sel-b`, and the elevation in C, the terminals in D and the stack in E all read them. The two directory rows of the elevation are click targets for the same radios when script runs.
+- **Style:** one radio group, drawn as a tab standing on the elevation's bar in zone C: boxes sharing an edge (stacked on a phone, side by side from 480px), 48px high, each led by a lettered balloon. The chosen one is solid ink and runs into the bar. Hover and pressed on the other are ink grid. Its legend ("Agent starts in") is for screen readers only.
+- **Behaviour:** CSS first. `main:has(#detail-b:checked)` sets `--sel-a` and `--sel-b`, and the elevation under the tab reads them. The two directory rows of the elevation are click targets for the same radios when script runs.
 
 ### Instrument window
-- **Style:** a 1px ink box under a solid 28px ink bar. The bar carries a caps label for the kind of view, the subject in its own case (ellipsis if too long), and a note at the far end ("Scale 1:1", "Not to scale").
-- **Variants:** file panel (bar with a 12px cut corner, the file at 1:1, its scope underneath in ink muted), terminal capture (corner squares, focusable scroll area, 24px fade at the right edge as the scroll cue), elevation, exploded view.
+- **Style:** a 1px ink box under a solid 28px ink bar. The bar carries a caps label for the kind of view, the subject in its own case (ellipsis if too long), and a note at the far end ("Not to scale").
+- **Variants:** file panel (bar with a 12px cut corner, the file at 1:1, nothing under it), elevation, the agent's window in the correction.
 
 ### Annotation
-- **Leader:** a square node on the subject, one 45 degree kink, a short shoulder, a caption. The leader is drawn once and mirrored for the other three directions.
-- **Narrow screens:** the leader is replaced by a numbered balloon on the subject and a keyed legend under the figure, or by a plain list of the captions.
-- **Note:** a 5px square node, then one sentence in ink muted.
+- **Leader:** a square node on the subject, one 45 degree kink, a short shoulder, a caption. The sheet has one: the file and the line that fix the mix-up, on the cable in zone B.
+- **Narrow screens:** the leader goes and its caption sits under the figure.
 
 **The One Leader Rule.** One annotation system: square node, one 45 degree kink, shoulder, caption. No arrows, no curved callouts, no second style.
 
 ### Stipple figure
 - **Technique:** artwork is drawn as stipple and shipped as a mask. A box filled with ink is masked by it, so the art prints in the theme's ink. Where a tonal negative would read wrong (an empty socket turning into a lit one), a `name-dark.png` mask beside `name.png` is used on the dark ground, and only one of the two loads.
-- **Layering:** a paper-coloured shape mask under the ink mask lets a line pass behind the art (the hand in zone B, the plates in the stack).
+- **Layering:** a paper-coloured shape mask under the ink mask lets a line pass behind the art (the hand in zone B).
 - **Accessibility:** each figure has a text label naming the real things on it.
 
 **The Mask Rule.** Raster art is never shown as an image with its own colours. It is a mask printed in the ink.
 
 ### Motion
-- **Draw-in, once.** The correction (B) and the elevation (C) draw themselves the first time 40% of the figure is in view. A shared inline helper arms the figure before it paints (`data-draw="armed"`), then releases it (`data-draw="drawn"`). The elevation's dimensions run down in merge order, shallowest file first.
-- **Response to the choice.** Changing the directory fades the captures (150ms), swaps solid and phantom lines (200ms), runs the projection line across (150ms out, 400ms in) and presses the stack shut and open again (240ms and 380ms).
-- **Tokens.** `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` for things arriving and press feedback. `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` for lines being drawn and parts travelling. Plain `ease` for fades of 90 to 200ms. Colour and fill changes are 150ms.
-- **Fallbacks.** With reduced motion the helper never arms, so every figure is in its final state; fades stay, travelling lines go, smooth scroll is off. With no script the figures are drawn, the stack follows the choice instantly, and the choice itself still works.
-- **Layout.** Motion never moves layout. Views that swap share one grid cell so nothing jumps.
+Two drawings move: the correction and the elevation. Everything else on the sheet is still, apart from the feedback of a control (press, hover, the Copy label).
+
+- **Draw-in, once.** The correction (B) and the elevation (C) draw themselves the first time 40% of the figure is in view. A shared inline helper arms the figure before it paints (`data-draw="armed"`), then releases it (`data-draw="drawn"`). The correction runs cable, cross, hand, written name, then its caption. The elevation's dimensions run down in merge order, shallowest file first, then the projection line runs across.
+- **Response to the choice.** Changing the directory swaps solid and phantom lines (200ms), fills the other balloon (150ms) and runs the projection line across (150ms out, 400ms in).
+- **Tokens.** `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` for press feedback. `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` for lines being drawn. Plain `ease` for fades of 150 to 200ms. Colour and fill changes are 150ms.
+- **Fallbacks.** With reduced motion the helper never arms, so the elevation is in its final state; fades stay, travelling lines go, smooth scroll is off. With no script the elevation is drawn and the choice still works.
+- **Layout.** Motion never moves layout.
 
 **The Explain Or Cut Rule.** At most one explaining motion per zone. An animation that does not show how plugbay works is removed.
 
@@ -282,11 +274,12 @@ Every control is at least 44px in both directions, including the zone letters, w
 
 ### Do:
 - **Do** print everything in the one ink and build emphasis from size, solid fills and the three tints.
-- **Do** keep every line 1px. A new exception needs one job and a name next to the 2px live cable and the red pencil.
+- **Do** keep every line 1px. A new exception needs one job and a name next to the red pencil.
 - **Do** use ink muted as the lightest text tint and keep ink soft and ink grid for lines and fills.
 - **Do** set literals in mono, sentences in Barlow and statements in Big Shoulders 300 caps.
 - **Do** derive every product value from `src/data/plugbay.ts` and add a build-time check when a drawing depends on a count or a merge.
-- **Do** annotate with the one leader on wide screens and a numbered balloon with a legend on narrow ones.
+- **Do** say it once: a zone gets a title, at most one line, and its drawing.
+- **Do** annotate with the one leader on wide screens and a plain caption under the figure on narrow ones.
 - **Do** ship stipple art as a mask, with a `-dark` mask where the negative reads wrong.
 - **Do** keep each line type and mark to its meaning: solid applies here, phantom applies elsewhere, hatch is off, filled dot is plugged in, ring is not.
 - **Do** give every animation a drawn final state that shows with reduced motion and with no script.
@@ -294,12 +287,12 @@ Every control is at least 44px in both directions, including the zone letters, w
 
 ### Don't:
 - **Don't** add glow, shadows or blur to lift anything off the paper.
-- **Don't** use a gradient as a colour or a surface. `linear-gradient` is a drawing tool here: hard-stop lines, hatching, corner squares and the one alpha fade that cues a scrolling capture.
+- **Don't** use a gradient as a colour or a surface. `linear-gradient` is a drawing tool here: hard-stop lines and hatching.
 - **Don't** add a second accent, and don't use the red outside the correction in zone B.
 - **Don't** round a box or build feature cards. Circles are balloons and ports; cut corners are folds.
 - **Don't** invent readouts: no coordinates, drawing numbers, dates, revisions or measurements that are not real plugbay values.
 - **Don't** state a version, release, badge, star count or any number the product repo cannot back.
 - **Don't** set text under 13px, apart from the 11px title block labels.
-- **Don't** abridge, recolour or wrap terminal output. plugbay prints no colour, so the output is one colour and only the prompt is muted.
-- **Don't** draw the grid as wallpaper. A grid line that is not a labelled server or directory goes.
+- **Don't** add back a paragraph, a legend or a caption that a title or a drawing already says.
+- **Don't** draw grid lines over the stipple art or as wallpaper. Name the parts of a drawing instead.
 - **Don't** redraw the logo. Read the current files from the product repo.

@@ -1,28 +1,23 @@
 ---
 // Zone C. Three small files, then the drawing of how far each line of them
-// reaches.
+// reaches, for the directory chosen on its tab.
 import "./one-file-per-tree.css";
 import { callouts } from "../data/plugbay";
 import { zoneTitles } from "../lib/content";
 import { files } from "../lib/model";
 import Elevation from "./Elevation.astro";
-import FilePanel, { type Note } from "./FilePanel.astro";
+import FilePanel from "./FilePanel.astro";
 import ZoneRef from "./ZoneRef.astro";
-
-const notes: Note[] = [
-  { line: 'sentry = "acme"', text: callouts.account },
-  { line: "linear = false", text: callouts.disable },
-].map((note, index) => ({ ...note, number: index + 1 }));
 ---
 
 <section class="zone" id="c">
   <ZoneRef letter="C" />
   <header class="zone-head">
     <h2 class="section-title">{zoneTitles.oneFilePerTree}</h2>
-    <p class="prose">{callouts.merge}</p>
+    <p class="prose">{callouts.deeperWins}</p>
   </header>
   <div class="files">
-    {files.map((file) => <FilePanel file={file} notes={notes} />)}
+    {files.map((file) => <FilePanel file={file} />)}
   </div>
   <Elevation />
 </section>

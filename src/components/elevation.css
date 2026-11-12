@@ -1,6 +1,66 @@
 @layer theme, base, components, utilities;
 
 @layer components {
+  .elevation-view {
+    max-width: 1040px;
+  }
+
+  /* The chooser is a tab on the window: boxes that share an edge and stand on
+     its bar. The solid one is where the agent starts. */
+  .chooser {
+    display: grid;
+  }
+
+  .choice {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 48px;
+    padding-inline: 14px;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    border: 1px solid var(--color-ink);
+    border-bottom: 0;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .choice:active {
+    background: var(--color-ink-grid);
+  }
+
+  .choice:has(:checked) {
+    color: var(--color-paper);
+    background: var(--color-ink);
+  }
+
+  .choice:has(:focus-visible) {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .choice:not(:has(:checked)):hover {
+      background: var(--color-ink-grid);
+    }
+  }
+
+  @media (min-width: 480px) {
+    .chooser {
+      display: flex;
+    }
+
+    .choice {
+      padding-inline: 18px;
+    }
+
+    .choice + .choice {
+      border-left: 0;
+    }
+  }
+
   .elevation {
     --rail: 14px;
     --row: 56px;
@@ -9,14 +69,12 @@
     --after-name: 34px;
     --tree-size: var(--code);
     --value-size: 13px;
-    --end: calc(var(--rows) + 3);
     /* A short foot under the last row, so dimension ends clear the frame.
        --foot is the grid line below it. */
-    --foot: calc(var(--end) + 1);
+    --foot: calc(var(--rows) + 4);
     display: grid;
-    grid-template-rows: var(--bar) var(--head) repeat(var(--rows), var(--row)) 12px auto;
+    grid-template-rows: var(--bar) var(--head) repeat(var(--rows), var(--row)) 12px;
     grid-template-columns: minmax(0, 1fr) repeat(var(--lanes), 80px);
-    max-width: 1040px;
     font-size: var(--code);
   }
 
@@ -339,86 +397,6 @@
     transition: transform calc(150ms + 250ms * var(--sel)) var(--ease-in-out);
   }
 
-  /* Key to the drawing's own marks, and the way on to the detail views. */
-  .elevation-key {
-    display: flex;
-    flex-wrap: wrap;
-    grid-row: var(--foot);
-    grid-column: 1 / -1;
-    gap: 4px 32px;
-    align-items: center;
-    margin-top: 12px;
-    font-size: 13px;
-    color: var(--color-ink-muted);
-  }
-
-  .marks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 24px;
-  }
-
-  .marks > li {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-    line-height: 1.6;
-  }
-
-  .mark {
-    flex: none;
-    width: 24px;
-    height: 1px;
-  }
-
-  .mark-solid {
-    background: var(--color-ink);
-  }
-
-  .mark-phantom {
-    background: linear-gradient(
-      to right,
-      var(--color-ink-soft) 0 14px,
-      transparent 14px 17px,
-      var(--color-ink-soft) 17px 18px,
-      transparent 18px 21px,
-      var(--color-ink-soft) 21px 22px,
-      transparent 22px
-    );
-  }
-
-  .mark-hatch {
-    height: 12px;
-    background: repeating-linear-gradient(
-      135deg,
-      var(--color-ink-soft) 0 1px,
-      transparent 1px 6px
-    );
-  }
-
-  .mark-port {
-    width: 11px;
-    height: 11px;
-    background: var(--color-ink);
-    border-radius: 50%;
-  }
-
-  .mark-ring {
-    width: 11px;
-    height: 11px;
-    border: 1px solid var(--color-ink);
-    border-radius: 50%;
-  }
-
-  .detail-link {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    min-height: 44px;
-    margin-left: auto;
-    color: var(--color-ink);
-  }
-
   /* Pointing at the other directory previews its projection. */
   @media (hover: hover) and (pointer: fine) {
     .elevation[data-live] .row-leaf:hover .balloon {
@@ -454,10 +432,6 @@
 
     .file-tag-name {
       display: inline;
-    }
-
-    .marks > .mark-file {
-      display: none;
     }
   }
 

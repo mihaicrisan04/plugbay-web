@@ -1,20 +1,19 @@
 ---
 // The pain, drawn, and its correction. An agent started in the Globex repo has its Sentry cable
-// in the Acme account, the one used last. That is crossed out in red, the hand moves the plug to
-// the Globex account, and the right name is written in. One ink and one red pencil.
+// in the Acme account, the one used last. That is crossed out in red, the hand has moved the plug
+// to the Globex account, and the right name is written in. One ink and one red pencil.
 // Every value comes from src/data/plugbay.ts. The stippled hand was generated in Paper and is
 // shipped as one-bit masks, so it takes the ink of whichever theme it is in.
 import "./correction.css";
 import handDark from "../../assets/figures/correction/hand-dark.png";
 import handLight from "../../assets/figures/correction/hand-light.png";
 import handShape from "../../assets/figures/correction/hand-shape.png";
-import { pain, resolved, terminal } from "../../data/plugbay";
+import { resolved, terminal } from "../../data/plugbay";
 import { settingAt } from "../../lib/model";
 import ArmDraw from "../ArmDraw.astro";
 import Leader from "../Leader.astro";
 
 const SERVER = "sentry";
-const USED_LAST = "logged in to whichever account you used last";
 
 function required<T>(value: T | undefined, what: string): T {
   if (value === undefined) {
@@ -38,8 +37,8 @@ const [, rightAccount] = right.split(":");
 const set = required(settingAt(directory, SERVER) ?? undefined, `${SERVER} setting for ${directory}`);
 const { line: setting, setBy: file } = set;
 const tools = `${SERVER}__*`;
-if (!(terminal.lsGlobex.output.includes(tools) && pain.body.includes(USED_LAST))) {
-  throw new Error("Correction figure: its captions no longer match the page data");
+if (!terminal.lsGlobex.output.includes(tools)) {
+  throw new Error(`Correction figure: plugbay ls in ${directory} no longer lists ${tools}`);
 }
 
 // Two drawings of the same thing, each in its own units: wide (1100 by 400) and narrow (360 by 440).
@@ -99,11 +98,11 @@ const summary = `An agent started in ${directory} has its ${SERVER} cable plugge
       drawings.map((drawing) => (
         <svg aria-hidden="true" class={`correction-drawing correction-drawing-${drawing.name}`} preserveAspectRatio="none" viewBox={`0 0 ${drawing.width} ${drawing.height}`}>
           <path
-            class="correction-box correction-appear"
+            class="correction-box"
             d={`M${drawing.bay.left} ${drawing.bay.top}H${drawing.bay.right}V${drawing.bay.bottom - cut}L${drawing.bay.right - cut} ${drawing.bay.bottom}H${drawing.bay.left}Z`}
           />
-          <circle class="correction-box correction-appear" cx={drawing.jack.wrong.x} cy={drawing.jack.wrong.y} r={jackRadius} />
-          <circle class="correction-box correction-appear" cx={drawing.jack.right.x} cy={drawing.jack.right.y} r={jackRadius} />
+          <circle class="correction-box" cx={drawing.jack.wrong.x} cy={drawing.jack.wrong.y} r={jackRadius} />
+          <circle class="correction-box" cx={drawing.jack.right.x} cy={drawing.jack.right.y} r={jackRadius} />
           <path class="correction-line correction-soft" d={drawing.stray} />
           <path class="correction-line correction-stray" d={drawing.stray} pathLength="1" />
           <path class="correction-line correction-held" d={drawing.held} pathLength="1" />
@@ -131,25 +130,14 @@ const summary = `An agent started in ${directory} has its ${SERVER} cable plugge
     <p class="correction-jack correction-jack-wrong">{wrong}</p>
     <p class="correction-jack correction-jack-right">{right}</p>
     <p aria-hidden="true" class="correction-written">{rightAccount}</p>
-    <span aria-hidden="true" class="balloon correction-balloon correction-key correction-key-1">1</span>
-    <span aria-hidden="true" class="balloon correction-balloon correction-key correction-key-2">2</span>
   </div>
 
-  <ol class="correction-notes">
-    <li class="correction-note correction-note-1">
-      <span aria-hidden="true" class="balloon correction-balloon">1</span>
-      <Leader class="correction-leader" />
-      <span class="label correction-caption">{USED_LAST}</span>
-    </li>
-    <li class="correction-note correction-note-2">
-      <span aria-hidden="true" class="balloon correction-balloon">2</span>
-      <Leader class="correction-leader" />
-      <span class="label correction-caption">
-        <code>{file.path}</code>
-        <code>{setting}</code>
-        <span>{file.scope}</span>
-      </span>
-    </li>
-  </ol>
+  <p class="correction-note">
+    <Leader class="correction-leader" />
+    <span class="correction-caption">
+      <code>{file.path}</code>
+      <code>{setting}</code>
+    </span>
+  </p>
 </figure>
 <ArmDraw />

@@ -1,6 +1,6 @@
 // The drawings are computed from the page data, never typed by hand: every
-// dimension, port and capture below comes out of src/data/plugbay.ts.
-import { configFiles, resolved, terminal } from "../data/plugbay";
+// dimension and port below comes out of src/data/plugbay.ts.
+import { configFiles, resolved } from "../data/plugbay";
 
 const SETTING = /^(?<server>[a-z0-9-]+) = (?<literal>.+)$/;
 const DETAIL_IDS = ["a", "b", "c", "d"] as const;
@@ -8,12 +8,6 @@ const DETAIL_IDS = ["a", "b", "c", "d"] as const;
 export type DetailId = (typeof DETAIL_IDS)[number];
 export type Connector = "blank" | "elbow" | "pipe" | "tee";
 export type PortState = "off" | "on";
-
-export interface Session {
-  command: string;
-  cwd: string;
-  output: string;
-}
 
 interface Setting {
   // The line as the file spells it, then its two halves.
@@ -58,47 +52,14 @@ const directories = [
 
 export const [root] = directories;
 
-export const promptOf = (session: Session) =>
-  `${session.cwd} $ ${session.command}`;
-
-// Width of a capture in characters, so its window can be sized before it renders.
-export const columnsOf = (sessions: readonly Session[]) =>
-  Math.max(
-    ...sessions.flatMap((session) => [
-      promptOf(session).length,
-      ...session.output.split("\n").map((line) => line.length),
-    ])
-  );
-
-function captureFor(directory: string, command: string): Session {
-  const capture = Object.values(terminal).find(
-    (entry) => entry.cwd === directory && entry.command === command
-  );
-  if (!capture) {
-    throw new Error(`No "${command}" capture for ${directory}`);
-  }
-  return capture;
-}
-
-// Each directory an agent starts in gets a detail view: its real `plugbay ls`,
-// then `plugbay why sentry`, the server both directories share.
+// Each directory an agent can start in, keyed by a letter.
 export const details = resolved.map((entry, index) => ({
   ...entry,
   id: DETAIL_IDS[index],
   letter: DETAIL_IDS[index].toUpperCase(),
-  ls: captureFor(entry.directory, "plugbay ls"),
-  why: captureFor(entry.directory, "plugbay why sentry"),
 }));
 
 export type Detail = (typeof details)[number];
-
-export const lsColumns = columnsOf(details.map((detail) => detail.ls));
-export const whyColumns = columnsOf(details.map((detail) => detail.why));
-
-// Every server and account pair in use: one login, one keychain token each.
-export const accounts = [
-  ...new Set(resolved.flatMap((entry) => entry.servers)),
-].toSorted();
 
 // Files on the way from / down to `directory`, shallowest first (merge order).
 export const filesOnPath = (directory: string) =>

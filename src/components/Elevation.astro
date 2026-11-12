@@ -2,10 +2,10 @@
 // The drawing of zone C. The ~/work tree in elevation, one lane per server,
 // and one dimension per setting: the run of directories a single line of a
 // plugbay.toml governs. Everything is placed by the grid, from src/data.
-// The directory on show is chosen in zone D. The two directory rows here are
-// plain click targets for the same radios: the radios keep one name each.
+// The directory on show is chosen on the tab above the window: the page's one
+// radio group. The two directory rows are plain click targets for the same
+// radios: the radios keep one name each.
 import "./elevation.css";
-import { legend } from "../lib/content";
 import { details, ports, root, rows, servers, spans } from "../lib/model";
 import ArmDraw from "./ArmDraw.astro";
 import FileGlyph from "./FileGlyph.astro";
@@ -27,6 +27,24 @@ const summary = details
   .join(" ");
 ---
 
+<div class="elevation-view">
+<fieldset class="chooser">
+  <legend class="sr-only">Agent starts in</legend>
+  {details.map((detail) => (
+    <label class="choice">
+      <input
+        checked={detail === details[0]}
+        class="sr-only"
+        id={`detail-${detail.id}`}
+        name="detail"
+        type="radio"
+        value={detail.id}
+      />
+      <span aria-hidden="true" class="balloon">{detail.letter}</span>
+      {detail.directory}
+    </label>
+  ))}
+</fieldset>
 <figure
   aria-label={`Elevation of ${root}: the server and account each directory gets`}
   class="elevation"
@@ -107,28 +125,13 @@ const summary = details
       style={`grid-column:${lane(port.server)};grid-row:${gridRow(port.row)};--order:${port.row}`}
     />
   ))}
-
-  <div class="elevation-key">
-    <ul class="marks">
-      <li><span aria-hidden="true" class="mark mark-solid"></span>{legend.here}</li>
-      <li><span aria-hidden="true" class="mark mark-phantom"></span>{legend.elsewhere}</li>
-      <li><span aria-hidden="true" class="mark mark-hatch"></span>{legend.off}</li>
-      <li><span aria-hidden="true" class="mark mark-port"></span>{legend.plugged}</li>
-      <li><span aria-hidden="true" class="mark mark-ring"></span>{legend.offHere}</li>
-      <li class="mark-file"><FileGlyph />plugbay.toml</li>
-    </ul>
-    <a class="label detail-link" href="#d">
-      {details.map((detail) => <span aria-hidden="true" class="balloon">{detail.letter}</span>)}
-      Details in zone D
-    </a>
-  </div>
 </figure>
 <ArmDraw />
+</div>
 
 <script>
-  // A directory row chooses that directory: it checks the radio in zone D
-  // without moving focus, so the page stays where it is. Choosing the one
-  // already on show does nothing.
+  // A directory row chooses that directory: it checks the radio on the tab
+  // without moving focus. Choosing the one already on show does nothing.
   const elevation = document.querySelector<HTMLElement>(".elevation");
   if (elevation) {
     elevation.dataset.live = "";

@@ -7,9 +7,11 @@
   }
 
   .files {
-    display: grid;
-    gap: 32px;
-    margin-block: 48px 56px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 40px;
+    align-items: flex-start;
+    margin-block: 48px;
   }
 
   @media (min-width: 720px) {
@@ -18,29 +20,7 @@
     }
 
     .files {
-      grid-template-columns: repeat(2, minmax(0, auto));
-      gap: 40px 48px;
-      justify-content: start;
-      margin-block: 64px 72px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .files {
-      grid-template-columns: repeat(3, minmax(0, auto));
-    }
-  }
-
-  /* Wide enough for the leaders: the files sit in one row, each note beside
-     the line it explains. */
-  @media (min-width: 1440px) {
-    .files {
-      display: flex;
-      gap: 40px;
-    }
-
-    .file:has(.leader) {
-      margin-right: 236px;
+      margin-block: 64px;
     }
   }
 }

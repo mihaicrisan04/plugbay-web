@@ -2,7 +2,7 @@
 
 Landing page for [plugbay](https://github.com/mihaicrisan04/plugbay), "mise for MCP servers". Deploys to `plugbay.mihaicrisan.com`.
 
-Status: live at `https://plugbay.mihaicrisan.com` (Vercel project `plugbay-web`). Mihai picked direction A, "Sheet" (one drawing sheet, zones A to F), out of four prototypes; the full page is built at `/`. `DESIGN.md` records its system and `.impeccable/surfaces/src-pages-index-astro.md` its direction contract. plugbay has no tagged release yet, so the brew command on the page does not work until one ships.
+Status: live at `https://plugbay.mihaicrisan.com` (Vercel project `plugbay-web`). Mihai picked direction A, "Sheet", out of four prototypes, then "S1 Distilled sheet" out of three Swiss-minimal passes on it: the same drawing sheet with far less text, zones A to D (hero, problem, one file per tree, install). The full page is built at `/`; the brief and copy deck for the pass are in `docs/research/swiss-pass-brief.md`. `DESIGN.md` records its system and `.impeccable/surfaces/src-pages-index-astro.md` its direction contract. plugbay has no tagged release yet, so the brew command on the page does not work until one ships.
 
 ## Goal
 
@@ -33,10 +33,10 @@ Already extracted, with sources (`docs/research/` is gitignored, so these exist 
 ## Commands
 
 - `bun run dev` (agents: `astro dev --background`, then `astro dev stop`)
-- `bun run verify`: lint, types, build, then Playwright against the production build on port 4322 (smoke, directory switch, copy button, JS off). Run it before calling anything done
+- `bun run verify`: lint, types, build, then Playwright against the production build on port 4322 (smoke, directory switch on the elevation, copy buttons, JS off). Run it before calling anything done
 - `bun scripts/shot.ts <route> [--out dir] [--full] [--motion]`: desktop and mobile, light and dark screenshots of a route against the running server, with console errors and overflow reported
 - `bun run fix`: auto-fix lint and format
-- `sh scripts/dark-masks/build.sh` (needs `uv`): rebuilds the dark-theme stipple masks (`*-dark.png`) from the light masks. Rerun after resizing or replacing a light mask; `patch-bay.json` holds cable traces in the patch bay's pixel coordinates, so scale it if that image changes size
+- `sh scripts/dark-masks/build.sh` (needs `uv`): rebuilds the patch bay's dark-theme stipple mask (`patch-bay-dark.png`) from its light mask. Rerun after resizing or replacing the light mask; `patch-bay.json` holds cable traces in the patch bay's pixel coordinates, so scale it if that image changes size
 
 ## Deploy
 
@@ -52,12 +52,12 @@ Already extracted, with sources (`docs/research/` is gitignored, so these exist 
 Minimal and clean, drawn like a technical drawing. Decided by Mihai; variants explore inside it, not around it.
 
 - Reference, named by Mihai: [sutera.ch](https://www.sutera.ch/) in its blueprint mode (the "change reality" button). Captures, extracted values and guidelines are in `docs/research/reference/sutera/`. Match its richness and discipline (one ink on white, 1px lines, large light display type against small mono caps, instrument-window panels, stippled illustrations in the same ink); do not copy its brand, layout or fake readouts
-- Chosen build: direction A, "Sheet". One violet ink on white (dark: one light ink on a deep ground), every line 1px, Big Shoulders light caps against Commit Mono, views as instrument windows, stippled illustrations generated in Paper and masked to the ink. One red, used only for the correction in the pain zone. The four prototypes are archived in `archive/directions/` (not built, linted or deployed; its README says how to restore them)
+- Chosen build: direction A, "Sheet", distilled (S1). One violet ink on white (dark: one light ink on a deep ground), every line 1px, Big Shoulders light caps against Commit Mono, views as instrument windows, stippled illustrations generated in Paper and masked to the ink. One red, used only for the correction in the problem zone. Swiss discipline on top: flush left, say it once, a title replaces the paragraph under it. The four prototypes are archived in `archive/directions/` (not built, linted or deployed; its README says how to restore them)
 - Workflow finding: code-first with Paper generating the illustrations beat comp-first (fewer generations, no invented wiring to correct). Use comps only when a composition is stuck
 - The grid is structure, not wallpaper: content sits on it, and its lines, ticks, registration marks, dimension lines and callouts carry meaning
 - The terminal and the `plugbay.toml` file are the product. Show them for real, annotated like a drawing, not as decoration
 - Few colours, thin lines, generous space. No gradients-and-glow dev-tool template
-- A small number of tasteful animations and interactions (lines drawing in, a grid that responds, the config tree resolving). Each one must explain something or be cut. Respect `prefers-reduced-motion`
+- One drawing moves: the elevation draws in and answers the directory chosen on its tab. Anything else must explain something or be cut. Respect `prefers-reduced-motion`
 - Light and dark, both designed. Static HTML, no layout shift
 - Logos live in `../plugbay/docs/assets/` and are being reworked there (uncommitted edits); read the current files, don't redraw the mark
 
@@ -67,7 +67,7 @@ Paper file `plugbay-web`: https://app.paper.design/file/01M73K4HZSZX13DKRHA2EWA5
 
 - Paper is the asset pipeline, not just a mirror: it generates images (`paper-gen://` URLs, see `get_guide` topic `image-generation`) and SVGs. Use it for illustrations, diagrams, grid and annotation pieces, textures and the OG image before hand-drawing anything. Export into `src/assets/`
 - Read `get_guide` topic `paper-mcp-instructions` before the first Paper call
-- Mirror the final page design into the file so Mihai can make small manual edits. If he edits it, the Paper file wins over the code for that element
+- The shipped page is artboard "S1 Distilled sheet" (page `p-7-0`, id `12I-0`); the pre-distilled page is on "Landing page". If Mihai edits the S1 artboard, the Paper file wins over the code for that element
 - Mihai is on Paper Pro, so there is no weekly tool-call cap to budget for (the 100-call note in `../alesiabaicu.com/AGENTS.md` is outdated)
 
 ## Agents

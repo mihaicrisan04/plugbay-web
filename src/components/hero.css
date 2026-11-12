@@ -52,12 +52,17 @@
     display: block;
   }
 
-  /* (.statement > ...: these two adjust shared classes, so they must outrank
-     them whatever order the stylesheets load in.) */
+  /* (.statement > ...: this adjusts a shared class, so it must outrank it
+     whatever order the stylesheets load in.) */
   .statement > .subhead {
-    max-width: 40ch;
+    max-width: 380px;
     margin-top: 24px;
     font-size: 19px;
+  }
+
+  .subhead > code {
+    font-family: var(--font-mono);
+    font-size: 16px;
   }
 
   /* Narrow: the command on one line, then Copy and GitHub side by side. */
@@ -77,11 +82,6 @@
     border-bottom: 0;
   }
 
-  .statement > .works-with {
-    max-width: none;
-    margin-top: 20px;
-  }
-
   /* The drawing runs to the frame, so the frame is its crop. Its own pixels
      are the limit: 1158 of them, two per CSS pixel. */
   .pictorial {
@@ -91,30 +91,10 @@
     margin: 116px calc(var(--pad) * -1) 0 0;
   }
 
-  .pictorial > .stipple-art {
-    isolation: isolate;
-  }
-
-  /* The measured grid behind the bay: one line through each column of sockets
-     and one through each row, and nothing unlabelled. Columns are servers,
-     named along the top. Rows are the two directories of the detail views,
-     keyed by letter and spelled out above. */
-  .bay-line {
-    position: absolute;
-    z-index: -1;
-    background: var(--color-ink-grid);
-  }
-
-  .bay-column {
-    top: -34px;
-    bottom: 0;
-    width: 1px;
-  }
-
-  .bay-row {
-    right: 0;
-    left: 0;
-    height: 1px;
+  /* No grid over the bay: each server is named over its column of sockets,
+     each directory lettered on its row, and the letters keyed to the paths. */
+  .pictorial {
+    container: bay / inline-size;
   }
 
   .bay-name,
@@ -126,32 +106,32 @@
   }
 
   .bay-name {
-    bottom: calc(100% + 8px);
-    left: 50%;
+    bottom: calc(100% + 9px);
     translate: -50% 0;
   }
 
   /* On the narrowest phones the columns sit closer than their names are wide,
      so the outer two names lean away from the middle one. */
   @media (max-width: 359px) {
-    .bay-column:first-child > .bay-name {
+    .bay-name:first-child {
       translate: -62% 0;
     }
 
-    .bay-column:has(+ .bay-row) > .bay-name {
+    .bay-name:has(+ .bay-mark) {
       translate: -38% 0;
     }
   }
 
   .bay-mark {
     position: absolute;
-    left: 3.4%;
+    left: 3.45%;
     background: var(--color-paper);
     translate: -50% -50%;
   }
 
+  /* Narrow: the key stands over the names. */
   .bay-key {
-    bottom: calc(100% + 64px);
+    bottom: calc(100% + 40px);
     left: 0;
     display: flex;
     flex-wrap: wrap;
@@ -162,6 +142,17 @@
     display: inline-flex;
     gap: 8px;
     align-items: center;
+  }
+
+  /* Wide enough: the key sits right of the plate, level with its top. */
+  @container bay (min-width: 520px) {
+    .bay-key {
+      top: 0;
+      bottom: auto;
+      left: 67.7%;
+      flex-direction: column;
+      gap: 8px;
+    }
   }
 
   @media (min-width: 480px) {

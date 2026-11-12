@@ -1,10 +1,41 @@
 @layer theme, base, components, utilities;
 
 @layer components {
-  .install-body {
-    display: grid;
-    gap: 56px;
+  /* The steps are a ruled list: a number, what happens, the command for it. */
+  .steps {
     margin-top: 48px;
+    border-bottom: 1px solid var(--color-ink);
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 12px 0;
+    align-items: baseline;
+    padding-block: 20px;
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .step-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 3.2vw, 44px);
+    font-weight: 300;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .step-command {
+    grid-column: 2;
+    font-size: var(--code);
+    line-height: 22px;
+    overflow-wrap: anywhere;
+  }
+
+  /* (.step-command > ...: the prompt is hidden on a phone inside a command
+     box; here it always shows.) */
+  .step-command > .command-prompt {
+    display: inline;
+    margin-right: 0;
   }
 
   .install-commands {
@@ -12,29 +43,38 @@
     gap: 12px;
     justify-items: start;
     min-width: 0;
+    margin-top: 48px;
   }
 
-  .install-commands > .label:not(:first-child) {
-    margin-top: 24px;
-  }
-
-  .install-facts {
-    display: grid;
-    gap: 28px;
+  /* On a phone both commands stack their button, so both take the full width. */
+  @media (max-width: 479px) {
+    .install-commands > .command {
+      width: 100%;
+    }
   }
 
   .facts {
     display: grid;
-    gap: 8px;
-  }
-
-  .facts > .note {
-    font-size: 18px;
-    color: var(--color-ink);
+    gap: 6px;
+    margin-top: 28px;
+    font-size: 13px;
+    line-height: 20px;
   }
 
   @media (min-width: 720px) {
-    .install-body {
+    .steps {
+      margin-top: 64px;
+    }
+
+    .step {
+      grid-template-columns: 72px minmax(0, 1fr);
+    }
+
+    .step-command {
+      font-size: 14px;
+    }
+
+    .install-commands {
       margin-top: 64px;
     }
 
@@ -50,13 +90,32 @@
     .command-primary > .copy {
       min-width: 104px;
     }
+
+    /* One line, a centred dot between facts. */
+    .facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    .facts > li + li::before {
+      margin-inline: 2ch;
+      content: "·" / "";
+    }
   }
 
-  @media (min-width: 1280px) {
-    .install-body {
-      grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-      column-gap: 72px;
-      align-items: start;
+  /* Wide: the command starts on the sheet's centre line, on the title's row. */
+  @media (min-width: 1024px) {
+    .step {
+      grid-template-columns: 72px minmax(0, 1fr) 50%;
+      gap: 0;
+      align-items: center;
+      min-height: 88px;
+      padding-block: 0;
+    }
+
+    .step-command {
+      grid-column: 3;
     }
   }
 }
