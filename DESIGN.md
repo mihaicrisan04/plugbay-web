@@ -184,11 +184,13 @@ Contrast, computed from the token values: ink on paper 9.6:1 light and 10.9:1 da
 
 The page is one sheet, max 1560px wide, with four zones A to D and a title block: A hero, B problem, C one file per tree, D install. One idea per zone, with generous space around it. Everything starts on the left edge of the sheet, ragged right; nothing is centred.
 
+The privacy policy at `/privacy` is sheet 2 of the set (`sheets` in `src/lib/content.ts` numbers them): one zone, the masthead with the mark linking home, the title, and a ruled list of plain answers whose text starts on the centre line from 1024px, as the steps do.
+
 - **Frame.** From 720px the sheet has a 1px border on all sides and a margin equal to the strip (28px). On a phone the frame is its left edge only, with a 20px strip. From 1616px the sheet centres.
 - **Zone letters.** Each zone has its letter in the strip. The letter is a link to the zone and rides the edge (sticky at mid-viewport) while its zone is on screen. A 9px tick crosses the frame where one zone ends and the next begins.
 - **Zone rhythm.** Zone padding is 56px above and 72px below on a phone, 96px above and below from 720px. Inside a zone the parts sit 64px apart (48px on a phone), a title and its line 28px. Side padding is 14px, then 32px from 720px. The hero is the exception: it fills the first viewport from 960px, and its drawing stands on a 1px ground line at the bottom of the zone. The tick after the hero sits on that line.
 - **Labels, not grid lines.** The hero's patch bay has no grid: each server is named over its column of sockets, each directory lettered on its row (balloons A and B), and the key to the right of the plate spells out the paths (above the names when the drawing is under 520px wide). There is no page-wide grid wallpaper.
-- **Title block.** Bottom of the sheet, real fields only: mark, title, sheet, creator, licence, repository. From 1024px it sits in the bottom right corner with its top left corner cut.
+- **Title block.** Bottom of the sheet, real fields only: mark, title, sheet, creator, licence, repository, privacy. From 1024px it sits in the bottom right corner with its top left corner cut.
 - **Ruled list.** The steps in zone D are a list ruled in 1px ink, 88px a row from 1024px: the number in a 72px column, the title, and the command starting on the sheet's centre line. Below 1024px the command sits under its title.
 - **Placed drawings.** The correction is drawn twice, a narrow drawing and a wide one, in their own units, and switches by container width at 640px. Lettering stays in CSS pixels while the lines scale.
 

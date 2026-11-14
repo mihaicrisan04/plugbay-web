@@ -4,12 +4,11 @@
 // metaphor, a patch bay being patched by hand. No grid: each server is named
 // over its column of sockets, each directory lettered on its row.
 import "./hero.css";
-import logoDark from "../assets/logo-dark.svg?url";
-import logoLight from "../assets/logo-light.svg?url";
 import art from "../assets/patch-bay.png";
 import { hero, install, links } from "../data/plugbay";
 import { details, servers } from "../lib/model";
 import CopyCommand from "./CopyCommand.astro";
+import Masthead from "./Masthead.astro";
 import StippleFigure from "./StippleFigure.astro";
 import ZoneRef from "./ZoneRef.astro";
 
@@ -45,13 +44,7 @@ if (columns.length !== servers.length || rows.length !== details.length) {
 <section class="zone hero" id="a">
   <ZoneRef letter="A" />
 
-  <header class="masthead">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset={logoDark}>
-      <img alt="plugbay" class="logo" height="88" src={logoLight} width="376">
-    </picture>
-    <p class="tagline">{hero.eyebrow}</p>
-  </header>
+  <Masthead />
 
   <div class="statement">
     <h1 class="headline">

@@ -1,6 +1,7 @@
 ---
 import barlow from "@fontsource/barlow/files/barlow-latin-400-normal.woff2?url";
 import commitMono from "@fontsource/commit-mono/files/commit-mono-latin-400-normal.woff2?url";
+import { routeOf } from "../lib/content";
 import "../styles/global.css";
 
 interface Props {
@@ -13,7 +14,7 @@ const {
   description = "The right MCP servers, logged in to the right account, in every directory and every agent.",
 } = Astro.props;
 const preloads = ["/fonts/sheet/BigShoulders.woff2", commitMono, barlow];
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const canonical = new URL(routeOf(Astro.url.pathname), Astro.site);
 const socialImage = new URL("/og.png", Astro.site);
 ---
 

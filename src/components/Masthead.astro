@@ -1,0 +1,25 @@
+---
+// The mark and the brand's own line, top left of a sheet. Away from the home
+// sheet the mark links back to it.
+import "./masthead.css";
+import logoDark from "../assets/logo-dark.svg?url";
+import logoLight from "../assets/logo-light.svg?url";
+import { hero } from "../data/plugbay";
+
+interface Props {
+  linkHome?: boolean;
+}
+
+const { linkHome = false } = Astro.props;
+const Mark = linkHome ? "a" : "span";
+---
+
+<header class="masthead">
+  <Mark href={linkHome ? "/" : undefined} class:list={{ "masthead-home": linkHome }} >
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset={logoDark}>
+      <img alt={linkHome ? "plugbay home" : "plugbay"} class="logo" height="88" src={logoLight} width="376">
+    </picture>
+  </Mark>
+  <p class="tagline">{hero.eyebrow}</p>
+</header>

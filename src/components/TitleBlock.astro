@@ -5,7 +5,9 @@ import "./title-block.css";
 import logoDark from "../assets/logo-dark.svg?url";
 import logoLight from "../assets/logo-light.svg?url";
 import { links } from "../data/plugbay";
-import { titleBlock } from "../lib/content";
+import { privacyPath, sheetOf, titleBlock } from "../lib/content";
+
+const sheet = sheetOf(Astro.url.pathname);
 ---
 
 <footer class="sheet-foot">
@@ -28,7 +30,7 @@ import { titleBlock } from "../lib/content";
     </div>
     <div class="field field-sheet">
       <dt class="field-label">Sheet</dt>
-      <dd>{titleBlock.sheet}</dd>
+      <dd>{sheet.number}</dd>
     </div>
     <div class="field field-creator">
       <dt class="field-label">Creator</dt>
@@ -41,6 +43,10 @@ import { titleBlock } from "../lib/content";
     <div class="field field-repository">
       <dt class="field-label">Repository</dt>
       <dd><a href={links.repo}>{titleBlock.repository}</a></dd>
+    </div>
+    <div class="field field-privacy">
+      <dt class="field-label">Privacy</dt>
+      <dd><a aria-current={sheet.route === privacyPath ? "page" : undefined} href={privacyPath}>{titleBlock.privacy}</a></dd>
     </div>
   </dl>
 </footer>

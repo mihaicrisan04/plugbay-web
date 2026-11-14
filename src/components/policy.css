@@ -1,0 +1,94 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  /* The masthead holds the top of the sheet, as it does on the home sheet.
+     (.zone.policy: must outrank the zone's own padding.) */
+  .zone.policy {
+    padding-top: 18px;
+  }
+
+  .policy-head {
+    display: grid;
+    gap: 20px;
+    margin-top: 48px;
+  }
+
+  .policy-date {
+    color: var(--color-ink-muted);
+  }
+
+  /* A ruled list, like the steps: the question, then its plain answer. */
+  .policy-sections {
+    margin-top: 48px;
+    border-bottom: 1px solid var(--color-ink);
+  }
+
+  .policy-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding-block: 24px 28px;
+    border-top: 1px solid var(--color-ink);
+  }
+
+  .policy-heading {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 3.2vw, 44px);
+    font-weight: 300;
+    line-height: 0.95;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  /* Prose, at a reading measure: a policy is read, not scanned.
+     (.policy-section > ...: must outrank the shared class it adjusts.) */
+  .policy-section > .policy-body {
+    display: grid;
+    gap: 14px;
+    max-width: 62ch;
+  }
+
+  /* A literal inside a sentence stays in mono. */
+  .policy-body code {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    overflow-wrap: anywhere;
+  }
+
+  .policy-body ul {
+    display: grid;
+    gap: 6px;
+    padding-left: 1.1em;
+    list-style: square;
+  }
+
+  .policy-body li::marker {
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 720px) {
+    .zone.policy {
+      padding-top: 24px;
+    }
+
+    .policy-head {
+      margin-top: 72px;
+    }
+
+    .policy-sections {
+      margin-top: 64px;
+    }
+
+    .policy-section {
+      padding-block: 28px 32px;
+    }
+  }
+
+  /* Wide: the answer starts on the sheet's centre line, on the title's row. */
+  @media (min-width: 1024px) {
+    .policy-section {
+      grid-template-columns: minmax(0, 1fr) 50%;
+      gap: 0;
+    }
+  }
+}

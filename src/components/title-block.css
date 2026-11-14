@@ -45,7 +45,8 @@
   }
 
   .field-title,
-  .field-repository {
+  .field-repository,
+  .field-privacy {
     grid-column: 1 / -1;
   }
 
@@ -53,7 +54,7 @@
     order: -1;
   }
 
-  .field-repository {
+  .field-privacy {
     border-bottom: 0;
   }
 
@@ -66,7 +67,8 @@
     text-transform: uppercase;
   }
 
-  .field-repository a {
+  .field-repository a,
+  .field-privacy a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -88,7 +90,7 @@
     }
 
     .field-sheet,
-    .field-repository {
+    .field-privacy {
       border-right: 0;
     }
 
@@ -98,8 +100,9 @@
       border-bottom: 0;
     }
 
-    .field-repository {
-      grid-column: span 2;
+    .field-repository,
+    .field-privacy {
+      grid-column: auto;
     }
   }
 

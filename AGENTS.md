@@ -2,7 +2,7 @@
 
 Landing page for [plugbay](https://github.com/mihaicrisan04/plugbay), "mise for MCP servers". Deploys to `plugbay.mihaicrisan.com`.
 
-Status: live at `https://plugbay.mihaicrisan.com` (Vercel project `plugbay-web`). Mihai picked direction A, "Sheet", out of four prototypes, then "S1 Distilled sheet" out of three Swiss-minimal passes on it: the same drawing sheet with far less text, zones A to D (hero, problem, one file per tree, install). The full page is built at `/`; the brief and copy deck for the pass are in `docs/research/swiss-pass-brief.md`. `DESIGN.md` records its system and `.impeccable/surfaces/src-pages-index-astro.md` its direction contract. plugbay has no tagged release yet, so the brew command on the page does not work until one ships.
+Status: live at `https://plugbay.mihaicrisan.com` (Vercel project `plugbay-web`). Mihai picked direction A, "Sheet", out of four prototypes, then "S1 Distilled sheet" out of three Swiss-minimal passes on it: the same drawing sheet with far less text, zones A to D (hero, problem, one file per tree, install). The full page is built at `/`, and `/privacy` holds the privacy policy for the Google OAuth client "plugbay" (used by workspace-mcp), linked from the title block; the brief and copy deck for the pass are in `docs/research/swiss-pass-brief.md`. `DESIGN.md` records its system and `.impeccable/surfaces/src-pages-index-astro.md` its direction contract. plugbay has no tagged release yet, so the brew command on the page does not work until one ships.
 
 ## Goal
 

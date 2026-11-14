@@ -17,24 +17,6 @@
     top: -1px;
   }
 
-  .masthead {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-  }
-
-  .logo {
-    width: auto;
-    height: 28px;
-  }
-
-  /* Part of the lockup: the brand's own line, in its own case. */
-  .tagline {
-    font-size: 14px;
-    line-height: 1;
-    color: var(--color-ink-muted);
-  }
-
   .statement {
     margin-top: 32px;
   }
@@ -174,10 +156,6 @@
   @media (min-width: 720px) {
     .zone.hero {
       padding-top: 24px;
-    }
-
-    .logo {
-      height: 32px;
     }
   }
 

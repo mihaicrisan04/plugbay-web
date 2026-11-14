@@ -1,0 +1,33 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+  .masthead {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .masthead-home {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .logo {
+    width: auto;
+    height: 28px;
+  }
+
+  /* Part of the lockup: the brand's own line, in its own case. */
+  .tagline {
+    font-size: 14px;
+    line-height: 1;
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 720px) {
+    .logo {
+      height: 32px;
+    }
+  }
+}

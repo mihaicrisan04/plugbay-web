@@ -1,0 +1,80 @@
+---
+// The privacy policy, one ruled list of plain answers. It is written for the
+// Google OAuth client "plugbay", which workspace-mcp uses on the user's machine.
+import "./policy.css";
+import Masthead from "./Masthead.astro";
+import ZoneRef from "./ZoneRef.astro";
+
+const effective = new Date("2026-11-14");
+const tokenFolder = "~/.google_workspace_mcp/<account>/";
+const contact = "crisanmihai2004@gmail.com";
+---
+
+<section class="zone policy" id="a">
+  <ZoneRef letter="A" />
+  <Masthead linkHome />
+
+  <div class="policy-head">
+    <h1 class="section-title">Privacy policy</h1>
+    <p class="label policy-date">
+      Effective <time datetime={effective.toISOString().slice(0, 10)}>{effective.toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC", year: "numeric" })}</time>
+    </p>
+  </div>
+
+  <div class="policy-sections">
+    <section class="policy-section">
+      <h2 class="policy-heading">What plugbay collects</h2>
+      <div class="prose policy-body">
+        <p>Nothing. plugbay runs on your machine. It has no servers and no telemetry. plugbay and its author do not collect, store, share or sell your data, including data from Google. This website has no analytics and sets no cookies.</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2 class="policy-heading">Google user data</h2>
+      <div class="prose policy-body">
+        <p>plugbay can run <a href="https://github.com/taylorwilsdon/google_workspace_mcp">workspace-mcp</a>, an open-source Google Workspace MCP server, on your own machine, one process per Google account. It signs in through the Google OAuth client named plugbay and asks for:</p>
+        <ul>
+          <li>Read and write access to Gmail: read, compose, send, modify, labels and basic settings</li>
+          <li>Read and write access to Drive, Calendar, Docs and Sheets</li>
+          <li>Your profile and email address (<code>openid</code>, <code>userinfo.email</code>, <code>userinfo.profile</code>)</li>
+        </ul>
+        <p>plugbay itself never reads your Google data. workspace-mcp uses it only to do what you ask your AI agent to do.</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2 class="policy-heading">Where your Google data goes</h2>
+      <div class="prose policy-body">
+        <p>Only to the AI agent you run, such as Claude Code or Codex, when you ask it to do something. That agent's provider handles the data under its own privacy policy. Nothing goes to plugbay or its author.</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2 class="policy-heading">Where tokens are stored</h2>
+      <div class="prose policy-body">
+        <p>OAuth tokens are stored only on your machine, in <code>{tokenFolder}</code>.</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2 class="policy-heading">Removing access</h2>
+      <div class="prose policy-body">
+        <p>Revoke access at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>. Delete <code>{tokenFolder}</code> to remove the tokens from your machine.</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2 class="policy-heading">Limited Use</h2>
+      <div class="prose policy-body">
+        <p>plugbay's use and transfer of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2 class="policy-heading">Changes and contact</h2>
+      <div class="prose policy-body">
+        <p>If this policy changes, this page changes and its effective date moves. Questions go to <a href={`mailto:${contact}`}>{contact}</a>.</p>
+      </div>
+    </section>
+  </div>
+</section>
